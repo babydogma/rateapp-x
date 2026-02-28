@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RateApp X</title>
 
 <style>
@@ -17,7 +16,6 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 
 body{
 min-height:100vh;
-overflow-x:hidden;
 color:white;
 background:
 radial-gradient(circle at 15% 10%, rgba(59,130,246,0.15), transparent 45%),
@@ -27,9 +25,9 @@ linear-gradient(160deg,#070c1a,#0f1f44 60%,#0b1a38);
 
 .header{
 padding:20px;
+text-align:center;
 font-size:22px;
 font-weight:600;
-text-align:center;
 }
 
 .divider{
@@ -50,14 +48,13 @@ backdrop-filter:blur(20px);
 text-align:center;
 margin-bottom:20px;
 font-weight:600;
-letter-spacing:1px;
 }
 
 .podium{
 display:flex;
 align-items:flex-end;
 justify-content:center;
-gap:15px;
+gap:12px;
 height:140px;
 }
 
@@ -69,23 +66,22 @@ align-items:center;
 justify-content:flex-end;
 border-radius:16px;
 background:rgba(255,255,255,0.08);
-padding:10px;
-text-align:center;
+padding:8px;
 font-size:12px;
-overflow:hidden;
+text-align:center;
 }
 
 .place img{
 width:100%;
 height:60px;
 object-fit:cover;
-border-radius:10px;
+border-radius:8px;
 margin-bottom:6px;
 }
 
-.place.first{ height:130px; }
-.place.second{ height:100px; }
-.place.third{ height:85px; }
+.first{height:130px;}
+.second{height:100px;}
+.third{height:85px;}
 
 .grid{
 display:grid;
@@ -96,28 +92,12 @@ padding-bottom:120px;
 }
 
 .card{
-position:relative;
 background:rgba(255,255,255,0.06);
 backdrop-filter:blur(28px);
 border-radius:22px;
 padding:14px;
-transition:0.35s ease;
 box-shadow:0 20px 50px rgba(0,0,0,0.45);
-overflow:hidden;
-}
-
-.card::after{
-content:"";
-position:absolute;
-left:0;
-right:0;
-bottom:0;
-height:60%;
-border-radius:22px;
-background:var(--glowColor, transparent);
-opacity:var(--glowOpacity, 0);
-transition:0.4s ease;
-pointer-events:none;
+position:relative;
 }
 
 .card img{
@@ -159,8 +139,7 @@ margin-top:8px;
 appearance:none;
 height:6px;
 border-radius:6px;
-background:rgba(255,255,255,0.08);
-outline:none;
+background:rgba(255,255,255,0.1);
 }
 
 .slider::-webkit-slider-thumb{
@@ -169,7 +148,6 @@ width:18px;
 height:18px;
 border-radius:50%;
 background:white;
-cursor:pointer;
 }
 
 .add-btn{
@@ -185,7 +163,6 @@ align-items:center;
 justify-content:center;
 font-size:36px;
 cursor:pointer;
-box-shadow:0 15px 40px rgba(0,0,0,0.5);
 }
 </style>
 </head>
@@ -205,13 +182,12 @@ box-shadow:0 15px 40px rgba(0,0,0,0.5);
 
 <div class="grid" id="grid"></div>
 
-<div class="add-btn" onclick="openFilePicker()">+</div>
+<div class="add-btn" onclick="openPicker()">+</div>
 
 <script>
 
-const STORAGE_KEY="rateapp_top_v1"
-
-let state={ cards:[] }
+const STORAGE_KEY="rateapp_ultra_stable_v1"
+let state={cards:[]}
 
 function save(){
 localStorage.setItem(STORAGE_KEY,JSON.stringify(state))
@@ -238,91 +214,79 @@ return b.createdAt-a.createdAt
 .slice(0,3)
 
 podium.innerHTML=""
-
-const positions=["second","first","third"]
+const order=["second","first","third"]
 
 for(let i=0;i<3;i++){
-const card=weekly[i]
 const div=document.createElement("div")
-div.className="place "+positions[i]
-
-if(card){
-div.innerHTML=`
-<img src="${card.image}">
-${card.rating}/10
-`
+div.className="place "+order[i]
+if(weekly[i]){
+div.innerHTML=`<img src="${weekly[i].image}">${weekly[i].rating}/10`
 }else{
-div.innerHTML=`—`
+div.innerHTML="—"
 }
-
 podium.appendChild(div)
-}
-}
-
-function renderCard(cardData,prepend=false){
-const card=document.createElement("div")
-card.className="card"
-
-card.innerHTML=`
-<img src="${cardData.image}">
-<div class="delete-btn">✕</div>
-<textarea placeholder="Описание">${cardData.text||""}</textarea>
-<div class="rating">${cardData.rating}/10</div>
-<input type="range" min="0" max="10" value="${cardData.rating}" class="slider">
-`
-
-if(prepend) grid.prepend(card)
-else grid.appendChild(card)
-
-card.querySelector(".delete-btn").onclick=()=>{
-state.cards=state.cards.filter(c=>c.id!==cardData.id)
-save()
-renderAll()
-}
-
-card.querySelector("textarea").oninput=(e)=>{
-cardData.text=e.target.value
-save()
-}
-
-const slider=card.querySelector(".slider")
-const rating=card.querySelector(".rating")
-
-updateGlow(card,slider.value)
-
-slider.oninput=()=>{
-cardData.rating=Number(slider.value)
-rating.textContent=slider.value+"/10"
-updateGlow(card,slider.value)
-save()
-renderTop()
 }
 }
 
 function renderAll(){
 grid.innerHTML=""
-state.cards.forEach(c=>renderCard(c,false))
+state.cards.forEach(card=>{
+const el=document.createElement("div")
+el.className="card"
+el.innerHTML=`
+<img src="${card.image}">
+<div class="delete-btn">✕</div>
+<textarea placeholder="Описание">${card.text||""}</textarea>
+<div class="rating">${card.rating}/10</div>
+<input type="range" min="0" max="10" value="${card.rating}" class="slider">
+`
+
+el.querySelector(".delete-btn").onclick=()=>{
+state.cards=state.cards.filter(c=>c.id!==card.id)
+save()
+renderAll()
+}
+
+el.querySelector("textarea").oninput=e=>{
+card.text=e.target.value
+save()
+}
+
+const slider=el.querySelector(".slider")
+const rating=el.querySelector(".rating")
+slider.oninput=()=>{
+card.rating=Number(slider.value)
+rating.textContent=slider.value+"/10"
+save()
+renderTop()
+}
+
+grid.appendChild(el)
+})
+
 renderTop()
 }
 
 renderAll()
 
-function openFilePicker(){
+function openPicker(){
 const input=document.createElement("input")
 input.type="file"
 input.accept="image/*"
+input.capture="none"
 input.style.display="none"
 document.body.appendChild(input)
 
-input.addEventListener("change",function(e){
+input.addEventListener("change",e=>{
 const file=e.target.files[0]
 if(!file) return
 
 const reader=new FileReader()
-reader.onload=function(ev){
+reader.onload=ev=>{
+compressImage(ev.target.result,base64=>{
 const newCard={
 id:Date.now(),
-image:ev.target.result,
+image:base64,
 text:"",
 rating:0,
 createdAt:Date.now()
@@ -331,18 +295,28 @@ state.cards.unshift(newCard)
 save()
 renderAll()
 document.body.removeChild(input)
+})
 }
+
 reader.readAsDataURL(file)
 })
 
 input.click()
 }
 
-function updateGlow(card,val){
-let hue=(val/10)*170
-card.style.setProperty("--glowColor",
-`radial-gradient(circle at 50% 100%, hsla(${hue},100%,55%,0.4) 0%, transparent 70%)`)
-card.style.setProperty("--glowOpacity", val/10)
+function compressImage(base64,callback){
+const img=new Image()
+img.src=base64
+img.onload=function(){
+const canvas=document.createElement("canvas")
+const maxWidth=800
+const scale=maxWidth/img.width
+canvas.width=maxWidth
+canvas.height=img.height*scale
+const ctx=canvas.getContext("2d")
+ctx.drawImage(img,0,0,canvas.width,canvas.height)
+callback(canvas.toDataURL("image/jpeg",0.7))
+}
 }
 
 </script>
