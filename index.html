@@ -23,10 +23,17 @@ linear-gradient(160deg,#070c1a,#0f1f44 60%,#0b1a38);
 }
 
 .header{
-padding:20px;
+padding:20px 20px 10px;
 text-align:center;
 font-size:22px;
 font-weight:600;
+}
+
+.stats{
+text-align:center;
+font-size:14px;
+opacity:0.8;
+margin-bottom:15px;
 }
 
 .divider{
@@ -34,53 +41,6 @@ height:1px;
 margin:15px 25px;
 background:linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
 }
-
-.top-section{
-margin:10px 20px 20px;
-padding:20px;
-border-radius:22px;
-background:rgba(255,255,255,0.06);
-backdrop-filter:blur(20px);
-}
-
-.top-title{
-text-align:center;
-margin-bottom:20px;
-font-weight:600;
-}
-
-.podium{
-display:flex;
-align-items:flex-end;
-justify-content:center;
-gap:12px;
-height:140px;
-}
-
-.place{
-flex:1;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:flex-end;
-border-radius:16px;
-background:rgba(255,255,255,0.08);
-padding:8px;
-font-size:12px;
-text-align:center;
-}
-
-.place img{
-width:100%;
-height:60px;
-object-fit:cover;
-border-radius:8px;
-margin-bottom:6px;
-}
-
-.first{height:130px;}
-.second{height:100px;}
-.third{height:85px;}
 
 .grid{
 display:grid;
@@ -95,8 +55,8 @@ background:rgba(255,255,255,0.06);
 backdrop-filter:blur(28px);
 border-radius:22px;
 padding:14px;
-box-shadow:0 20px 50px rgba(0,0,0,0.45);
 position:relative;
+transition:box-shadow 0.4s ease, transform 0.3s ease;
 }
 
 .card img{
@@ -108,8 +68,8 @@ border-radius:16px;
 
 .delete-btn{
 position:absolute;
-top:8px;
-right:10px;
+top:10px;
+right:12px;
 font-size:18px;
 cursor:pointer;
 opacity:0.8;
@@ -173,14 +133,7 @@ display:none;
 <body>
 
 <div class="header">RateApp X</div>
-
-<div class="divider"></div>
-
-<div class="top-section">
-<div class="top-title">🏆 ТОП НЕДЕЛИ</div>
-<div class="podium" id="podium"></div>
-</div>
-
+<div class="stats" id="stats">Пока нет оценок</div>
 <div class="divider"></div>
 
 <div class="grid" id="grid"></div>
@@ -192,7 +145,7 @@ display:none;
 
 <script>
 
-const STORAGE_KEY="rateapp_final_stable_v1"
+const STORAGE_KEY="rateapp_minimal_v2"
 let state={cards:[]}
 
 function save(){
@@ -206,40 +159,34 @@ if(data) state=JSON.parse(data)
 load()
 
 const grid=document.getElementById("grid")
-const podium=document.getElementById("podium")
+const stats=document.getElementById("stats")
 const photoInput=document.getElementById("photoInput")
 
-function renderTop(){
-const weekAgo=Date.now()-7*24*60*60*1000
-
-const weekly=state.cards
-.filter(c=>c.createdAt>=weekAgo && c.rating>=1)
-.sort((a,b)=>{
-if(b.rating!==a.rating) return b.rating-a.rating
-return b.createdAt-a.createdAt
-})
-.slice(0,3)
-
-podium.innerHTML=""
-const order=["second","first","third"]
-
-for(let i=0;i<3;i++){
-const div=document.createElement("div")
-div.className="place "+order[i]
-if(weekly[i]){
-div.innerHTML=`<img src="${weekly[i].image}">${weekly[i].rating}/10`
-}else{
-div.innerHTML="—"
+function calculateStats(){
+if(state.cards.length===0){
+stats.textContent="Пока нет оценок"
+return
 }
-podium.appendChild(div)
+
+let sum=0
+state.cards.forEach(c=> sum+=c.rating)
+
+let avg=(sum/state.cards.length).toFixed(1)
+stats.textContent=`Средняя оценка: ${avg}   •   Карточек: ${state.cards.length}`
 }
+
+function getGlowColor(rating){
+const hue = rating * 18   // 0 → 180
+return `hsl(${hue}, 100%, 55%)`
 }
 
 function renderAll(){
 grid.innerHTML=""
+
 state.cards.forEach(card=>{
 const el=document.createElement("div")
 el.className="card"
+
 el.innerHTML=`
 <img src="${card.image}">
 <div class="delete-btn">✕</div>
@@ -247,6 +194,9 @@ el.innerHTML=`
 <div class="rating">${card.rating}/10</div>
 <input type="range" min="0" max="10" value="${card.rating}" class="slider">
 `
+
+const glowColor=getGlowColor(card.rating)
+el.style.boxShadow=`0 35px 60px -25px ${glowColor}`
 
 el.querySelector(".delete-btn").onclick=()=>{
 state.cards=state.cards.filter(c=>c.id!==card.id)
@@ -261,17 +211,22 @@ save()
 
 const slider=el.querySelector(".slider")
 const rating=el.querySelector(".rating")
+
 slider.oninput=()=>{
 card.rating=Number(slider.value)
 rating.textContent=slider.value+"/10"
+
+const newColor=getGlowColor(card.rating)
+el.style.boxShadow=`0 35px 60px -25px ${newColor}`
+
 save()
-renderTop()
+calculateStats()
 }
 
 grid.appendChild(el)
 })
 
-renderTop()
+calculateStats()
 }
 
 renderAll()
@@ -287,8 +242,7 @@ const newCard={
 id:Date.now(),
 image:base64,
 text:"",
-rating:0,
-createdAt:Date.now()
+rating:0
 }
 state.cards.unshift(newCard)
 save()
