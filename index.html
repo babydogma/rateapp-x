@@ -5,14 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RateApp X</title>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 body{
 min-height:100vh;
 color:#e7e3dc;
@@ -21,7 +17,6 @@ radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
 radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
 linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
 }
-
 .header{
 padding:25px 20px 10px;
 text-align:center;
@@ -30,20 +25,17 @@ font-weight:600;
 letter-spacing:1px;
 color:#d4af37;
 }
-
 .stats{
 text-align:center;
 font-size:15px;
 margin-bottom:20px;
 color:#c6b27a;
 }
-
 .divider{
 height:1px;
 margin:0 30px 20px;
 background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);
 }
-
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
@@ -51,23 +43,20 @@ gap:18px;
 padding:20px;
 padding-bottom:120px;
 }
-
 .card{
 background:#1a1a1c;
 border-radius:18px;
 padding:14px;
 position:relative;
-transition:box-shadow 0.4s ease, transform 0.3s ease;
+transition:box-shadow 0.4s ease;
 box-shadow:0 20px 40px rgba(0,0,0,0.6);
 }
-
 .card img{
 width:100%;
 height:150px;
 object-fit:cover;
 border-radius:14px;
 }
-
 .delete-btn{
 position:absolute;
 top:10px;
@@ -75,9 +64,7 @@ right:12px;
 font-size:18px;
 cursor:pointer;
 color:#c6b27a;
-opacity:0.8;
 }
-
 textarea{
 width:100%;
 margin-top:10px;
@@ -89,13 +76,11 @@ color:#e7e3dc;
 resize:none;
 font-size:13px;
 }
-
 .rating{
 margin-top:8px;
 font-weight:600;
 color:#d4af37;
 }
-
 .slider{
 width:100%;
 margin-top:8px;
@@ -104,7 +89,6 @@ height:5px;
 border-radius:6px;
 background:#2a2a2c;
 }
-
 .slider::-webkit-slider-thumb{
 appearance:none;
 width:16px;
@@ -112,7 +96,6 @@ height:16px;
 border-radius:50%;
 background:#d4af37;
 }
-
 .add-btn{
 position:fixed;
 right:28px;
@@ -130,19 +113,14 @@ color:#d4af37;
 cursor:pointer;
 box-shadow:0 0 20px rgba(212,175,55,0.2);
 }
-
-#photoInput{
-display:none;
-}
+#photoInput{display:none;}
 </style>
 </head>
-
 <body>
 
 <div class="header">RateApp X</div>
-<div class="stats" id="stats">Пока нет оценок</div>
+<div class="stats" id="stats">Загрузка...</div>
 <div class="divider"></div>
-
 <div class="grid" id="grid"></div>
 
 <label class="add-btn">
@@ -151,111 +129,105 @@ display:none;
 </label>
 
 <script>
+const SUPABASE_URL = "https://qlogmlywwdb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 
-const STORAGE_KEY="rateapp_black_gold_v1"
-let state={cards:[]}
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function save(){
-localStorage.setItem(STORAGE_KEY,JSON.stringify(state))
-}
-
-function load(){
-const data=localStorage.getItem(STORAGE_KEY)
-if(data) state=JSON.parse(data)
-}
-load()
-
-const grid=document.getElementById("grid")
-const stats=document.getElementById("stats")
-const photoInput=document.getElementById("photoInput")
-
-function calculateStats(){
-if(state.cards.length===0){
-stats.textContent="Пока нет оценок"
-return
-}
-let sum=0
-state.cards.forEach(c=> sum+=c.rating)
-let avg=(sum/state.cards.length).toFixed(1)
-stats.textContent=`Средняя оценка: ${avg}  •  Карточек: ${state.cards.length}`
-}
+const grid = document.getElementById("grid");
+const stats = document.getElementById("stats");
+const photoInput = document.getElementById("photoInput");
 
 function getGlowColor(rating){
-const hue = 10 + (rating * 4)  // красный → золотой
-return `hsl(${hue}, 80%, 55%)`
+const hue = 10 + (rating * 4);
+return `hsl(${hue}, 80%, 55%)`;
 }
 
-function renderAll(){
-grid.innerHTML=""
+async function loadCards(){
+const { data, error } = await supabaseClient
+.from("cards")
+.select("*")
+.order("created_at",{ascending:false});
 
-state.cards.forEach(card=>{
-const el=document.createElement("div")
-el.className="card"
+if(error){console.error(error);return;}
+
+grid.innerHTML="";
+let sum=0;
+
+data.forEach(card=>{
+sum+=card.rating||0;
+
+const el=document.createElement("div");
+el.className="card";
+el.style.boxShadow=`0 35px 60px -25px ${getGlowColor(card.rating||0)}`;
 
 el.innerHTML=`
-<img src="${card.image}">
+<img src="${card.image_url}">
 <div class="delete-btn">✕</div>
 <textarea placeholder="Описание">${card.text||""}</textarea>
-<div class="rating">${card.rating}/10</div>
-<input type="range" min="0" max="10" value="${card.rating}" class="slider">
-`
+<div class="rating">${card.rating||0}/10</div>
+<input type="range" min="0" max="10" value="${card.rating||0}" class="slider">
+`;
 
-const glowColor=getGlowColor(card.rating)
-el.style.boxShadow=`0 35px 60px -25px ${glowColor}`
+el.querySelector(".delete-btn").onclick=async()=>{
+await supabaseClient.from("cards").delete().eq("id",card.id);
+loadCards();
+};
 
-el.querySelector(".delete-btn").onclick=()=>{
-state.cards=state.cards.filter(c=>c.id!==card.id)
-save()
-renderAll()
+el.querySelector("textarea").oninput=async(e)=>{
+await supabaseClient.from("cards")
+.update({text:e.target.value})
+.eq("id",card.id);
+};
+
+const slider=el.querySelector(".slider");
+const ratingEl=el.querySelector(".rating");
+
+slider.oninput=async()=>{
+ratingEl.textContent=slider.value+"/10";
+el.style.boxShadow=`0 35px 60px -25px ${getGlowColor(slider.value)}`;
+await supabaseClient.from("cards")
+.update({rating:Number(slider.value)})
+.eq("id",card.id);
+};
+
+grid.appendChild(el);
+});
+
+if(data.length===0){
+stats.textContent="Пока нет оценок";
+}else{
+stats.textContent=`Средняя оценка: ${(sum/data.length).toFixed(1)} • Карточек: ${data.length}`;
+}
 }
 
-el.querySelector("textarea").oninput=e=>{
-card.text=e.target.value
-save()
-}
+photoInput.addEventListener("change",async(e)=>{
+const file=e.target.files[0];
+if(!file)return;
 
-const slider=el.querySelector(".slider")
-const rating=el.querySelector(".rating")
+const fileName=Date.now()+"-"+file.name;
 
-slider.oninput=()=>{
-card.rating=Number(slider.value)
-rating.textContent=slider.value+"/10"
+const { error:uploadError }=await supabaseClient
+.storage.from("photos")
+.upload(fileName,file);
 
-const newColor=getGlowColor(card.rating)
-el.style.boxShadow=`0 35px 60px -25px ${newColor}`
+if(uploadError){console.error(uploadError);return;}
 
-save()
-calculateStats()
-}
+const { data }=supabaseClient
+.storage.from("photos")
+.getPublicUrl(fileName);
 
-grid.appendChild(el)
-})
-
-calculateStats()
-}
-
-renderAll()
-
-photoInput.addEventListener("change",function(e){
-const file=e.target.files[0]
-if(!file) return
-
-const reader=new FileReader()
-reader.onload=function(event){
-const newCard={
-id:Date.now(),
-image:event.target.result,
+await supabaseClient.from("cards").insert([{
+image_url:data.publicUrl,
 text:"",
 rating:0
-}
-state.cards.unshift(newCard)
-save()
-renderAll()
-}
-reader.readAsDataURL(file)
-photoInput.value=""
-})
+}]);
 
+loadCards();
+photoInput.value="";
+});
+
+loadCards();
 </script>
 
 </body>
