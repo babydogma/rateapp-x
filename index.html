@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>RateApp X</title>
+
+<meta name="theme-color" content="#0c0c0d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* Сброс */
 *{
   margin:0;
   padding:0;
@@ -15,20 +19,27 @@
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
-html, body{
-  height:100%;
-}
-
-body{
-  min-height:100dvh; /* мобильная высота корректно */
-  padding-bottom: env(safe-area-inset-bottom);
-  color:#e7e3dc;
+/* Фон на html — покрывает всю viewport (убирает белые полосы) */
+html {
+  height: 100%;
   background:
-  radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
-  radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
-  linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
+    linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
 }
 
+/* Body прозрачный, учитываем safe-area */
+body{
+  min-height:100vh;
+  height:100%;
+  color:#e7e3dc;
+  background: transparent;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Контент */
 .header{
   padding:25px 20px 10px;
   text-align:center;
@@ -119,12 +130,14 @@ textarea{
   background:#d4af37;
 }
 
-.date{
+.created{
   margin-top:8px;
   color:#c6b27a;
   font-size:13px;
+  font-weight:600;
 }
 
+/* floating add button */
 .add-btn{
   position:fixed;
   right:28px;
@@ -168,19 +181,24 @@ const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
-// формат DD.MM.YYYY
-function formatDate(iso){
-  if(!iso) return "";
-  const d = new Date(iso);
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yyyy = d.getFullYear();
-  return `${dd}.${mm}.${yyyy}`;
-}
-
 function getGlowColor(rating){
   const hue = 10 + (rating * 4);
   return `hsl(${hue}, 80%, 55%)`;
+}
+
+/* форматируем дату в DD.MM.YYYY (без времени и без слова "создано") */
+function formatDate(dateString){
+  if(!dateString) return "";
+  try{
+    const d = new Date(dateString);
+    if (isNaN(d)) return "";
+    const dd = String(d.getUTCDate()).padStart(2,'0');
+    const mm = String(d.getUTCMonth()+1).padStart(2,'0');
+    const yyyy = d.getUTCFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  }catch(e){
+    return "";
+  }
 }
 
 async function loadCards(){
@@ -216,34 +234,26 @@ async function loadCards(){
       <textarea placeholder="Описание">${card.text || ""}</textarea>
       <div class="rating">${card.rating || 0}/10</div>
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
-      <div class="date">${formatDate(card.created_at)}</div>
+      <div class="created">${formatDate(card.created_at)}</div>
     `;
 
-    // DELETE - используем uuid (PK у тебя uuid)
     el.querySelector(".delete-btn").onclick=async()=>{
-      const { error } = await supabaseClient
-        .from("cards")
-        .delete()
-        .eq("uuid", card.uuid);
-
+      // удаляем запись по id (не менял логику — предполагаем, что id работает)
+      const { error } = await supabaseClient.from("cards").delete().eq("id", card.id);
       if(error){
         console.error(error);
         alert("Ошибка удаления: " + (error.message || error));
         return;
       }
-
       loadCards();
     };
 
-    // UPDATE TEXT (по uuid)
     el.querySelector("textarea").oninput=async(e)=>{
-      await supabaseClient
-        .from("cards")
+      await supabaseClient.from("cards")
         .update({text:e.target.value})
-        .eq("uuid", card.uuid);
+        .eq("id",card.id);
     };
 
-    // UPDATE RATING (по uuid)
     const slider = el.querySelector(".slider");
     const ratingEl = el.querySelector(".rating");
 
@@ -256,7 +266,7 @@ async function loadCards(){
       const { error } = await supabaseClient
         .from("cards")
         .update({ rating: newRating })
-        .eq("uuid", card.uuid);
+        .eq("id", card.id);
 
       if (error) {
         console.error(error);
@@ -264,7 +274,7 @@ async function loadCards(){
         return;
       }
 
-      loadCards();
+      await loadCards();
     });
 
     grid.appendChild(el);
