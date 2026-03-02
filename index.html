@@ -211,13 +211,16 @@ async function loadCards(){
     const slider=el.querySelector(".slider");
     const ratingEl=el.querySelector(".rating");
 
-    slider.oninput=async()=>{
-      ratingEl.textContent=slider.value+"/10";
-      el.style.boxShadow=`0 35px 60px -25px ${getGlowColor(slider.value)}`;
+    slider.onchange = async () => {
+  const newRating = Number(slider.value);
 
-      await supabaseClient.from("cards")
-        .update({rating:Number(slider.value)})
-        .eq("id",card.id);
+  await supabaseClient
+    .from("cards")
+    .update({ rating: newRating })
+    .eq("id", card.id);
+
+  loadCards(); // ← ВОТ ЭТО КЛЮЧЕВОЕ
+};
     };
 
     grid.appendChild(el);
