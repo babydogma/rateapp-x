@@ -2,28 +2,29 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>RateApp X</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* твои стили без изменений (скопировал как есть) */
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-body{min-height:100vh;color:#e7e3dc;background:radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);}
-.header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
-.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:120px;}
-.card{background:#1a1a1c;border-radius:18px;padding:14px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.6);transition:0.3s ease;}
-.card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
-.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
-textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
-.rating{margin-top:8px;font-weight:600;color:#d4af37;}
-.slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
-.slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
-.add-btn{position:fixed;right:28px;bottom:28px;width:70px;height:70px;border-radius:50%;background:#111;border:1px solid rgba(212,175,55,0.4);display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);}
+/* --- Я НЕ трогал ваши стили кроме мелочей — ниже оригинал --- */
+*{ margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+body{ min-height:100vh; color:#e7e3dc; background: radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%), radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%), linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d); }
+.header{ padding:25px 20px 10px; text-align:center; font-size:24px; font-weight:600; letter-spacing:1px; color:#d4af37; }
+.stats{ text-align:center; font-size:15px; margin-bottom:20px; color:#c6b27a; }
+.divider{ height:1px; margin:0 30px 20px; background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent); }
+.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; padding:20px; padding-bottom:120px; }
+.card{ background:#1a1a1c; border-radius:18px; padding:14px; position:relative; box-shadow:0 20px 40px rgba(0,0,0,0.6); transition:0.3s ease; }
+.card img{ width:100%; height:150px; object-fit:cover; border-radius:14px; }
+.delete-btn{ position:absolute; top:10px; right:12px; font-size:18px; cursor:pointer; color:#c6b27a; }
+textarea{ width:100%; margin-top:10px; background:#141415; border:1px solid rgba(212,175,55,0.15); border-radius:12px; padding:8px; color:#e7e3dc; resize:none; font-size:13px; }
+.rating{ margin-top:8px; font-weight:600; color:#d4af37; }
+.slider{ width:100%; margin-top:8px; appearance:none; height:5px; border-radius:6px; background:#2a2a2c; }
+.slider::-webkit-slider-thumb{ appearance:none; width:16px; height:16px; border-radius:50%; background:#d4af37; }
+.add-btn{ position:fixed; right:28px; bottom:28px; width:70px; height:70px; border-radius:50%; background:#111; border:1px solid rgba(212,175,55,0.4); display:flex; align-items:center; justify-content:center; font-size:32px; color:#d4af37; cursor:pointer; box-shadow:0 0 20px rgba(212,175,55,0.2); }
 #photoInput{display:none;}
+.small-id{ font-size:10px; color:#888; margin-top:6px; word-break:break-all; }
 </style>
 </head>
 <body>
@@ -33,13 +34,13 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
 <div class="divider"></div>
 <div class="grid" id="grid"></div>
 
-<label class="add-btn">
+<label class="add-btn" title="Добавить фото">
   +
   <input id="photoInput" type="file" accept="image/*">
 </label>
 
 <script>
-/* --- ВСТАВЬ СВОИ КОНСТАНТЫ (если еще не вставил) --- */
+/* === Вставь свои ключи сюда (как у тебя было раньше) === */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 
@@ -54,18 +55,18 @@ function getGlowColor(rating){
   return `hsl(${hue}, 80%, 55%)`;
 }
 
+/* Загрузка карточек */
 async function loadCards(){
   stats.textContent = "Загрузка...";
-
   const { data, error } = await supabaseClient
     .from("cards")
     .select("*")
     .order("created_at", { ascending: false });
 
   if(error){
-    console.error("Ошибка загрузки:", error);
+    console.error(error);
     stats.textContent = "Ошибка загрузки";
-    grid.innerHTML = "";
+    alert("Ошибка загрузки: " + (error.message || error));
     return;
   }
 
@@ -78,85 +79,92 @@ async function loadCards(){
   }
 
   data.forEach(card => {
-    // определяем PK динамически (если в таблице uuid — используем uuid, если id — id)
-    const pkCol = card.uuid ? "uuid" : (card.id ? "id" : null);
-    const pkVal = pkCol ? card[pkCol] : null;
-
-    sum += (typeof card.rating === "number") ? card.rating : (Number(card.rating) || 0);
+    sum += (card.rating || 0);
 
     const el = document.createElement("div");
     el.className = "card";
     el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
 
+    // показываем created_at на карточке (удобно для отладки на телефоне)
+    const created = card.created_at || "";
+
     el.innerHTML = `
-      <img src="${card.image_url || ""}">
-      <div class="delete-btn">✕</div>
+      <img src="${card.image_url || ""}" alt="">
+      <div class="delete-btn" title="Удалить">✕</div>
       <textarea placeholder="Описание">${card.text || ""}</textarea>
       <div class="rating">${card.rating || 0}/10</div>
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
+      <div class="small-id">created_at: ${created}</div>
     `;
 
-    // DELETE
+    // Удаление — ВНИМАНИЕ: мы удаляем по created_at (потому что имя PK у вас путается)
     el.querySelector(".delete-btn").onclick = async () => {
-      if(!pkCol || !pkVal){
-        alert("Ошибка удаления: uuid/id не найден для этой карточки");
-        return;
-      }
-      const { error } = await supabaseClient
-        .from("cards")
-        .delete()
-        .eq(pkCol, pkVal);
+      // confirm перед удалением (необязательно)
+      if(!confirm("Удалить эту карточку?")) return;
 
-      if(error){
-        console.error("Ошибка удаления:", error);
-        alert("Ошибка удаления: " + (error.message || JSON.stringify(error)));
-        return;
-      }
+      try {
+        const { error } = await supabaseClient
+          .from("cards")
+          .delete()
+          .eq("created_at", card.created_at);
 
-      await loadCards();
+        if(error){
+          console.error(error);
+          alert("Ошибка удаления: " + (error.message || error));
+          return;
+        }
+
+        await loadCards();
+      } catch (err) {
+        console.error(err);
+        alert("Ошибка удаления: " + err.message);
+      }
     };
 
-    // TEXT update
+    // Обновление текста
     el.querySelector("textarea").oninput = async (e) => {
-      if(!pkCol || !pkVal) return;
-      const { error } = await supabaseClient
-        .from("cards")
-        .update({ text: e.target.value })
-        .eq(pkCol, pkVal);
+      try {
+        const { error } = await supabaseClient
+          .from("cards")
+          .update({ text: e.target.value })
+          .eq("created_at", card.created_at);
 
-      if(error){
-        console.error("Ошибка обновления текста:", error);
+        if(error){
+          console.error(error);
+          alert("Ошибка сохранения текста: " + (error.message || error));
+        }
+      } catch(err){
+        console.error(err);
+        alert("Ошибка сохранения текста: " + err.message);
       }
     };
 
-    // RATING slider
+    // Рейтинг (событие change — когда закончили менять)
     const slider = el.querySelector(".slider");
     const ratingEl = el.querySelector(".rating");
 
-    // используем change — чтобы не спамить запросами при скролле ползунка
     slider.addEventListener("change", async () => {
       const newRating = Number(slider.value);
       ratingEl.textContent = newRating + "/10";
       el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
 
-      if(!pkCol || !pkVal){
-        alert("Ошибка обновления рейтинга: uuid/id не найден");
-        return;
+      try {
+        const { error } = await supabaseClient
+          .from("cards")
+          .update({ rating: newRating })
+          .eq("created_at", card.created_at);
+
+        if(error){
+          console.error(error);
+          alert("Ошибка обновления рейтинга: " + (error.message || error));
+          return;
+        }
+
+        await loadCards();
+      } catch(err){
+        console.error(err);
+        alert("Ошибка обновления рейтинга: " + err.message);
       }
-
-      const { error } = await supabaseClient
-        .from("cards")
-        .update({ rating: newRating })
-        .eq(pkCol, pkVal);
-
-      if(error){
-        console.error("Ошибка обновления рейтинга:", error);
-        alert("Ошибка обновления рейтинга: " + (error.message || JSON.stringify(error)));
-        return;
-      }
-
-      // перезагрузим список, чтобы всё синхронизировать
-      await loadCards();
     });
 
     grid.appendChild(el);
@@ -165,45 +173,48 @@ async function loadCards(){
   stats.textContent = `Средняя оценка: ${(sum/data.length).toFixed(1)} • Карточек: ${data.length}`;
 }
 
-/* Upload -> storage -> insert row */
+/* Загрузка фото -> storage -> вставка записи в cards */
 photoInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if(!file) return;
 
   const fileName = Date.now() + "-" + file.name;
 
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("photos")
-    .upload(fileName, file);
+  try {
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("photos")
+      .upload(fileName, file);
 
-  if(uploadError){
-    console.error("Ошибка загрузки в storage:", uploadError);
-    alert("Ошибка загрузки");
-    return;
+    if(uploadError){
+      console.error(uploadError);
+      alert("Ошибка загрузки в storage: " + (uploadError.message || uploadError));
+      return;
+    }
+
+    const { data } = supabaseClient
+      .storage
+      .from("photos")
+      .getPublicUrl(fileName);
+
+    const publicUrl = data?.publicUrl || "";
+
+    const { error: insertError } = await supabaseClient
+      .from("cards")
+      .insert([{ image_url: publicUrl, text: "", rating: 0 }]);
+
+    if(insertError){
+      console.error(insertError);
+      alert("Ошибка записи в БД: " + (insertError.message || insertError));
+      return;
+    }
+
+    await loadCards();
+    photoInput.value = "";
+  } catch(err){
+    console.error(err);
+    alert("Ошибка при загрузке: " + err.message);
   }
-
-  // получить публичный URL
-  const { data } = supabaseClient.storage.from("photos").getPublicUrl(fileName);
-  const publicUrl = data.publicUrl;
-
-  // вставить запись в таблицу
-  const { error: insertError } = await supabaseClient
-    .from("cards")
-    .insert([{
-      image_url: publicUrl,
-      text: "",
-      rating: 0
-    }]);
-
-  if(insertError){
-    console.error("Ошибка записи в БД:", insertError);
-    alert("Ошибка записи в БД");
-    return;
-  }
-
-  await loadCards();
-  photoInput.value = "";
 });
 
 loadCards();
