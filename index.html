@@ -1,137 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>RateApp X</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-
-body{
-  min-height:100vh;
-  color:#e7e3dc;
-  background:
-  radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
-  radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
-  linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
-}
-
-.header{
-  padding:25px 20px 10px;
-  text-align:center;
-  font-size:24px;
-  font-weight:600;
-  letter-spacing:1px;
-  color:#d4af37;
-}
-
-.stats{
-  text-align:center;
-  font-size:15px;
-  margin-bottom:20px;
-  color:#c6b27a;
-}
-
-.divider{
-  height:1px;
-  margin:0 30px 20px;
-  background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-  padding:20px;
-  padding-bottom:120px;
-}
-
-.card{
-  background:#1a1a1c;
-  border-radius:18px;
-  padding:14px;
-  position:relative;
-  box-shadow:0 20px 40px rgba(0,0,0,0.6);
-  transition:0.3s ease;
-}
-
-.card img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:14px;
-}
-
-.delete-btn{
-  position:absolute;
-  top:10px;
-  right:12px;
-  font-size:18px;
-  cursor:pointer;
-  color:#c6b27a;
-}
-
-textarea{
-  width:100%;
-  margin-top:10px;
-  background:#141415;
-  border:1px solid rgba(212,175,55,0.15);
-  border-radius:12px;
-  padding:8px;
-  color:#e7e3dc;
-  resize:none;
-  font-size:13px;
-}
-
-.rating{
-  margin-top:8px;
-  font-weight:600;
-  color:#d4af37;
-}
-
-.slider{
-  width:100%;
-  margin-top:8px;
-  appearance:none;
-  height:5px;
-  border-radius:6px;
-  background:#2a2a2c;
-}
-
-.slider::-webkit-slider-thumb{
-  appearance:none;
-  width:16px;
-  height:16px;
-  border-radius:50%;
-  background:#d4af37;
-}
-
-.add-btn{
-  position:fixed;
-  right:28px;
-  bottom:28px;
-  width:70px;
-  height:70px;
-  border-radius:50%;
-  background:#111;
-  border:1px solid rgba(212,175,55,0.4);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:32px;
-  color:#d4af37;
-  cursor:pointer;
-  box-shadow:0 0 20px rgba(212,175,55,0.2);
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+body{min-height:100vh;color:#e7e3dc;
+background:radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
+radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
+linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);}
+.header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
+.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
+.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:120px;}
+.card{background:#1a1a1c;border-radius:18px;padding:14px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.6);transition:0.3s ease;}
+.card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
+.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
+textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:#d4af37;}
+.slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
+.slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
+.add-btn{position:fixed;right:28px;bottom:28px;width:70px;height:70px;border-radius:50%;background:#111;border:1px solid rgba(212,175,55,0.4);display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);}
 #photoInput{display:none;}
 </style>
 </head>
@@ -142,160 +35,184 @@ textarea{
 <div class="divider"></div>
 <div class="grid" id="grid"></div>
 
-<label class="add-btn">
-+
-<input id="photoInput" type="file" accept="image/*">
+<label class="add-btn">+
+  <input id="photoInput" type="file" accept="image/*">
 </label>
 
 <script>
+/* ---------- CONFIG ---------- */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ---------- DOM refs ---------- */
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
+/* ---------- UI helper ---------- */
 function getGlowColor(rating){
   const hue = 10 + (rating * 4);
   return `hsl(${hue}, 80%, 55%)`;
 }
 
+/* ---------- Load & render ---------- */
 async function loadCards(){
   const { data, error } = await supabaseClient
     .from("cards")
     .select("*")
-    .order("created_at",{ascending:false});
+    .order("created_at", { ascending: false });
 
-  if(error){
+  if (error){
     console.error(error);
-    stats.textContent="Ошибка загрузки";
+    stats.textContent = "Ошибка загрузки";
     return;
   }
 
-  grid.innerHTML="";
-  let sum=0;
+  grid.innerHTML = "";
+  let sum = 0;
 
-  if(!data || data.length===0){
-    stats.textContent="Пока нет карточек";
+  if (!data || data.length === 0){
+    stats.textContent = "Пока нет карточек";
     return;
   }
 
-  data.forEach(card=>{
+  data.forEach(card => {
     sum += card.rating || 0;
 
-    const el=document.createElement("div");
-    el.className="card";
-    el.style.boxShadow=`0 35px 60px -25px ${getGlowColor(card.rating||0)}`;
+    const el = document.createElement("div");
+    el.className = "card";
 
-    el.innerHTML=`
-      <img src="${card.image_url || ""}">
+    // store uuid in DOM (very important)
+    // prefer card.uuid; fallback to card.id if used earlier
+    el.dataset.uuid = card.uuid || card.id || "";
+
+    el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
+    el.innerHTML = `
+      <img src="${card.image_url || ""}" alt="photo">
       <div class="delete-btn">✕</div>
       <textarea placeholder="Описание">${card.text || ""}</textarea>
       <div class="rating">${card.rating || 0}/10</div>
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
     `;
 
-    // DELETE
+    // DELETE (uses dataset.uuid)
     el.querySelector(".delete-btn").onclick = async () => {
-      const { error } = await supabaseClient
-        .from("cards")
-        .delete()
-        .eq("uuid", card.uuid);
-
-      if (error) {
-        console.error(error);
-        alert("Ошибка удаления: " + error.message);
+      const uuid = el.dataset.uuid;
+      if (!uuid){
+        alert("Ошибка удаления: uuid не найден для этой карточки");
         return;
       }
 
-      el.remove();
-      loadCards();
-    };
-
-    // UPDATE TEXT
-    el.querySelector("textarea").addEventListener("change", async (e)=>{
       const { error } = await supabaseClient
         .from("cards")
-        .update({ text: e.target.value })
-        .eq("uuid", card.uuid);
+        .delete()
+        .eq("uuid", uuid); // <- убедился, что в БД колонка называется uuid
 
-      if (error) {
+      if (error){
         console.error(error);
-        alert("Ошибка обновления текста: " + error.message);
+        alert("Ошибка удаления: " + (error.message || error));
+        return;
       }
-    });
 
-    // UPDATE RATING
+      // remove visually (быстро) + обновить
+      el.remove();
+      // обновим список и статистику
+      await loadCards();
+    };
+
+    // TEXT update
+    const ta = el.querySelector("textarea");
+    ta.oninput = async (e) => {
+      const uuid = el.dataset.uuid;
+      if (!uuid) return;
+      await supabaseClient.from("cards")
+        .update({ text: e.target.value })
+        .eq("uuid", uuid);
+    };
+
+    // RATING update
     const slider = el.querySelector(".slider");
     const ratingEl = el.querySelector(".rating");
 
-    slider.addEventListener("input", () => {
-      ratingEl.textContent = slider.value + "/10";
-      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(slider.value)}`;
-    });
-
     slider.addEventListener("change", async () => {
+      const newRating = Number(slider.value);
+      ratingEl.textContent = newRating + "/10";
+      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
+
+      const uuid = el.dataset.uuid;
+      if (!uuid){
+        alert("Ошибка обновления рейтинга: uuid не найден");
+        return;
+      }
+
       const { error } = await supabaseClient
         .from("cards")
-        .update({ rating: Number(slider.value) })
-        .eq("uuid", card.uuid);
+        .update({ rating: newRating })
+        .eq("uuid", uuid);
 
-      if (error) {
+      if (error){
         console.error(error);
-        alert("Ошибка обновления рейтинга: " + error.message);
+        alert("Ошибка обновления рейтинга: " + (error.message || error));
+        return;
       }
+
+      await loadCards();
     });
 
     grid.appendChild(el);
   });
 
-  stats.textContent=`Средняя оценка: ${(sum/data.length).toFixed(1)} • Карточек: ${data.length}`;
+  stats.textContent = `Средняя оценка: ${(sum / data.length).toFixed(1)} • Карточек: ${data.length}`;
 }
 
-photoInput.addEventListener("change",async(e)=>{
-  const file=e.target.files[0];
-  if(!file) return;
+/* ---------- Upload photo & insert row ---------- */
+photoInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const fileName=Date.now()+"-"+file.name;
+  const fileName = Date.now() + "-" + file.name;
 
-  const { error:uploadError } = await supabaseClient
+  const { error: uploadError } = await supabaseClient
     .storage
     .from("photos")
-    .upload(fileName,file);
+    .upload(fileName, file);
 
-  if(uploadError){
+  if (uploadError){
     console.error(uploadError);
-    alert("Ошибка загрузки фото");
+    alert("Ошибка загрузки");
     return;
   }
 
+  // getPublicUrl возвращает сразу data
   const { data } = supabaseClient
     .storage
     .from("photos")
     .getPublicUrl(fileName);
 
-  const publicUrl = data.publicUrl;
+  const publicUrl = data?.publicUrl || "";
 
-  const { error:insertError } = await supabaseClient
+  // вставляем запись в таблицу (uuid создастся автоматически)
+  const { error: insertError } = await supabaseClient
     .from("cards")
     .insert([{
-      image_url:publicUrl,
-      text:"",
-      rating:0
+      image_url: publicUrl,
+      text: "",
+      rating: 0
     }]);
 
-  if(insertError){
+  if (insertError){
     console.error(insertError);
-    alert("Ошибка записи в БД: " + insertError.message);
+    alert("Ошибка записи в БД");
     return;
   }
 
-  loadCards();
-  photoInput.value="";
+  // обновляем UI
+  await loadCards();
+  photoInput.value = "";
 });
 
+/* ---------- start ---------- */
 loadCards();
 </script>
 
