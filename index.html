@@ -2,21 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>RateApp X</title>
-
-<!-- === FIX: динамический vh для мобильных (избегает белых полос при 100vh) === -->
-<script>
-  (function setVh(){
-    function update(){
-      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    }
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('orientationchange', update);
-  })();
-</script>
-<!-- === /FIX === -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -28,9 +15,13 @@
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
+html, body{
+  height:100%;
+}
+
 body{
-  /* заменили на использование --vh, чтобы мобильные браузеры не создавали полосы */
-  min-height: calc(var(--vh, 1vh) * 100);
+  min-height:100dvh; /* корректная мобильная высота */
+  padding-bottom: env(safe-area-inset-bottom);
   color:#e7e3dc;
   background:
   radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
@@ -128,6 +119,12 @@ textarea{
   background:#d4af37;
 }
 
+.date{
+  margin-top:8px;
+  color:#c6b27a;
+  font-size:13px;
+}
+
 .add-btn{
   position:fixed;
   right:28px;
@@ -171,6 +168,15 @@ const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
+function formatDate(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}
+
 function getGlowColor(rating){
   const hue = 10 + (rating * 4);
   return `hsl(${hue}, 80%, 55%)`;
@@ -209,41 +215,56 @@ async function loadCards(){
       <textarea placeholder="Описание">${card.text || ""}</textarea>
       <div class="rating">${card.rating || 0}/10</div>
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
+      <div class="date">${formatDate(card.created_at)}</div>
     `;
 
+    // DELETE
     el.querySelector(".delete-btn").onclick=async()=>{
-      await supabaseClient.from("cards").delete().eq("id",card.id);
+      const { error } = await supabaseClient
+        .from("cards")
+        .delete()
+        .eq("id",card.id);
+
+      if(error){
+        console.error(error);
+        alert("Ошибка удаления");
+        return;
+      }
+
       loadCards();
     };
 
+    // UPDATE TEXT
     el.querySelector("textarea").oninput=async(e)=>{
-      await supabaseClient.from("cards")
+      await supabaseClient
+        .from("cards")
         .update({text:e.target.value})
         .eq("id",card.id);
     };
 
+    // UPDATE RATING
     const slider = el.querySelector(".slider");
-const ratingEl = el.querySelector(".rating");
+    const ratingEl = el.querySelector(".rating");
 
-slider.addEventListener("change", async () => {
-  const newRating = Number(slider.value);
+    slider.addEventListener("change", async () => {
+      const newRating = Number(slider.value);
 
-  ratingEl.textContent = newRating + "/10";
-  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
+      ratingEl.textContent = newRating + "/10";
+      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
 
-  const { error } = await supabaseClient
-    .from("cards")
-    .update({ rating: newRating })
-    .eq("id", card.id);
+      const { error } = await supabaseClient
+        .from("cards")
+        .update({ rating: newRating })
+        .eq("id", card.id);
 
-  if (error) {
-    console.error(error);
-    alert("Ошибка обновления рейтинга");
-    return;
-  }
+      if (error) {
+        console.error(error);
+        alert("Ошибка обновления рейтинга");
+        return;
+      }
 
-  await loadCards();
-});
+      loadCards();
+    });
 
     grid.appendChild(el);
   });
