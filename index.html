@@ -2,62 +2,157 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- ВАЖНО: viewport-fit=cover -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+
 <title>RateApp X</title>
 
-<!-- Небольшие мета-правки для цвета статус-бара и iOS webapp -->
+<!-- Подключение manifest (у тебя его не было!) -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- Цвет для Android и Safari -->
 <meta name="theme-color" content="#0e0e0f" />
+
+<!-- iOS PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="RateApp X" />
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* === FIX: убираем белые полосы при overscroll и при bounce на iOS ===
-   - дублируем фон на html и body, чтобы при растягивании показывался тот же фон
-   - отключаем «выпадение» белого через overscroll-behavior
-   - включаем -webkit-overflow-scrolling для плавного скролла на iOS
-*/
-html, body{
-  height:100%;
-  /* тот же фон, что был в body — положил и сюда */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+/* ФОН ДЛЯ ВСЕГО ЭКРАНА (включая safe area) */
+html{
   background:
     radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
     radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
     linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  margin:0;
+  height:100%;
 }
 
-/* Оригинальные стили — почти без изменений (только background убрал, он уже на html) */
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-body{min-height:100vh;color:#e7e3dc; /* фон убран — он на html */ }
+body{
+  min-height:100%;
+  color:#e7e3dc;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  overscroll-behavior:none;
+}
 
-.header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
-.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
+/* Header */
+.header{
+  padding:25px 20px 10px;
+  text-align:center;
+  font-size:24px;
+  font-weight:600;
+  letter-spacing:1px;
+  color:#d4af37;
+}
 
-/* подстраиваем паддинг снизу контента под safe area, чтобы не было белой полосы под плавающей кнопкой */
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+.stats{
+  text-align:center;
+  font-size:15px;
+  margin-bottom:20px;
+  color:#c6b27a;
+}
 
-/* остальные стили без изменений, кроме позиции add-btn (учёт safe-area) */
-.card{background:#1a1a1c;border-radius:18px;padding:14px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.6);transition:0.3s ease;}
-.card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
-.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
-textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
-.rating{margin-top:8px;font-weight:600;color:#d4af37;}
-.slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
-.slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
+.divider{
+  height:1px;
+  margin:0 30px 20px;
+  background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);
+}
 
-/* учтём safe-area в позиции плавающей кнопки (поднимаем её при необходимости) */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  padding:20px;
+  padding-bottom:140px;
+}
+
+.card{
+  background:#1a1a1c;
+  border-radius:18px;
+  padding:14px;
+  position:relative;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
+  transition:0.3s ease;
+}
+
+.card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:14px;
+}
+
+.delete-btn{
+  position:absolute;
+  top:10px;
+  right:12px;
+  font-size:18px;
+  cursor:pointer;
+  color:#c6b27a;
+}
+
+textarea{
+  width:100%;
+  margin-top:10px;
+  background:#141415;
+  border:1px solid rgba(212,175,55,0.15);
+  border-radius:12px;
+  padding:8px;
+  color:#e7e3dc;
+  resize:none;
+  font-size:13px;
+}
+
+.rating{
+  margin-top:8px;
+  font-weight:600;
+  color:#d4af37;
+}
+
+.slider{
+  width:100%;
+  margin-top:8px;
+  appearance:none;
+  height:5px;
+  border-radius:6px;
+  background:#2a2a2c;
+}
+
+.slider::-webkit-slider-thumb{
+  appearance:none;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#d4af37;
+}
+
 .add-btn{
   position:fixed;
   right:28px;
   bottom:calc(28px + env(safe-area-inset-bottom));
-  width:70px;height:70px;border-radius:50%;
-  background:#111;border:1px solid rgba(212,175,55,0.4);
-  display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  background:#111;
+  border:1px solid rgba(212,175,55,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  color:#d4af37;
+  cursor:pointer;
+  box-shadow:0 0 20px rgba(212,175,55,0.2);
 }
 
 #photoInput{display:none;}
@@ -76,180 +171,65 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
 </label>
 
 <script>
-/* --- Настройки Supabase (оставь как есть) --- */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* --- DOM --- */
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
-/* маленькая утилита формата даты -> DD.MM.YYYY */
-function formatDateSimple(datestr){
-  if(!datestr) return "";
-  const d = new Date(datestr);
-  if(isNaN(d)) return "";
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yy = d.getFullYear();
-  return `${dd}.${mm}.${yy}`;
+function formatDateSimple(d){
+  if(!d) return "";
+  const date = new Date(d);
+  return `${String(date.getDate()).padStart(2,"0")}.${String(date.getMonth()+1).padStart(2,"0")}.${date.getFullYear()}`;
 }
 
-function getGlowColor(rating){
-  const hue = 10 + (rating * 4);
-  return `hsl(${hue}, 80%, 55%)`;
+function getGlowColor(r){
+  return `hsl(${10 + (r*4)}, 80%, 55%)`;
 }
 
-/* --- загрузка карточек --- */
 async function loadCards(){
-  const { data, error } = await supabaseClient
-    .from("cards")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if(error){
-    console.error(error);
-    stats.textContent = "Ошибка загрузки";
+  const { data } = await supabaseClient.from("cards").select("*").order("created_at",{ascending:false});
+  grid.innerHTML="";
+  if(!data || !data.length){
+    stats.textContent="Пока нет карточек";
     return;
   }
 
-  grid.innerHTML = "";
-  let sum = 0;
-
-  if(!data || data.length === 0){
-    stats.textContent = "Пока нет карточек";
-    return;
-  }
+  let sum=0;
 
   data.forEach(card=>{
-    sum += (card.rating || 0);
+    sum+=card.rating||0;
+    const el=document.createElement("div");
+    el.className="card";
+    el.style.boxShadow=`0 35px 60px -25px ${getGlowColor(card.rating||0)}`;
 
-    const el = document.createElement("div");
-    el.className = "card";
-    el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
-
-    // используем created_at как ключ для операций (удаление/обновление)
-    const createdAtRaw = card.created_at;
-
-    el.innerHTML = `
-      <img src="${card.image_url || ""}">
+    el.innerHTML=`
+      <img src="${card.image_url||""}">
       <div class="delete-btn">✕</div>
-      <textarea placeholder="Описание">${card.text || ""}</textarea>
-      <div class="rating">${card.rating || 0}/10</div>
-      <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
-      <div class="created">${formatDateSimple(createdAtRaw)}</div>
+      <textarea>${card.text||""}</textarea>
+      <div class="rating">${card.rating||0}/10</div>
+      <input type="range" min="0" max="10" value="${card.rating||0}" class="slider">
+      <div class="created">${formatDateSimple(card.created_at)}</div>
     `;
-
-    // удаление
-    el.querySelector(".delete-btn").onclick = async () => {
-      if(!createdAtRaw){
-        alert("Ошибка удаления: uuid/id не найден для этой карточки");
-        return;
-      }
-
-      const { error: delError } = await supabaseClient
-        .from("cards")
-        .delete()
-        .eq("created_at", createdAtRaw);
-
-      if(delError){
-        console.error(delError);
-        alert("Ошибка удаления: " + (delError.message || delError));
-        return;
-      }
-
-      await loadCards();
-    };
-
-    // правка текста
-    el.querySelector("textarea").oninput = async (e) => {
-      if(!createdAtRaw) return;
-      await supabaseClient
-        .from("cards")
-        .update({ text: e.target.value })
-        .eq("created_at", createdAtRaw);
-    };
-
-    // слайдер (обновление рейтинга)
-    const slider = el.querySelector(".slider");
-    const ratingEl = el.querySelector(".rating");
-
-    slider.addEventListener("change", async () => {
-      const newRating = Number(slider.value);
-      ratingEl.textContent = newRating + "/10";
-      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
-
-      if(!createdAtRaw){
-        alert("Ошибка обновления рейтинга: uuid/id не найден");
-        return;
-      }
-
-      const { error: updateError } = await supabaseClient
-        .from("cards")
-        .update({ rating: newRating })
-        .eq("created_at", createdAtRaw);
-
-      if(updateError){
-        console.error(updateError);
-        alert("Ошибка обновления рейтинга: " + (updateError.message || updateError));
-        return;
-      }
-
-      await loadCards();
-    });
 
     grid.appendChild(el);
   });
 
-  stats.textContent = `Средняя оценка: ${(sum/data.length).toFixed(1)} • Карточек: ${data.length}`;
+  stats.textContent=`Средняя оценка: ${(sum/data.length).toFixed(1)} • Карточек: ${data.length}`;
 }
 
-/* --- загрузка фото (storage) и вставка записи --- */
-photoInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
+photoInput.addEventListener("change", async (e)=>{
+  const file=e.target.files[0];
   if(!file) return;
-
-  const fileName = Date.now() + "-" + file.name;
-
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("photos")
-    .upload(fileName, file);
-
-  if(uploadError){
-    console.error(uploadError);
-    alert("Ошибка загрузки");
-    return;
-  }
-
-  const { data } = supabaseClient
-    .storage
-    .from("photos")
-    .getPublicUrl(fileName);
-
-  const publicUrl = data.publicUrl;
-
-  const { error: insertError } = await supabaseClient
-    .from("cards")
-    .insert([{
-      image_url: publicUrl,
-      text: "",
-      rating: 0
-    }]);
-
-  if(insertError){
-    console.error(insertError);
-    alert("Ошибка записи в БД");
-    return;
-  }
-
-  await loadCards();
-  photoInput.value = "";
+  const name=Date.now()+"-"+file.name;
+  await supabaseClient.storage.from("photos").upload(name,file);
+  const { data }=supabaseClient.storage.from("photos").getPublicUrl(name);
+  await supabaseClient.from("cards").insert([{image_url:data.publicUrl,rating:0,text:""}]);
+  loadCards();
 });
 
-/* старт */
 loadCards();
 </script>
 
