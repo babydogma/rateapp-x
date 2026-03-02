@@ -20,7 +20,7 @@ html, body{
 }
 
 body{
-  min-height:100dvh; /* корректная мобильная высота */
+  min-height:100dvh; /* мобильная высота корректно */
   padding-bottom: env(safe-area-inset-bottom);
   color:#e7e3dc;
   background:
@@ -168,6 +168,7 @@ const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
+// формат DD.MM.YYYY
 function formatDate(iso){
   if(!iso) return "";
   const d = new Date(iso);
@@ -218,31 +219,31 @@ async function loadCards(){
       <div class="date">${formatDate(card.created_at)}</div>
     `;
 
-    // DELETE
+    // DELETE - используем uuid (PK у тебя uuid)
     el.querySelector(".delete-btn").onclick=async()=>{
       const { error } = await supabaseClient
         .from("cards")
         .delete()
-        .eq("id",card.id);
+        .eq("uuid", card.uuid);
 
       if(error){
         console.error(error);
-        alert("Ошибка удаления");
+        alert("Ошибка удаления: " + (error.message || error));
         return;
       }
 
       loadCards();
     };
 
-    // UPDATE TEXT
+    // UPDATE TEXT (по uuid)
     el.querySelector("textarea").oninput=async(e)=>{
       await supabaseClient
         .from("cards")
         .update({text:e.target.value})
-        .eq("id",card.id);
+        .eq("uuid", card.uuid);
     };
 
-    // UPDATE RATING
+    // UPDATE RATING (по uuid)
     const slider = el.querySelector(".slider");
     const ratingEl = el.querySelector(".rating");
 
@@ -255,11 +256,11 @@ async function loadCards(){
       const { error } = await supabaseClient
         .from("cards")
         .update({ rating: newRating })
-        .eq("id", card.id);
+        .eq("uuid", card.uuid);
 
       if (error) {
         console.error(error);
-        alert("Ошибка обновления рейтинга");
+        alert("Ошибка обновления рейтинга: " + (error.message || error));
         return;
       }
 
