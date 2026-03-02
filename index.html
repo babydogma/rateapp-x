@@ -2,17 +2,15 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>RateApp X</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* твои стили без изменений (скопировал как есть) */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-body{min-height:100vh;color:#e7e3dc;
-background:radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
-radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
-linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);}
+body{min-height:100vh;color:#e7e3dc;background:radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);}
 .header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
@@ -35,141 +33,142 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
 <div class="divider"></div>
 <div class="grid" id="grid"></div>
 
-<label class="add-btn">+
+<label class="add-btn">
+  +
   <input id="photoInput" type="file" accept="image/*">
 </label>
 
 <script>
-/* ---------- CONFIG ---------- */
+/* --- ВСТАВЬ СВОИ КОНСТАНТЫ (если еще не вставил) --- */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
+
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ---------- DOM refs ---------- */
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
-/* ---------- UI helper ---------- */
 function getGlowColor(rating){
   const hue = 10 + (rating * 4);
   return `hsl(${hue}, 80%, 55%)`;
 }
 
-/* ---------- Load & render ---------- */
 async function loadCards(){
+  stats.textContent = "Загрузка...";
+
   const { data, error } = await supabaseClient
     .from("cards")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error){
-    console.error(error);
+  if(error){
+    console.error("Ошибка загрузки:", error);
     stats.textContent = "Ошибка загрузки";
+    grid.innerHTML = "";
     return;
   }
 
   grid.innerHTML = "";
   let sum = 0;
 
-  if (!data || data.length === 0){
+  if(!data || data.length === 0){
     stats.textContent = "Пока нет карточек";
     return;
   }
 
   data.forEach(card => {
-    sum += card.rating || 0;
+    // определяем PK динамически (если в таблице uuid — используем uuid, если id — id)
+    const pkCol = card.uuid ? "uuid" : (card.id ? "id" : null);
+    const pkVal = pkCol ? card[pkCol] : null;
+
+    sum += (typeof card.rating === "number") ? card.rating : (Number(card.rating) || 0);
 
     const el = document.createElement("div");
     el.className = "card";
-
-    // store uuid in DOM (very important)
-    // prefer card.uuid; fallback to card.id if used earlier
-    el.dataset.uuid = card.uuid || card.id || "";
-
     el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
+
     el.innerHTML = `
-      <img src="${card.image_url || ""}" alt="photo">
+      <img src="${card.image_url || ""}">
       <div class="delete-btn">✕</div>
       <textarea placeholder="Описание">${card.text || ""}</textarea>
       <div class="rating">${card.rating || 0}/10</div>
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
     `;
 
-    // DELETE (uses dataset.uuid)
+    // DELETE
     el.querySelector(".delete-btn").onclick = async () => {
-      const uuid = el.dataset.uuid;
-      if (!uuid){
-        alert("Ошибка удаления: uuid не найден для этой карточки");
+      if(!pkCol || !pkVal){
+        alert("Ошибка удаления: uuid/id не найден для этой карточки");
         return;
       }
-
       const { error } = await supabaseClient
         .from("cards")
         .delete()
-        .eq("uuid", uuid); // <- убедился, что в БД колонка называется uuid
+        .eq(pkCol, pkVal);
 
-      if (error){
-        console.error(error);
-        alert("Ошибка удаления: " + (error.message || error));
+      if(error){
+        console.error("Ошибка удаления:", error);
+        alert("Ошибка удаления: " + (error.message || JSON.stringify(error)));
         return;
       }
 
-      // remove visually (быстро) + обновить
-      el.remove();
-      // обновим список и статистику
       await loadCards();
     };
 
     // TEXT update
-    const ta = el.querySelector("textarea");
-    ta.oninput = async (e) => {
-      const uuid = el.dataset.uuid;
-      if (!uuid) return;
-      await supabaseClient.from("cards")
+    el.querySelector("textarea").oninput = async (e) => {
+      if(!pkCol || !pkVal) return;
+      const { error } = await supabaseClient
+        .from("cards")
         .update({ text: e.target.value })
-        .eq("uuid", uuid);
+        .eq(pkCol, pkVal);
+
+      if(error){
+        console.error("Ошибка обновления текста:", error);
+      }
     };
 
-    // RATING update
+    // RATING slider
     const slider = el.querySelector(".slider");
     const ratingEl = el.querySelector(".rating");
 
+    // используем change — чтобы не спамить запросами при скролле ползунка
     slider.addEventListener("change", async () => {
       const newRating = Number(slider.value);
       ratingEl.textContent = newRating + "/10";
       el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
 
-      const uuid = el.dataset.uuid;
-      if (!uuid){
-        alert("Ошибка обновления рейтинга: uuid не найден");
+      if(!pkCol || !pkVal){
+        alert("Ошибка обновления рейтинга: uuid/id не найден");
         return;
       }
 
       const { error } = await supabaseClient
         .from("cards")
         .update({ rating: newRating })
-        .eq("uuid", uuid);
+        .eq(pkCol, pkVal);
 
-      if (error){
-        console.error(error);
-        alert("Ошибка обновления рейтинга: " + (error.message || error));
+      if(error){
+        console.error("Ошибка обновления рейтинга:", error);
+        alert("Ошибка обновления рейтинга: " + (error.message || JSON.stringify(error)));
         return;
       }
 
+      // перезагрузим список, чтобы всё синхронизировать
       await loadCards();
     });
 
     grid.appendChild(el);
   });
 
-  stats.textContent = `Средняя оценка: ${(sum / data.length).toFixed(1)} • Карточек: ${data.length}`;
+  stats.textContent = `Средняя оценка: ${(sum/data.length).toFixed(1)} • Карточек: ${data.length}`;
 }
 
-/* ---------- Upload photo & insert row ---------- */
+/* Upload -> storage -> insert row */
 photoInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
-  if (!file) return;
+  if(!file) return;
 
   const fileName = Date.now() + "-" + file.name;
 
@@ -178,21 +177,17 @@ photoInput.addEventListener("change", async (e) => {
     .from("photos")
     .upload(fileName, file);
 
-  if (uploadError){
-    console.error(uploadError);
+  if(uploadError){
+    console.error("Ошибка загрузки в storage:", uploadError);
     alert("Ошибка загрузки");
     return;
   }
 
-  // getPublicUrl возвращает сразу data
-  const { data } = supabaseClient
-    .storage
-    .from("photos")
-    .getPublicUrl(fileName);
+  // получить публичный URL
+  const { data } = supabaseClient.storage.from("photos").getPublicUrl(fileName);
+  const publicUrl = data.publicUrl;
 
-  const publicUrl = data?.publicUrl || "";
-
-  // вставляем запись в таблицу (uuid создастся автоматически)
+  // вставить запись в таблицу
   const { error: insertError } = await supabaseClient
     .from("cards")
     .insert([{
@@ -201,18 +196,16 @@ photoInput.addEventListener("change", async (e) => {
       rating: 0
     }]);
 
-  if (insertError){
-    console.error(insertError);
+  if(insertError){
+    console.error("Ошибка записи в БД:", insertError);
     alert("Ошибка записи в БД");
     return;
   }
 
-  // обновляем UI
   await loadCards();
   photoInput.value = "";
 });
 
-/* ---------- start ---------- */
 loadCards();
 </script>
 
