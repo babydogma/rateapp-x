@@ -197,39 +197,42 @@ async function loadCards(){
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
     `;
 
+    // Удаление
     el.querySelector(".delete-btn").onclick=async()=>{
-      await supabaseClient.from("cards").delete().eq("id",card.id);
+      await supabaseClient.from("cards").delete().eq("uuid", card.uuid);
       loadCards();
     };
 
+    // Обновление текста
     el.querySelector("textarea").oninput=async(e)=>{
       await supabaseClient.from("cards")
         .update({text:e.target.value})
-        .eq("id",card.id);
+        .eq("uuid", card.uuid);
     };
 
+    // Обновление рейтинга
     const slider = el.querySelector(".slider");
-const ratingEl = el.querySelector(".rating");
+    const ratingEl = el.querySelector(".rating");
 
-slider.addEventListener("change", async () => {
-  const newRating = Number(slider.value);
+    slider.addEventListener("change", async () => {
+      const newRating = Number(slider.value);
 
-  ratingEl.textContent = newRating + "/10";
-  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
+      ratingEl.textContent = newRating + "/10";
+      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
 
-  const { error } = await supabaseClient
-    .from("cards")
-    .update({ rating: newRating })
-    .eq("id", card.id);
+      const { error } = await supabaseClient
+        .from("cards")
+        .update({ rating: newRating })
+        .eq("uuid", card.uuid);
 
-  if (error) {
-    console.error(error);
-    alert("Ошибка обновления рейтинга");
-    return;
-  }
+      if (error) {
+        console.error(error);
+        alert("Ошибка обновления рейтинга");
+        return;
+      }
 
-  await loadCards();
-});
+      await loadCards();
+    });
 
     grid.appendChild(el);
   });
