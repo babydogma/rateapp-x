@@ -5,22 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>RateApp X</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- PWA: manifest + theme + iOS touch icon (ДОБАВЛЕНО) -->
-<link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#d4af37" />
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" sizes="180x180" />
+<!-- Небольшие мета-правки для цвета статус-бара и iOS webapp -->
+<meta name="theme-color" content="#0e0e0f" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
+/* === FIX: убираем белые полосы при overscroll и при bounce на iOS ===
+   - дублируем фон на html и body, чтобы при растягивании показывался тот же фон
+   - отключаем «выпадение» белого через overscroll-behavior
+   - включаем -webkit-overflow-scrolling для плавного скролла на iOS
+*/
+html, body{
+  height:100%;
+  /* тот же фон, что был в body — положил и сюда */
+  background:
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
+    linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  margin:0;
+}
+
+/* Оригинальные стили — почти без изменений (только background убрал, он уже на html) */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-body{min-height:100vh;color:#e7e3dc;background:radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);}
+body{min-height:100vh;color:#e7e3dc; /* фон убран — он на html */ }
+
 .header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:120px;}
+
+/* подстраиваем паддинг снизу контента под safe area, чтобы не было белой полосы под плавающей кнопкой */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+
+/* остальные стили без изменений, кроме позиции add-btn (учёт safe-area) */
 .card{background:#1a1a1c;border-radius:18px;padding:14px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.6);transition:0.3s ease;}
 .card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
 .delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
@@ -28,7 +49,17 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
 .rating{margin-top:8px;font-weight:600;color:#d4af37;}
 .slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
 .slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
-.add-btn{position:fixed;right:28px;bottom:28px;width:70px;height:70px;border-radius:50%;background:#111;border:1px solid rgba(212,175,55,0.4);display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);}
+
+/* учтём safe-area в позиции плавающей кнопки (поднимаем её при необходимости) */
+.add-btn{
+  position:fixed;
+  right:28px;
+  bottom:calc(28px + env(safe-area-inset-bottom));
+  width:70px;height:70px;border-radius:50%;
+  background:#111;border:1px solid rgba(212,175,55,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);
+}
+
 #photoInput{display:none;}
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
 </style>
@@ -220,15 +251,6 @@ photoInput.addEventListener("change", async (e) => {
 
 /* старт */
 loadCards();
-</script>
-
-<!-- Регистрация service worker (ДОБАВЛЕНО) -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('SW registered'))
-    .catch((err) => console.warn('SW reg failed', err));
-}
 </script>
 
 </body>
