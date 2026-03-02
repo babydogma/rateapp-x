@@ -197,41 +197,55 @@ async function loadCards(){
       <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
     `;
 
-    // Удаление
-    el.querySelector(".delete-btn").onclick=async()=>{
-      await supabaseClient.from("cards").delete().eq("uuid", card.uuid);
-      loadCards();
-    };
-
-    // Обновление текста
-    el.querySelector("textarea").oninput=async(e)=>{
-      await supabaseClient.from("cards")
-        .update({text:e.target.value})
-        .eq("uuid", card.uuid);
-    };
-
-    // Обновление рейтинга
-    const slider = el.querySelector(".slider");
-    const ratingEl = el.querySelector(".rating");
-
-    slider.addEventListener("change", async () => {
-      const newRating = Number(slider.value);
-
-      ratingEl.textContent = newRating + "/10";
-      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
-
+    // DELETE
+    el.querySelector(".delete-btn").onclick = async () => {
       const { error } = await supabaseClient
         .from("cards")
-        .update({ rating: newRating })
+        .delete()
         .eq("uuid", card.uuid);
 
       if (error) {
         console.error(error);
-        alert("Ошибка обновления рейтинга");
+        alert("Ошибка удаления: " + error.message);
         return;
       }
 
-      await loadCards();
+      el.remove();
+      loadCards();
+    };
+
+    // UPDATE TEXT
+    el.querySelector("textarea").addEventListener("change", async (e)=>{
+      const { error } = await supabaseClient
+        .from("cards")
+        .update({ text: e.target.value })
+        .eq("uuid", card.uuid);
+
+      if (error) {
+        console.error(error);
+        alert("Ошибка обновления текста: " + error.message);
+      }
+    });
+
+    // UPDATE RATING
+    const slider = el.querySelector(".slider");
+    const ratingEl = el.querySelector(".rating");
+
+    slider.addEventListener("input", () => {
+      ratingEl.textContent = slider.value + "/10";
+      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(slider.value)}`;
+    });
+
+    slider.addEventListener("change", async () => {
+      const { error } = await supabaseClient
+        .from("cards")
+        .update({ rating: Number(slider.value) })
+        .eq("uuid", card.uuid);
+
+      if (error) {
+        console.error(error);
+        alert("Ошибка обновления рейтинга: " + error.message);
+      }
     });
 
     grid.appendChild(el);
@@ -253,7 +267,7 @@ photoInput.addEventListener("change",async(e)=>{
 
   if(uploadError){
     console.error(uploadError);
-    alert("Ошибка загрузки");
+    alert("Ошибка загрузки фото");
     return;
   }
 
@@ -274,7 +288,7 @@ photoInput.addEventListener("change",async(e)=>{
 
   if(insertError){
     console.error(insertError);
-    alert("Ошибка записи в БД");
+    alert("Ошибка записи в БД: " + insertError.message);
     return;
   }
 
