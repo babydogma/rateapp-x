@@ -1,89 +1,235 @@
-/* ================== GLOBAL BACKGROUND (lux gold velvet) ================== */
+/* =========================
+   RateApp X — полный style.css
+   (фон + все UI-стили)
+   ========================= */
 
-/* базовое — делаем html и body надёжными для full-bleed фоновых слоёв */
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* --- RESET / BASE --- */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:#e7e3dc;
+  background:transparent;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain; /* защитит от белого bounce */
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  position:relative;
+  overflow-x:hidden;
 }
 
-/* тело — основной плейсхолдер */
-body {
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background-color: #050507; /* запасной фон */
-  position: relative;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; /* плавный скролл на iOS */
-  overscroll-behavior-y: contain; /* предотвращает "выпадение" белого на некоторых браузерах */
+/* =========================
+   BACKGROUND: velvet + gold glow
+   ========================= */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-3;
+  background:linear-gradient(180deg,#0b0b10 0%,#07070a 40%,#050507 100%);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
 }
 
-/* основной линейный градиент (бархат) — подложка */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;                      /* top:0; right:0; bottom:0; left:0 */
-  z-index: -3;
-  background: linear-gradient(
-    180deg,
-    #0b0b10 0%,
-    #07070a 40%,
-    #050507 100%
-  );
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-/* золотые световые акценты + виньетка */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
   background:
-    /* крупное мягкое золото слева/снизу */
-    radial-gradient(
-      700px 520px at 22% 72%,
-      rgba(212, 175, 55, 0.24),
-      rgba(212, 175, 55, 0.08) 20%,
-      transparent 60%
-    ),
-    /* компенсирующее тёплое отражение справа/вверху */
-    radial-gradient(
-      1000px 700px at 82% 18%,
-      rgba(255, 220, 120, 0.08),
-      transparent 60%
-    ),
-    /* центральная виньетка для глубины */
-    radial-gradient(
-      circle at center,
-      transparent 55%,
-      rgba(0,0,0,0.65) 100%
-    );
-  background-repeat: no-repeat;
+    radial-gradient(700px 520px at 22% 72%, rgba(212,175,55,0.24), rgba(212,175,55,0.08) 20%, transparent 60%),
+    radial-gradient(1000px 700px at 82% 18%, rgba(255,220,120,0.08), transparent 60%),
+    radial-gradient(circle at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+  background-repeat:no-repeat;
 }
 
-/* --- небольшая оптимизация: уменьшение деталей на мелких экранах --- */
-@media (max-width: 420px) {
-  body::after {
+/* уменьшенная детализация на маленьких экранах */
+@media (max-width:420px){
+  body::after{
     background:
-      radial-gradient(
-        520px 380px at 20% 70%,
-        rgba(212,175,55,0.22),
-        transparent 60%
-      ),
-      radial-gradient(
-        700px 500px at 85% 18%,
-        rgba(255,220,120,0.06),
-        transparent 70%
-      ),
-      radial-gradient(
-        circle at center,
-        transparent 60%,
-        rgba(0,0,0,0.6) 100%
-      );
+      radial-gradient(520px 380px at 20% 70%, rgba(212,175,55,0.22), transparent 60%),
+      radial-gradient(700px 500px at 85% 18%, rgba(255,220,120,0.06), transparent 70%),
+      radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.6) 100%);
   }
 }
+
+/* =========================
+   LAYOUT
+   ========================= */
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:0.6px;color:#d4af37;text-shadow:0 6px 18px rgba(212,175,55,0.12);}
+.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
+.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.35), transparent);}
+
+/* Grid: две карточки в ряд, адаптив */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  padding:20px;
+  padding-bottom:calc(120px + env(safe-area-inset-bottom));
+}
+
+/* =========================
+   CARD
+   ========================= */
+.card{
+  background:#111111;
+  border-radius:18px;
+  padding:14px;
+  position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.06);
+  transition:transform .28s cubic-bezier(.2,1,.22,1), box-shadow .25s ease;
+  overflow:hidden;
+}
+
+/* inner glow rim */
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  padding:1px;
+  pointer-events:none;
+  box-shadow:0 10px 40px rgba(212,175,55,0.06) inset;
+}
+
+/* image */
+.card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:12px;
+  display:block;
+  background:#0f0f0f;
+}
+
+/* delete X */
+.delete-btn{
+  position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;z-index:4;
+}
+
+/* description textarea */
+textarea{
+  width:100%;
+  margin-top:10px;
+  background:rgba(20,20,21,0.6);
+  border:1px solid rgba(212,175,55,0.08);
+  border-radius:12px;
+  padding:12px;
+  color:#e7e3dc;
+  resize:none;
+  font-size:15px;
+  min-height:48px;
+}
+
+/* rating text */
+.rating{margin-top:8px;font-weight:700;color:#d4af37;font-size:20px;}
+
+/* slider (unstyled native fallback) */
+input[type="range"].slider{
+  width:100%;
+  margin-top:8px;
+  -webkit-appearance:none;
+  appearance:none;
+  height:8px;
+  border-radius:8px;
+  background:linear-gradient(90deg,#2a2a2c,#2a2a2c);
+  outline:none;
+  box-shadow:none;
+}
+
+/* thumb */
+input[type="range"].slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:20px;height:20px;border-radius:50%;
+  background:#d4af37;border:3px solid rgba(0,0,0,0.25);
+  box-shadow:0 4px 10px rgba(212,175,55,0.25);
+  margin-top:-6px;
+}
+input[type="range"].slider::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;background:#d4af37;border:3px solid rgba(0,0,0,0.25);
+}
+
+/* select styling */
+select{
+  width:100%;
+  margin-top:12px;
+  background:rgba(10,10,11,0.6);
+  color:#e7e3dc;
+  border:1px solid rgba(212,175,55,0.06);
+  padding:12px 14px;
+  border-radius:12px;
+  appearance:none;
+  -webkit-appearance:none;
+  font-size:15px;
+}
+
+/* created date small */
+.created{margin-top:10px;color:#c6b27a;font-size:13px;}
+
+/* =========================
+   FLOATING ADD BUTTON (bottom nav variant)
+   ========================= */
+.bottom-nav{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:18px;
+  z-index:40;
+  width:calc(100% - 40px);
+  max-width:720px;
+  height:72px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
+  border-radius:24px;
+  padding:8px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 18px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  border:1px solid rgba(212,175,55,0.06);
+}
+
+/* nav buttons (emoji) */
+.nav-emoji{
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:pointer;
+  background:transparent;border:none;
+}
+
+/* center add button smaller and inside nav */
+.nav-add{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#0e0e0f;border:2px solid rgba(212,175,55,0.12);
+  box-shadow:0 6px 18px rgba(212,175,55,0.14);
+  font-size:24px;color:#d4af37;cursor:pointer;
+  transform:translateY(-6px);
+}
+
+/* make sure it is above nav */
+.nav-add{z-index:45}
+
+/* small active indicator for emoji (remove underlines) */
+.nav-emoji:focus{outline:none}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width:800px){
+  .grid{grid-template-columns:repeat(1,1fr);padding-bottom:140px}
+  .header{font-size:26px}
+  .bottom-nav{height:64px}
+}
+
+/* =========================
+   Accessibility / Utility
+   ========================= */
+.hidden{display:none}
+/* small glow helper for card focus */
+.card:focus-within{transform:translateY(-4px);box-shadow:0 30px 70px rgba(212,175,55,0.08)}
