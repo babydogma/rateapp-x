@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>RateApp X</title>
 
 <link rel="manifest" href="/manifest.json">
@@ -12,33 +12,33 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="/style.css">
+
+<!-- supabase + script подключаем defer чтобы скрипт запускался после парсинга -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/script.js" defer></script>
 </head>
 <body>
 
-<header class="header">RateApp X</header>
-<div id="stats" class="stats">Загрузка...</div>
+<div class="header">RateApp X</div>
+<div class="stats" id="stats">Загрузка...</div>
 <div class="divider"></div>
 
-<main class="content">
-  <div id="grid" class="grid"></div>
-</main>
+<!-- основная сетка -->
+<div class="grid" id="grid"></div>
 
-<!-- скрытый input для фото -->
-<input id="photoInput" type="file" accept="image/*" style="display:none" />
+<!-- скрытый input для загрузки (центральная кнопка внутри панели его откроет) -->
+<input id="photoInput" type="file" accept="image/*" style="display:none;" aria-hidden="true"/>
 
-<!-- нижняя панель (glass) -->
-<nav class="bottom-bar">
-  <button id="homeBtn" class="nav-btn" aria-label="Главная">🏠</button>
+<!-- Нижняя панель -->
+<nav class="bottom-nav" role="navigation" aria-label="Навигация">
+  <a class="nav-item" id="nav-home" href="/index.html" title="Главная">🏠</a>
 
-  <div class="add-wrap">
-    <button id="addBtn" class="add-btn" aria-label="Добавить">+</button>
-  </div>
+  <!-- кнопка добавления внутри панели (меньше размера) -->
+  <label for="photoInput" class="nav-add" title="Добавить фото">＋</label>
 
-  <button id="catsBtn" class="nav-btn" aria-label="Категории">📂</button>
+  <a class="nav-item" id="nav-cats" href="/categories.html" title="Категории">📂</a>
 </nav>
 
-<script src="/script.js"></script>
 </body>
 </html>
