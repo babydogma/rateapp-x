@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
 <title>Категории — RateApp X</title>
-
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <div class="header">Категории</div>
+  <div class="stats">Здесь будут категории</div>
+  <div class="divider"></div>
 
-<div class="header">Категории</div>
-<div class="divider"></div>
+  <div style="padding:20px;color:#e7e3dc">
+    <p>Пока шаблон — добавь свои категории здесь.</p>
+    <p><a href="/" style="color:#d4af37;">← На главную</a></p>
+  </div>
 
-<div class="categories-page">
-  <div class="category-card">🎬 Фильмы</div>
-  <div class="category-card">📺 Сериалы</div>
-  <div class="category-card">🎮 Игры</div>
-  <div class="category-card">📚 Книги</div>
-</div>
+  <!-- кнопка добавить та же самая -->
+  <label class="add-btn" onclick="document.getElementById('gotoIndex').click()">+
+  </label>
 
-<div class="bottom-nav">
-  <a href="index.html">Главная</a>
-  <a href="categories.html" class="active">Категории</a>
-</div>
-
+  <a id="gotoIndex" href="/" style="display:none">index</a>
 </body>
 </html>
