@@ -1,6 +1,8 @@
-/* --- БАЗА --- */
+/* базовые стили — взяты и скорректированы из твоего дизайна */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-html{height:100%;
+
+html{
+  height:100%;
   background:
     radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
     radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
@@ -8,121 +10,111 @@ html{height:100%;
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
+
 body{
   min-height:100vh;
   color:#e7e3dc;
   background:transparent;
   padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
 }
 
-/* --- Шапка / статистика --- */
-.header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:#d4af37;}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-/* --- Сетка карточек --- */
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
 
-/* --- Карточка --- */
+/* карточка */
 .card{
-  background:#1a1a1c;border-radius:18px;padding:14px;position:relative;
+  background:#1a1a1c;
+  border-radius:18px;
+  padding:14px;
+  position:relative;
   box-shadow:0 20px 40px rgba(0,0,0,0.6);
   transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-  opacity:0; transform:translateY(20px) scale(.98);
-  animation:cardReveal .55s cubic-bezier(0.22,1,0.36,1) forwards;
 }
-@keyframes cardReveal{
-  0%{opacity:0; transform:translateY(20px) scale(.98);}
-  60%{opacity:1; transform:translateY(-6px) scale(1.01);}
-  100%{opacity:1; transform:translateY(0) scale(1);}
-}
-.card.fade-out{opacity:0; transform:translateY(10px) scale(.98);}
-
 .card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
 .delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
 textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
 .rating{margin-top:8px;font-weight:600;color:#d4af37;}
 .slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
 .slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
+
+/* category select */
+.category-select{
+  width:100%;
+  margin-top:12px;
+  background:#141415;
+  border:1px solid rgba(212,175,55,0.12);
+  color:#e7e3dc;
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:15px;
+}
+
+/* created line */
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
-/* --- Нижняя панель (nav) --- */
+/* --- нижняя панель (новый стиль, уменьшенный, glass + контур) --- */
 .bottom-nav{
   position:fixed;
-  left:12px; right:12px;
+  left:14px;
+  right:14px;
   bottom:12px;
-  height:86px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 24px;
-  z-index:1200;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.28));
+  height:66px;
+  background:rgba(255,255,255,0.04);
   border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding:8px 18px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px);
+  z-index:55;
 }
 
-/* nav кнопки (эмодзи) */
-.nav-btn{
-  background:transparent;
-  border:none;
-  font-size:30px;
-  color:#d4af37;
+/* эмодзи-кнопки */
+.nav-emoji{
+  font-size:28px;
+  background:none;border:0;cursor:pointer;
+  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.08));
+}
+
+/* уменьшенные эмодзи активной */
+.nav-emoji.active{ transform:translateY(-2px); }
+
+/* большая кнопка + внутри панели — чуть приподнята */
+.add-btn{
+  width:58px;height:58px;border-radius:50%;
+  background:#0f0f0f;color:#d4af37;border:2px solid rgba(212,175,55,0.2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:30px;
+  box-shadow:0 12px 30px rgba(212,175,55,0.16);
+  transform:translateY(-12%);
   cursor:pointer;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:56px;
-  height:56px;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-}
-.nav-btn:focus{outline: none;}
-
-/* FAB wrapper — внутри панели, по центру */
-.fab-wrap{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex: 0 0 72px;
-  margin: 0 6px;
 }
 
-/* сама кнопка */
-.fab{
-  width:64px;
-  height:64px;
-  border-radius:50%;
-  background:#0e0e0f;
-  border:2px solid rgba(212,175,55,0.25);
-  color:#d4af37;
-  display:flex;align-items:center;justify-content:center;
-  font-size:30px;
-  box-shadow:0 6px 24px rgba(212,175,55,0.18);
-  cursor:pointer;
-  transform: translateY(-10px);
-  z-index:10;
+/* ---- categories page blocks ---- */
+.categories-grid{
+  padding:18px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
-
-/* label+input — делаем input полноразмерным и кликабельным */
-.fab-label{position:relative; display:inline-block; width:64px; height:64px;}
-.fab-label input[type=file]{position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;}
-
-/* активный таб визуал */
-.nav-active{
-  box-shadow: inset 0 -4px 0 0 rgba(212,175,55,0.25);
-  border-radius:8px;
+.category-block{
+  display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.02);
+  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
+  border:1px solid rgba(212,175,55,0.06);
 }
+.cat-emoji{font-size:30px;}
+.cat-title{font-weight:600;}
+.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
 
-/* responsive */
-@media (max-width:420px){
-  .grid{grid-template-columns:repeat(2,1fr); gap:12px; padding-left:12px; padding-right:12px;}
-  .bottom-nav{padding-left:18px;padding-right:18px;height:92px;}
+/* responsive tweaks */
+@media (min-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr);}
+  .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
