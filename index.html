@@ -12,26 +12,38 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
 <div class="header">RateApp X</div>
 <div class="stats" id="stats">Загрузка...</div>
 <div class="divider"></div>
-
 <div class="grid" id="grid"></div>
 
-<label class="add-btn">+
-  <input id="photoInput" type="file" accept="image/*">
-</label>
+<!-- invisible file input (used by fab) -->
+<input id="photoInput" type="file" accept="image/*" style="display:none">
 
-<!-- нижняя навигация -->
-<nav class="bottom-nav" role="navigation" aria-label="Главная навигация">
-  <a class="nav-item" href="/" id="nav-home">Главная</a>
-  <a class="nav-item" href="/categories.html" id="nav-cats">Категории</a>
-</nav>
+<!-- bottom nav wrapper -->
+<div class="bottom-nav-wrap">
+  <div class="bottom-nav">
+    <a class="nav-item active" href="/index.html" id="nav-home">
+      <span class="icon">🏠</span>
+      <span class="label">Дом</span>
+    </a>
+
+    <!-- central fab placeholder (actual button) -->
+    <div class="fab-wrap">
+      <div class="fab" title="Добавить">+</div>
+    </div>
+
+    <a class="nav-item" href="/categories.html" id="nav-cats">
+      <span class="icon">📂</span>
+      <span class="label">Категории</span>
+    </a>
+  </div>
+</div>
 
 <script src="/script.js"></script>
 </body>
