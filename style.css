@@ -1,292 +1,120 @@
-/* style.css — заменитель. Кладём прямо в корень (или в ту же папку, где был старый). */
+/* базовые стили — взяты и скорректированы из твоего дизайна */
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
-/* базовые правила */
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
-html,body{height:100%}
-
-/* === фон: градиенты + тонкий "шум" для текстуры === */
 html{
+  height:100%;
   background:
-    radial-gradient(1200px 700px at 15% 10%, rgba(212,175,55,0.08), transparent 18%),
-    radial-gradient(900px 500px at 85% 90%, rgba(184,134,11,0.04), transparent 20%),
-    linear-gradient(160deg,#070707 0%, #0b0b0c 30%, #101012 60%, #0b0b0b 100%);
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
+    linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
 
-/* тонкий шум (CSS-only) — легкая "пыль" */
-html::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background-image:
-    radial-gradient(rgba(255,255,255,0.02) 0.5px, transparent 0.6px);
-  background-size:6px 6px;
-  mix-blend-mode:overlay;
-  opacity:0.35;
-}
-
-/* удобная прокрутка на iOS, и предотвращаем белый bounce */
 body{
   min-height:100vh;
   color:#e7e3dc;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain;
   background:transparent;
-  padding-top:env(safe-area-inset-top);
-  padding-bottom:env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
 }
 
-/* Заголовок + статистика */
-.header{
-  padding:28px 20px 8px;
-  text-align:center;
-  font-size:38px;
-  font-weight:800;
-  letter-spacing:0.6px;
-  color:#d4af37;
-  text-shadow:0 6px 18px rgba(212,175,55,0.12), 0 1px 0 rgba(0,0,0,0.6);
-  /* лёгкое подсвечивание под текстом */
-  display:block;
-}
-.stats{
-  text-align:center;
-  font-size:16px;
-  margin-bottom:18px;
-  color:#d6c08a;
-  opacity:0.95;
-}
-/* разделитель золотая линия */
-.divider{
-  height:1px;
-  margin:0 30px 22px;
-  background:linear-gradient(to right, transparent, rgba(212,175,55,0.45), transparent);
-}
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:#d4af37;}
+.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
+.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-/* Grid карточек — 2 колонки, аккуратные отступы */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(160px, 1fr));
-  gap:18px;
-  padding:18px;
-  padding-bottom:calc(120px + env(safe-area-inset-bottom));
-}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
 
-/* Карточка */
+/* карточка */
 .card{
-  background:linear-gradient(180deg, rgba(20,20,20,0.98), rgba(12,12,12,0.98));
+  background:#1a1a1c;
   border-radius:18px;
   padding:14px;
   position:relative;
-  overflow:hidden;
-  min-height:320px;
-  transition:transform .28s cubic-bezier(.2,.9,.2,1), box-shadow .28s ease;
-  /* внутренний светящийся контур */
-  box-shadow:
-    0 30px 40px -30px rgba(0,0,0,0.7),
-    0 24px 60px -30px rgba(212,175,55,0.12);
-  border:1px solid rgba(212,175,55,0.06);
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
+  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
 }
+.card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
+.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
+textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:#d4af37;}
+.slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
+.slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
 
-/* тонкая внутренняя рамка (эффект "cavity") */
-.card::before{
-  content:"";
-  position:absolute;
-  inset:6px;
-  border-radius:12px;
-  pointer-events:none;
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.5), inset 0 0 18px rgba(212,175,55,0.035);
-}
-
-/* карточка hover / active */
-.card:hover{ transform:translateY(-6px) }
-
-/* изображение */
-.card img{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border-radius:12px;
-  display:block;
-  box-shadow:0 8px 18px rgba(0,0,0,0.6);
-  border:1px solid rgba(255,255,255,0.02);
-}
-
-/* textarea / описание */
-textarea{
+/* category select */
+.category-select{
   width:100%;
   margin-top:12px;
-  background:rgba(20,20,20,0.9);
-  border:1px solid rgba(212,175,55,0.06);
-  border-radius:12px;
-  padding:12px;
+  background:#141415;
+  border:1px solid rgba(212,175,55,0.12);
   color:#e7e3dc;
-  resize:none;
-  font-size:15px;
-  min-height:46px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.45) inset;
-}
-
-/* рейтинг текст */
-.rating{
-  margin-top:14px;
-  font-weight:800;
-  color:#e0bf55;
-  font-size:20px;
-  text-shadow:0 2px 10px rgba(212,175,55,0.06);
-}
-
-/* слайдер (track + thumb) */
-.slider{
-  width:100%;
-  margin-top:10px;
-  -webkit-appearance:none;
-  appearance:none;
-  height:8px;
-  border-radius:999px;
-  background:linear-gradient(90deg,#222,#2a2a2c);
-  outline:none;
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,0.02);
-}
-.slider::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  appearance:none;
-  width:22px;height:22px;border-radius:50%;
-  background:linear-gradient(180deg,#f1cf66,#d4af37);
-  box-shadow:0 6px 18px rgba(212,175,55,0.25),0 1px 0 rgba(255,255,255,0.06) inset;
-  border:3px solid rgba(0,0,0,0.35);
-  cursor:pointer;
-}
-.slider::-moz-range-thumb{
-  width:22px;height:22px;border-radius:50%;
-  background:linear-gradient(180deg,#f1cf66,#d4af37);
-  border:3px solid rgba(0,0,0,0.35);
-}
-
-/* select (категория) */
-select{
-  width:100%;
-  margin-top:12px;
-  background:rgba(12,12,12,0.9);
-  color:#e7e3dc;
-  padding:12px;
+  padding:10px 12px;
   border-radius:12px;
-  border:1px solid rgba(212,175,55,0.06);
-  appearance:none;
-  -webkit-appearance:none;
   font-size:15px;
 }
 
-/* дата */
-.created{
-  margin-top:12px;
-  color:#d6c08a;
-  font-size:14px;
-}
+/* created line */
+.created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
-/* кнопка удаления (крестик) */
-.delete-btn{
-  position:absolute;
-  top:10px;
-  right:12px;
-  font-size:18px;
-  cursor:pointer;
-  color:rgba(212,175,55,0.9);
-  z-index:5;
-}
-
-/* === Нижняя панель (glass bar with center + button) === */
-/* контейнер — если у тебя есть свой класс, можно заменить селектор */
-.bottom-bar {
+/* --- нижняя панель (новый стиль, уменьшенный, glass + контур) --- */
+.bottom-nav{
   position:fixed;
-  left:12px;
-  right:12px;
-  bottom:calc(12px + env(safe-area-inset-bottom));
-  height:64px;
-  border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.25));
-  box-shadow:0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-  backdrop-filter: blur(8px) saturate(120%);
+  left:14px;
+  right:14px;
+  bottom:12px;
+  height:66px;
+  background:rgba(255,255,255,0.04);
+  border-radius:16px;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  padding:0 26px;
-  z-index:80;
+  justify-content:space-around;
+  padding:8px 18px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
+  z-index:55;
 }
 
-/* если панели нет в разметке — используем существующую метку .add-btn-wrapper? 
-   Но по умолчанию наш HTML использует <label class="add-btn"> — стилизуем её отдельно ниже.
-*/
-
-/* плюс-кнопка внутри панели */
-.bottom-bar .center-btn{
-  width:56px;height:56px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(180deg,#0b0b0b,#151515);
-  border:3px solid rgba(212,175,55,0.12);
-  color:#d4af37;
-  box-shadow:0 12px 30px rgba(212,175,55,0.18), 0 2px 0 rgba(0,0,0,0.6) inset;
-  transform:translateY(-8px);
+/* эмодзи-кнопки */
+.nav-emoji{
+  font-size:28px;
+  background:none;border:0;cursor:pointer;
+  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.08));
 }
 
-/* эмодзи слева/справа */
-.bottom-bar .icon{
-  font-size:22px;
-  opacity:0.98;
-  filter:drop-shadow(0 6px 20px rgba(0,0,0,0.6));
-}
+/* уменьшенные эмодзи активной */
+.nav-emoji.active{ transform:translateY(-2px); }
 
-/* маленькая версия, если панель строится по-другому — допустим .add-btn exists */
+/* большая кнопка + внутри панели — чуть приподнята */
 .add-btn{
-  /* скрываем старую позицию, если есть — и оставляем видимой только центр-кнопку в панели */
-  position:fixed;
-  right:28px;
-  bottom:28px;
-  width:70px;height:70px;border-radius:50%;
-  background:#111;border:1px solid rgba(212,175,55,0.4);
-  display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);
-  z-index:90;
+  width:58px;height:58px;border-radius:50%;
+  background:#0f0f0f;color:#d4af37;border:2px solid rgba(212,175,55,0.2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:30px;
+  box-shadow:0 12px 30px rgba(212,175,55,0.16);
+  transform:translateY(-12%);
+  cursor:pointer;
 }
 
-/* ссылки (категории page) — делаем блоки */
-.categories-list{
+/* ---- categories page blocks ---- */
+.categories-grid{
+  padding:18px;
   display:grid;
-  grid-template-columns:repeat(2, 1fr);
-  gap:16px;
-  padding:20px;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
-.category-tile{
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25));
-  border-radius:12px;
-  padding:16px;
-  display:flex;
-  align-items:center;
-  gap:14px;
-  color:#e2c86d;
-  font-weight:700;
-  box-shadow:0 12px 30px rgba(212,175,55,0.06);
-  border:1px solid rgba(212,175,55,0.03);
+.category-block{
+  display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.02);
+  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
+  border:1px solid rgba(212,175,55,0.06);
 }
+.cat-emoji{font-size:30px;}
+.cat-title{font-weight:600;}
+.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
 
-/* fallback для простого списка ссылок (если используется <a>) */
-.categories-list a{
-  text-decoration:none;
-  color:#e2c86d;
-}
-
-/* маленькие вспомогательные правки */
-@media (max-width:520px){
-  .header{font-size:32px}
-  .grid{grid-template-columns:repeat(1, 1fr)}
-  .card{min-height:360px}
-  .bottom-bar{left:10px;right:10px;padding:0 16px}
-}
-
-/* Accessibility: контрастные состояния фокуса (клавиатура) */
-button:focus, a:focus, input:focus, select:focus, textarea:focus{
-  outline:2px solid rgba(212,175,55,0.18);
-  outline-offset:3px;
-  box-shadow:0 8px 30px rgba(212,175,55,0.06);
+/* responsive tweaks */
+@media (min-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr);}
+  .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
