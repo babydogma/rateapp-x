@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
 <title>Категории — RateApp X</title>
 
 <link rel="manifest" href="/manifest.json">
@@ -13,75 +13,56 @@
 <meta name="theme-color" content="#0e0e0f" />
 
 <link rel="stylesheet" href="/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="header">Категории</div>
-  <div class="stats" id="catsStats">Загрузка...</div>
-  <div class="divider"></div>
+<header class="header">Категории</header>
+<div id="stats" class="stats">Загрузка...</div>
+<div class="divider"></div>
 
+<main class="content categories-grid-wrap">
   <div id="categoriesGrid" class="categories-grid"></div>
+  <div style="padding:20px;">
+    <a href="/" class="back-link">← На главную</a>
+  </div>
+</main>
 
-  <a class="back-to-main" href="/index.html">← На главную</a>
+<nav class="bottom-bar categories-bottom">
+  <button id="homeBtn2" class="nav-btn" aria-label="Главная">🏠</button>
 
-  <!-- нижняя панель (тот же блок для консистентности) -->
-  <nav class="bottom-nav" role="navigation" aria-label="Навигация">
-    <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
+  <div class="add-wrap">
+    <button id="addBtn2" class="add-btn" aria-label="Добавить">+</button>
+  </div>
 
-    <button id="addBtnCats" class="add-btn" title="Добавить фото">+</button>
-
-    <button class="nav-emoji active" data-page="categories" title="Категории">📂</button>
-  </nav>
+  <button id="catsBtn2" class="nav-btn active" aria-label="Категории">📂</button>
+</nav>
 
 <script>
-/* --- CATEGORIES list (copy of script.js) --- */
-const CATEGORIES = [
-  { id: "Фильм", emoji: "🎬" },
-  { id: "Сериалы", emoji: "📺" },
-  { id: "Еда", emoji: "🍔" },
-  { id: "Семья", emoji: "👪" },
-  { id: "Разное", emoji: "🔖" }
+/* простая локальная вставка категорий + навигация */
+const categories = [
+  { id: 'film', label: 'Фильм', emoji: '🎬' },
+  { id: 'series', label: 'Сериалы', emoji: '📺' },
+  { id: 'food', label: 'Еда', emoji: '🍔' },
+  { id: 'family', label: 'Семья', emoji: '👪' },
+  { id: 'other', label: 'Разное', emoji: '🏷️' }
 ];
 
-const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const categoriesGrid = document.getElementById("categoriesGrid");
-const catsStats = document.getElementById("catsStats");
-
-function createCategoryBlock(cat){
-  const el = document.createElement("a");
-  el.className = "category-block";
-  el.href = "/index.html?category=" + encodeURIComponent(cat.id);
-  el.innerHTML = `<div class="cat-emoji">${cat.emoji}</div><div class="cat-title">${cat.id}</div>`;
-  return el;
-}
-
-function renderCategoryBlocks(){
-  categoriesGrid.innerHTML = "";
-  CATEGORIES.forEach(c=>{
-    categoriesGrid.appendChild(createCategoryBlock(c));
-  });
-  catsStats.textContent = ""; // not used here
-}
-
-document.getElementById("addBtnCats").addEventListener("click", ()=> {
-  // делегируем открытие file input на index.html - открываем сам input, если есть
-  // просто перенаправим на главную и откроем диалог (index.js откроет input, если в ссылке ?openUpload=1)
-  location.href = "/index.html?openUpload=1";
-});
-
-/* nav emoji кнопки */
-document.querySelectorAll('.nav-emoji').forEach(btn=>{
-  btn.onclick = () => {
-    const page = btn.dataset.page;
-    if(page === 'home') location.href = '/index.html';
-    if(page === 'categories') location.href = '/categories.html';
+const grid = document.getElementById('categoriesGrid');
+categories.forEach(cat=>{
+  const el = document.createElement('button');
+  el.className = 'category-block';
+  el.innerHTML = `<span class="cat-emoji">${cat.emoji}</span><span class="cat-label">${cat.label}</span>`;
+  el.onclick = () => {
+    // переходим на главную и фильтруем по категории
+    location.href = '/?category=' + cat.id;
   };
+  grid.appendChild(el);
 });
 
-renderCategoryBlocks();
+document.getElementById('homeBtn2').onclick = () => location.href = '/';
+document.getElementById('addBtn2').onclick = () => {
+  // прокинуть к index → открыть файл-пикер там
+  location.href = '/';
+};
 </script>
 </body>
 </html>
