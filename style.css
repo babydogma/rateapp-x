@@ -73,18 +73,6 @@ body::after{
     0 16px 40px rgba(0,0,0,0.6);
 }
 
-/* тонкая внутренняя пунктирная рамка */
-.card::after{
-  content:"";
-  position:absolute;
-  inset:6px;
-  border-radius:12px;
-  pointer-events:none;
-  border:1px dotted rgba(212,175,55,0.12);
-  mix-blend-mode: screen;
-  z-index:9;
-}
-
 /* внешний мягкий золотой glow */
 .card::before{
   content:"";
