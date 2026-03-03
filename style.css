@@ -1,4 +1,9 @@
-/* style.css — обновлённый (заменить файл целиком) */
+/* style.css — обновлённый (заменить файл целиком)
+   Включает поддержку ассетов:
+   /assets/particles.png
+   /assets/glow-edge.png
+   /assets/nav-glow.png
+*/
 
 /* базовые переменные и reset */
 :root{
@@ -73,8 +78,15 @@ body::after{
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 32px rgba(0,0,0,0.55);
 }
 
-/* тонкий внутренний пунктир у карточки */
+/* внутренний декоративный пунктир (оставляем — это декоративно) */
+.card .inner-dotted {
+  display:none; /* placeholder if needed */
+}
+
+/* Тонкая внутренняя пунктирная рамка у карточки (если нужна) */
 .card::after{
+  /* раньше использовался для dotted border — теперь используем для тонкой декоративной рамки,
+     но её переопределяем ниже если используются asset-based rim */
   content:"";
   position:absolute;
   inset:6px;
@@ -82,9 +94,11 @@ body::after{
   pointer-events:none;
   border:1px dotted rgba(212,175,55,0.15);
   mix-blend-mode: screen;
+  z-index:9;
 }
 
-/* внешняя золотая подсветка — псевдоэлемент расширяет область и даёт плавное свечение */
+/* внешняя золотая подсветка — псевдоэлемент расширяет область и даёт плавное свечение.
+   Мы заменяем на использование и градиентов, и image overlay (если есть assets) ниже. */
 .card::before{
   content:"";
   position:absolute;
@@ -147,6 +161,7 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
   backdrop-filter: blur(10px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
   z-index:60;
+  overflow:visible;
 }
 
 /* внутренняя тонкая обводка (внутри панели) */
@@ -158,6 +173,7 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
   pointer-events:none;
   border:1px solid rgba(212,175,55,0.03);
   mix-blend-mode: screen;
+  z-index:59;
 }
 
 /* внешняя золотая подсветка у панели */
@@ -251,4 +267,129 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 }
 
 /* small helpers */
-.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s 
+.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
+
+
+/* =========================
+   НИЖЕ — добавленные правила для ассетов (glow + particles)
+   вставляй ассеты в /assets/ с именами:
+   - glow-edge.png
+   - nav-glow.png
+   - particles.png
+   ========================= */
+
+/* Золотая пыль по экрану — включается через <div class="gold-particles"></div> в body (опционально) */
+.gold-particles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image: url('/assets/particles.png');
+  background-repeat: repeat;
+  background-size: 420px;
+  opacity: 0.28; /* подбери по вкусу */
+  mix-blend-mode: screen;
+  z-index:2;
+}
+
+/* Убедимся, что карточке можно добавить внешний glow через класс .card-glow */
+.card.card-glow{
+  position:relative;
+  overflow:visible;
+  z-index:12;
+}
+
+/* дополнительный мягкий glow-полос под карточкой (используем particles) */
+.card.card-glow::after{
+  /* переопределяем dotted рамку: этот ::after используется для glow-частиц под карточкой */
+  content:"";
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:-32px;
+  width:260px;
+  height:120px;
+  border-radius:60px;
+  background-image: url('/assets/particles.png');
+  background-size: 220px 220px;
+  background-repeat: repeat;
+  opacity:0.95;
+  filter: blur(6px) saturate(1.05);
+  z-index:1;
+  pointer-events:none;
+}
+
+/* Заменим/усилим яркую тонкую кромку карточки (overlay image), используя ::before */
+.card.card-glow::before{
+  content:"";
+  position:absolute;
+  inset:-8px;
+  border-radius:24px;
+  pointer-events:none;
+  z-index:0;
+  background-image: url('/assets/glow-edge.png');
+  background-size: cover;
+  background-position: center;
+  opacity:0.98;
+  filter: blur(0.9px) saturate(1.05) contrast(1.02);
+  mix-blend-mode: screen;
+}
+
+/* Если нужен дополнительный мягкий ореол под картинкой */
+.card.card-glow .img-orb{
+  display:none;
+}
+
+/* Подсветка нижней панели через ассет (nav-glow) — переопределяем ::before/::after */
+.bottom-nav{
+  overflow:visible;
+  z-index:60;
+}
+
+/* Используем ::after для отображения полосы glow на панели */
+.bottom-nav::after{
+  /* оставляем внутреннюю тонкую обводку (см. выше) — теперь добавляем текстуру поверх */
+  content:"";
+  position:absolute;
+  left:8px; right:8px; top:6px; bottom:6px;
+  border-radius:14px;
+  pointer-events:none;
+  background-image: url('/assets/nav-glow.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: screen;
+  opacity:0.9;
+  filter: blur(0.6px) contrast(1.03) saturate(1.03);
+  z-index: -1;
+}
+
+/* Кнопка + — тонкая кромка по ассету */
+.add-btn{
+  position:relative;
+  z-index:70;
+}
+.add-btn::after{
+  content:"";
+  position:absolute;
+  inset:-8px;
+  border-radius:50%;
+  pointer-events:none;
+  background-image: url('/assets/glow-edge.png');
+  background-size: 220px 220px;
+  background-position:center;
+  opacity:0.95;
+  filter: blur(1px) saturate(1.05);
+  z-index:-1;
+}
+
+/* Небольшие fallback-правки на случай, если ассеты не найдены */
+@supports (background-image: url('/assets/glow-edge.png')) {
+  /* ассеты поддерживаются, ничего дополнительно не делаем */
+}
+@media (max-width:420px){
+  .gold-particles{ opacity:0.18; background-size: 320px; }
+  .card.card-glow::after{ width:200px; height:90px; bottom:-26px; filter: blur(5px); }
+  .card.card-glow::before{ inset:-6px; filter: blur(0.8px); }
+  .add-btn{ width:52px;height:52px;font-size:26px; }
+}
+
+/* Конец файла */
