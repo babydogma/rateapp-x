@@ -3,6 +3,16 @@ const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// TEMP: force-unregister ALL service workers (debug only)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => {
+      reg.unregister().then(ok => console.log('SW unregistered:', ok, reg.scope)).catch(()=>{});
+    });
+  }).catch(()=>{});
+}
+// УДАЛИТЬ ПОСЛЕ ПРОВЕРКИ
+
 const CATEGORIES = [
   { id: "Фильм", emoji: "🎬" },
   { id: "Сериалы", emoji: "📺" },
