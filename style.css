@@ -81,6 +81,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: 18px;
+overflow: hidden;
+}
+
+.lux-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: .05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
 
 /* ---------- TOP IMAGE ---------- */
@@ -150,6 +161,14 @@ textarea {
     0 0 15px rgba(255,204,102,.8),
     0 0 30px rgba(255,153,0,.5);
   cursor: pointer;
+  transition: .2s ease;
+}
+
+.slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 25px rgba(255,204,102,1),
+    0 0 50px rgba(255,153,0,.8);
 }
 
 /* ---------- SELECT ---------- */
@@ -167,5 +186,6 @@ textarea {
 .created {
   text-align: left;
   font-size: 14px;
-  color: rgba(255,204,102,.7);
+  color: rgba(255,204,102,.9);
+letter-spacing: 1px;
 }
