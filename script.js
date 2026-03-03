@@ -81,8 +81,7 @@ function buildCardElement(card){
   el.className = "lux-card-wrapper";
 
   el.innerHTML = `
-    <div class="lux-glow"></div>
-    <div class="lux-border"></div>
+    <div class="lux-card">
 
     <div class="lux-card">
 
