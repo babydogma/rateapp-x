@@ -1,18 +1,29 @@
-/* style.css — заменяет старую версию */
-/* Базовые настройки */
+/* style.css — обновлённый (заменить файл целиком) */
+
+/* базовые переменные и reset */
+:root{
+  --gold: #d4af37;
+  --gold-strong: rgba(212,175,55,1);
+  --gold-soft: rgba(212,175,55,0.18);
+  --bg-dark-1: #0e0e0f;
+  --bg-dark-2: #161618;
+  --card-bg: #111213;
+}
+
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
+/* фон и тонкий зернистый шум */
 html{
   height:100%;
   background:
-    radial-gradient(circle at 15% 10%, rgba(212,175,55,0.06), transparent 30%),
-    radial-gradient(circle at 85% 90%, rgba(212,150,40,0.03), transparent 40%),
-    linear-gradient(160deg,#0b0b0c 0%, #141314 45%, #0d0d0d 100%);
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.06), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.03), transparent 50%),
+    linear-gradient(160deg,var(--bg-dark-1), var(--bg-dark-2) 60%, #0c0c0d);
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
 
-/* тело — safe area + плавный скролл */
+/* тонкий «глиттер»/шум поверх фона (через псевдоэлемент body::after) */
 body{
   min-height:100vh;
   color:#e7e3dc;
@@ -21,221 +32,223 @@ body{
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
+  position:relative;
+}
+body::after{
+  content:"";
+  pointer-events:none;
+  position:fixed;
+  left:0;top:0;right:0;bottom:0;
+  background-image:
+    radial-gradient(rgba(255,215,150,0.03) 0.5px, transparent 0.5px),
+    radial-gradient(rgba(255,215,150,0.01) 0.5px, transparent 0.5px);
+  background-size: 6px 6px, 18px 18px;
+  mix-blend-mode: screen;
+  opacity:0.08;
+  transform:translateZ(0);
+  z-index:1;
 }
 
-/* Заголовки и общие */
-.header{padding:28px 20px 6px;text-align:center;font-size:28px;font-weight:800;letter-spacing:0.6px;color:#d4af37;text-shadow:0 6px 20px rgba(0,0,0,0.6);}
-.stats{text-align:center;font-size:15px;margin-bottom:18px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 18px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.45), transparent);}
+/* поверхностное затемнение, чтобы элементы были над шумом */
+.app-surface { position:relative; z-index:5; }
 
-/* Grid карточек */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-  padding:20px;
-  padding-bottom:calc(120px + env(safe-area-inset-bottom));
-}
+/* заголовки и базовые блоки */
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
+.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
+.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-/* ========== CARD ========== */
+/* лэйаут карточек */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
+
+/* === КАРТОЧКА: фон, внутренняя обводка, внешняя золотая подсветка === */
 .card{
-  position:relative;           /* нужен для ::before/::after */
-  background:#0f0f10;
+  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.22));
   border-radius:18px;
   padding:14px;
-  overflow:visible;            /* чтобы glow ничего не обрезал */
-  transition:transform .22s ease, box-shadow .22s ease;
+  position:relative;
+  overflow:visible;
+  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
   z-index:10;
-  /* внутренний тонкий контур + мягенная тень базы */
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.02),
-    0 18px 40px rgba(0,0,0,0.6);
-  /* чуть темнее фон чтобы контур был заметен */
-  border:1px solid rgba(255,255,255,0.02);
+  /* лёгкая внутренняя тень чтобы было глубже */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 32px rgba(0,0,0,0.55);
 }
 
-/* внешний золотой контур (тонкий яркий край) */
-.card::before{
-  content:"";
-  position:absolute;
-  left:-6px; right:-6px; top:-6px; bottom:-6px;
-  pointer-events:none;
-  border-radius:22px;
-  z-index:-1;
-
-  /* тонкая золотая линия + мягкий blur вокруг */
-  background:
-    linear-gradient(90deg, rgba(212,175,55,0.0), rgba(212,175,55,0.95), rgba(212,175,55,0.0));
-  mask: linear-gradient(#000, #000); /* force smooth edge on some browsers */
-
-  filter: blur(6px);
-  opacity:0.98;
-}
-
-/* дополнительное локальное glow/particles под карточкой */
+/* тонкий внутренний пунктир у карточки */
 .card::after{
   content:"";
   position:absolute;
-  left:-28px; right:-28px; bottom:-18px; top:60%;
-  pointer-events:none;
-  border-radius:30px;
-  z-index:-2;
-  background:
-    radial-gradient(closest-side at 50% 0%, rgba(212,140,35,0.2), transparent 40%),
-    radial-gradient(closest-side at 20% 100%, rgba(212,140,35,0.12), transparent 40%);
-  filter: blur(22px);
-  opacity:0.95;
-}
-
-/* image + inner rounded corner */
-.card img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
+  inset:6px;
   border-radius:12px;
-  display:block;
-  border:1px solid rgba(255,255,255,0.02);
+  pointer-events:none;
+  border:1px dotted rgba(212,175,55,0.15);
+  mix-blend-mode: screen;
 }
 
-/* delete, textarea, rating etc. (minor tweaks kept) */
-.delete-btn{position:absolute;top:8px;right:10px;font-size:18px;cursor:pointer;color:#d4af37;z-index:20;}
-textarea{width:100%;margin-top:12px;background:#121212;border:1px solid rgba(212,175,55,0.08);border-radius:12px;padding:12px;color:#e7e3dc;resize:none;font-size:15px;}
-.rating{margin-top:10px;font-weight:700;color:#d4af37;font-size:20px;}
-.slider{width:100%;margin-top:10px;appearance:none;height:6px;border-radius:8px;background:linear-gradient(90deg,#2b2b2c,#2b2b2c);}
-.slider::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,#ffd65a,#d4af37);box-shadow:0 6px 18px rgba(212,140,40,0.28);border:3px solid rgba(0,0,0,0.45);}
+/* внешняя золотая подсветка — псевдоэлемент расширяет область и даёт плавное свечение */
+.card::before{
+  content:"";
+  position:absolute;
+  left:-10px; right:-10px; top:-10px; bottom:-10px;
+  border-radius:24px;
+  pointer-events:none;
+  background: radial-gradient(ellipse at top center, rgba(212,175,55,0.12), transparent 25%),
+              linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
+  box-shadow:
+    0 20px 80px rgba(212,175,55,0.14),
+    0 6px 22px rgba(212,175,55,0.08),
+    0 0 40px rgba(212,175,55,0.12);
+  filter:blur(0.6px);
+  opacity:1;
+  mix-blend-mode: screen;
+  z-index:-1;
+}
+
+/* изображения и контент внутри карточки (не трогаем логику) */
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
+.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:var(--gold);}
+textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:var(--gold);}
+.slider{width:100%;margin-top:8px;appearance:none;height:8px;border-radius:6px;background:linear-gradient(90deg,#2a2a2c,#222);}
+.slider::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,var(--gold), #b8860b);box-shadow:0 6px 18px rgba(212,175,55,0.25);border:2px solid rgba(0,0,0,0.45);}
 
 /* category select */
 .category-select{
   width:100%;
   margin-top:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.007));
+  background:linear-gradient(180deg,#141415,#0f0f10);
   border:1px solid rgba(212,175,55,0.06);
   color:#e7e3dc;
   padding:12px;
   border-radius:12px;
   font-size:15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
 
-/* created date */
-.created{margin-top:12px;color:#c6b27a;font-size:13px;}
+/* created line */
+.created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
-/* ========== BOTTOM NAV (glass + golden rim) ========== */
+/* Плавный "подпрыг" карточки при hover/active (мелкий эффект) */
+.card:active{ transform:translateY(-4px); }
+
+/* === НИЖНЯЯ ПАНЕЛЬ с внутренней кнопкой и подсветкой === */
 .bottom-nav{
   position:fixed;
-  left:14px;
-  right:14px;
-  bottom:12px;
-  height:66px;
-  padding:8px 18px;
+  left:20px;
+  right:20px;
+  bottom:14px;
+  height:70px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border-radius:20px;
   display:flex;
   align-items:center;
   justify-content:space-around;
-  z-index:60;
-
-  /* glass base */
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:10px 28px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
   backdrop-filter: blur(10px) saturate(1.1);
-  border-radius:18px;
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.02);
-  overflow:visible;
+  border:1px solid rgba(212,175,55,0.06);
+  z-index:60;
 }
 
-/* golden rim around bottom-panel */
-.bottom-nav::before{
-  content:"";
-  position:absolute;
-  left:-8px; right:-8px; top:-8px; bottom:-8px;
-  border-radius:24px;
-  z-index:-1;
-  pointer-events:none;
-  background:linear-gradient(90deg, rgba(212,175,55,0), rgba(212,175,55,0.9), rgba(212,175,55,0));
-  filter: blur(6px);
-  opacity:0.95;
-}
-
-/* subtle particles across panel */
+/* внутренняя тонкая обводка (внутри панели) */
 .bottom-nav::after{
   content:"";
   position:absolute;
-  left:-40px; right:-40px; top:-10px; bottom:-20px;
-  z-index:-2;
-  background:
-    radial-gradient(circle at 50% 20%, rgba(212,140,40,0.06), transparent 6%),
-    radial-gradient(circle at 20% 80%, rgba(212,140,40,0.03), transparent 8%);
-  filter: blur(18px);
+  left:6px; right:6px; top:6px; bottom:6px;
+  border-radius:16px;
   pointer-events:none;
-  opacity:0.95;
+  border:1px solid rgba(212,175,55,0.03);
+  mix-blend-mode: screen;
 }
 
-/* emoji buttons */
+/* внешняя золотая подсветка у панели */
+.bottom-nav::before{
+  content:"";
+  position:absolute;
+  left:-8px; right:-8px; top:-6px; bottom:-6px;
+  border-radius:22px;
+  pointer-events:none;
+  box-shadow:
+    0 30px 80px rgba(212,175,55,0.12),
+    0 8px 30px rgba(212,175,55,0.08),
+    0 0 40px rgba(212,175,55,0.12);
+  mix-blend-mode: screen;
+  z-index:-1;
+}
+
+/* эмодзи-кнопки */
 .nav-emoji{
-  font-size:26px;
-  background:none;border:0;cursor:pointer;color:transparent; /* color controlled by emoji itself */
-  line-height:1;
-  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
-  transform:translateY(2px);
+  font-size:24px;
+  background:none;border:0;cursor:pointer;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));
+  z-index:62;
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
 }
+/* удаляем подчеркивания, меняем цвет при активе */
+.nav-emoji.active{ transform:translateY(-2px); }
 
-/* center + button — smaller, inside panel, with golden rim */
+/* большая кнопка + внутри панели — центр и с подсветкой */
 .add-btn{
   width:56px;height:56px;border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:26px;color:#d4af37;background:linear-gradient(180deg,#0b0b0b,#121212);
-  border:1px solid rgba(212,175,55,0.18);
+  background:linear-gradient(180deg,#0b0b0b,#0f0f0f);
+  color:var(--gold);border:2px solid rgba(0,0,0,0.35);
+  display:inline-flex;align-items:center;justify-content:center;font-size:30px;
   box-shadow:
-    0 12px 30px rgba(212,140,40,0.18),
-    inset 0 2px 6px rgba(255,255,255,0.02);
-  position:relative; z-index:70;
+    0 20px 50px rgba(0,0,0,0.6),
+    0 6px 24px rgba(212,175,55,0.12);
+  transform:translateY(-6%);
+  cursor:pointer;
+  position:relative;
+  z-index:70;
 }
 
-/* small golden rim for + */
+/* золотая обводка и свет у + */
 .add-btn::before{
   content:"";
   position:absolute;
-  left:-8px;right:-8px;top:-8px;bottom:-8px;
-  border-radius:999px;
-  z-index:-1;
+  left:-8px;right:-8px;top:-8px;bottom:-8px;border-radius:50%;
   pointer-events:none;
-  background: radial-gradient(circle at 50% 40%, rgba(212,175,55,0.95), rgba(212,175,55,0.35) 30%, rgba(0,0,0,0) 55%);
-  filter: blur(8px);
-  opacity:0.95;
+  box-shadow:
+    0 18px 40px rgba(212,175,55,0.18),
+    0 6px 18px rgba(212,175,55,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  mix-blend-mode: screen;
+  z-index:-1;
 }
 
-/* tiny highlight dot on center of panel */
+/* центральная «спот» подсветка под кнопкой */
 .add-btn::after{
   content:"";
   position:absolute;
-  left:50%; top:50%;
-  transform:translate(-50%,-50%);
-  width:86%; height:86%; border-radius:50%;
-  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.02), rgba(0,0,0,0.01));
+  left:50%;top:50%;width:140px;height:40px;transform:translate(-50%,-40%);
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.18), transparent 50%);
+  filter:blur(12px);
+  z-index:-2;
   pointer-events:none;
 }
 
-/* ================= categories blocks ================= */
+/* categories page blocks */
 .categories-grid{
   padding:18px;
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:12px;
+  position:relative; z-index:10;
 }
 .category-block{
-  display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.008));
-  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
+  display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;
   border:1px solid rgba(212,175,55,0.06);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
-.cat-emoji{font-size:30px;}
-.cat-title{font-weight:700;}
+.cat-emoji{font-size:28px;}
+.cat-title{font-weight:700; color: #f0d999;}
+.back-to-main{display:block;margin:28px 20px;font-size:18px;color:var(--gold);text-decoration:none;}
 
-/* back link */
-.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
-
-/* Responsives */
+/* responsive tweaks */
 @media (min-width:900px){
   .grid{grid-template-columns:repeat(3,1fr);}
   .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
+
+/* small helpers */
+.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
