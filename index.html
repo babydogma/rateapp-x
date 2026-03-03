@@ -1,50 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
-<title>RateApp X</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>RateApp X</title>
 
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0e0e0f" />
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0e0e0f" />
 
-<!-- подключаем CSS -->
-<link rel="stylesheet" href="/style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="/script.js" defer></script>
 </head>
 <body>
+  <header class="top">
+    <div class="title">RateApp X</div>
+    <div id="stats" class="stats">Загрузка...</div>
+    <div class="divider"></div>
+  </header>
 
-<header class="top">
-  <div class="title">RateApp X</div>
-  <div class="stats" id="stats">Загрузка...</div>
-  <div class="divider"></div>
-</header>
+  <main>
+    <section id="grid" class="grid"></section>
+  </main>
 
-<main>
-  <div id="grid" class="grid"></div>
-</main>
+  <!-- bottom navigation with central add -->
+  <nav class="bottom-nav" role="navigation" aria-label="Navigation">
+    <button id="nav-home" class="nav-btn" title="Главная">🏠</button>
 
-<!-- нижняя панель -->
-<nav class="bottom-nav" role="navigation" aria-label="Навигация">
-  <button class="nav-btn" id="nav-home" title="Главная">🏠</button>
-
-  <!-- центр: кнопка добавления + input (input скрыт, но остаётся тем же id) -->
-  <div class="nav-center">
-    <label class="add-btn" aria-hidden="true">
-      <input id="photoInput" type="file" accept="image/*">
-      <span class="plus">+</span>
+    <label class="add-btn" title="Добавить">
+      <input id="photoInput" type="file" accept="image/*" hidden>
+      <span class="add-inner">＋</span>
     </label>
-  </div>
 
-  <button class="nav-btn" id="nav-cats" title="Категории">📂</button>
-</nav>
+    <button id="nav-cats" class="nav-btn" title="Категории">📂</button>
+  </nav>
 
-<!-- маленький helper: ссылка на страницу категорий (клиентская навигация) -->
-<script src="/script.js"></script>
+  <!-- service worker registration will be done in script.js -->
 </body>
 </html>
