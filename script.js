@@ -1,23 +1,46 @@
+// script.js — диагностическая, безопасная версия
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
+
+// проверка, что либы загружены
+if (!window.supabase) {
+  alert("Ошибка: библиотека Supabase не загружена. Убедись, что <script src=\"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script> подключён перед script.js");
+  throw new Error("supabase lib missing");
+}
+
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 
-if(grid){  // защита чтобы categories.html не ломалась
+function showError(msg, err) {
+  console.error(msg, err);
+  try { stats.textContent = "Ошибка: " + (msg || "неизвестно"); } catch(e){}
+  // на телефоне alert — пользователь увидит
+  alert((msg || "Ошибка") + (err && err.message ? "\n\n" + err.message : ""));
+}
 
 function formatDateSimple(datestr){
   if(!datestr) return "";
   const d = new Date(datestr);
   if(isNaN(d)) return "";
-  return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`;
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yy = d.getFullYear();
+  return `${dd}.${mm}.${yy}`;
 }
-
 function getGlowColor(rating){
   const hue = 10 + (rating * 4);
   return `hsl(${hue}, 80%, 55%)`;
+}
+
+function debounce(fn, ms){
+  let t;
+  return (...a) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...a), ms);
+  };
 }
 
 function updateStatsFromDOM(){
@@ -36,15 +59,173 @@ function updateStatsFromDOM(){
   stats.textContent = `Средняя оценка: ${(sum/count).toFixed(1)} • Карточек: ${count}`;
 }
 
-function debounce(fn, ms){
-  let t;
-  return (...a) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...a), ms);
+function buildCardElement(card, index=0){
+  const el = document.createElement("div");
+  el.className = "card";
+  el.style.animationDelay = (index * 0.07) + "s";
+  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
+
+  const createdAtRaw = card.created_at;
+
+  el.innerHTML = `
+    <img src="${card.image_url || ""}">
+    <div class="delete-btn">✕</div>
+    <textarea placeholder="Описание">${card.text || ""}</textarea>
+    <div class="rating">${card.rating || 0}/10</div>
+    <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
+    <div class="created">${formatDateSimple(createdAtRaw)}</div>
+  `;
+
+  el.querySelector(".delete-btn").onclick = async () => {
+    if(!createdAtRaw){
+      alert("Ошибка удаления: uuid/id не найден для этой карточки");
+      return;
+    }
+
+    try {
+      const { error: delError } = await supabaseClient
+        .from("cards")
+        .delete()
+        .eq("created_at", createdAtRaw);
+
+      if(delError) throw delError;
+
+      el.classList.add("fade-out");
+      setTimeout(() => {
+        if(el.parentNode) el.parentNode.removeChild(el);
+        updateStatsFromDOM();
+      }, 260);
+
+    } catch (e) {
+      showError("Ошибка удаления: ", e);
+    }
   };
+
+  el.querySelector("textarea").oninput = debounce(async (e) => {
+    const txt = e.target.value;
+    if(!createdAtRaw) return;
+    try {
+      const { error } = await supabaseClient
+        .from("cards")
+        .update({ text: txt })
+        .eq("created_at", createdAtRaw);
+      if(error) throw error;
+    } catch (e) {
+      showError("Ошибка сохранения текста:", e);
+    }
+  }, 700);
+
+  const slider = el.querySelector(".slider");
+  const ratingEl = el.querySelector(".rating");
+
+  slider.addEventListener("change", async () => {
+    const prev = Number(ratingEl.textContent.split("/")[0]) || 0;
+    const newRating = Number(slider.value);
+
+    ratingEl.textContent = newRating + "/10";
+    el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
+    updateStatsFromDOM();
+
+    if(!createdAtRaw){
+      alert("Ошибка обновления рейтинга: uuid/id не найден");
+      return;
+    }
+
+    try {
+      const { error: updateError } = await supabaseClient
+        .from("cards")
+        .update({ rating: newRating })
+        .eq("created_at", createdAtRaw);
+      if(updateError) throw updateError;
+    } catch (e) {
+      // откат UI
+      ratingEl.textContent = prev + "/10";
+      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(prev)}`;
+      updateStatsFromDOM();
+      showError("Ошибка обновления рейтинга:", e);
+    }
+  });
+
+  return el;
 }
 
-/* ВАЖНО: остальной твой код остаётся без изменений */
+async function loadCards(){
+  try {
+    stats.textContent = "Загрузка...";
+    const { data, error } = await supabaseClient
+      .from("cards")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if(error) throw error;
+    grid.innerHTML = "";
+    if(!data || data.length === 0){
+      updateStatsFromDOM();
+      return;
+    }
+    data.forEach((card, i) => {
+      const el = buildCardElement(card, i);
+      grid.appendChild(el);
+    });
+    updateStatsFromDOM();
+  } catch (e) {
+    showError("Ошибка при загрузке карточек — проверь подключение и права таблицы 'cards'", e);
+  }
+}
+
+photoInput.addEventListener("change", async (ev) => {
+  const file = ev.target.files[0];
+  if(!file) return;
+
+  const fileName = Date.now() + "-" + file.name;
+
+  try {
+    // 1) upload
+    const uploadResp = await supabaseClient
+      .storage
+      .from("photos")
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    // supabase v2 возвращает { data, error }
+    if(uploadResp.error) throw uploadResp.error;
+
+    // 2) get public url
+    const { data: urlData } = supabaseClient
+      .storage
+      .from("photos")
+      .getPublicUrl(fileName);
+    const publicUrl = urlData?.publicUrl;
+    if(!publicUrl){
+      throw new Error("Не удалось получить publicUrl. Проверь настройки bucket 'photos' (он должен быть public или иметь правила для anon).");
+    }
+
+    // 3) insert row
+    const { data: inserted, error: insertError } = await supabaseClient
+      .from("cards")
+      .insert([{
+        image_url: publicUrl,
+        text: "",
+        rating: 0
+      }])
+      .select()
+      .single();
+
+    if(insertError) throw insertError;
+
+    // prepend локально
+    const el = buildCardElement(inserted, 0);
+    grid.insertBefore(el, grid.firstChild);
+    updateStatsFromDOM();
+    photoInput.value = "";
+  } catch (e) {
+    // Частые причины: bucket не существует, права доступа, CORS, RLS для таблицы
+    showError("Ошибка загрузки фото или вставки записи. Частые причины: бакет 'photos' не существует или приватный, либо правила таблицы 'cards' не позволяют anon-пользователю вставлять.", e);
+  }
+});
+
+// регистрация sw
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js').catch(()=>{/* silent */});
+}
+
 loadCards();
-
-}
