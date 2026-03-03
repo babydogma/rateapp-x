@@ -1,5 +1,7 @@
-/* базовые стили — взяты и скорректированы из твоего дизайна */
+/* базовые стили */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+
+/* ====== ФОН С АССЕТАМИ ====== */
 
 html{
   height:100%;
@@ -9,6 +11,29 @@ html{
     linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
   background-repeat:no-repeat;
   background-attachment:fixed;
+  position:relative;
+}
+
+/* частицы */
+html::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:url("/assets/particles.png") center/cover no-repeat;
+  opacity:0.05;
+  pointer-events:none;
+  z-index:-2;
+}
+
+/* мягкое свечение по краям */
+html::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:url("/assets/glow-edge.png") center/cover no-repeat;
+  opacity:0.35;
+  pointer-events:none;
+  z-index:-1;
 }
 
 body{
@@ -21,13 +46,14 @@ body{
   overscroll-behavior-y: none;
 }
 
+/* ====== ОСТАЛЬНОЕ — ТВОЙ СТАРЫЙ СТИЛЬ ====== */
+
 .header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:#d4af37;}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
 
-/* карточка */
 .card{
   background:#1a1a1c;
   border-radius:18px;
@@ -36,6 +62,7 @@ body{
   box-shadow:0 20px 40px rgba(0,0,0,0.6);
   transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
 }
+
 .card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
 .delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
 textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
@@ -43,7 +70,6 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
 .slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
 .slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
 
-/* category select */
 .category-select{
   width:100%;
   margin-top:12px;
@@ -55,10 +81,10 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
   font-size:15px;
 }
 
-/* created line */
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
-/* --- нижняя панель (новый стиль, уменьшенный, glass + контур) --- */
+/* ====== НИЖНЯЯ ПАНЕЛЬ ====== */
+
 .bottom-nav{
   position:fixed;
   left:14px;
@@ -77,17 +103,22 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
   z-index:55;
 }
 
-/* эмодзи-кнопки */
+/* glow под навбар */
+.bottom-nav::before{
+  content:"";
+  position:absolute;
+  inset:-40px;
+  background:url("/assets/nav-glow.png") center/contain no-repeat;
+  opacity:0.5;
+  pointer-events:none;
+  z-index:-1;
+}
+
 .nav-emoji{
   font-size:28px;
   background:none;border:0;cursor:pointer;
-  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.08));
 }
 
-/* уменьшенные эмодзи активной */
-.nav-emoji.active{ transform:translateY(-2px); }
-
-/* большая кнопка + внутри панели — чуть приподнята */
 .add-btn{
   width:58px;height:58px;border-radius:50%;
   background:#0f0f0f;color:#d4af37;border:2px solid rgba(212,175,55,0.2);
@@ -97,24 +128,7 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
   cursor:pointer;
 }
 
-/* ---- categories page blocks ---- */
-.categories-grid{
-  padding:18px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.category-block{
-  display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.02);
-  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
-  border:1px solid rgba(212,175,55,0.06);
-}
-.cat-emoji{font-size:30px;}
-.cat-title{font-weight:600;}
-.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
-
-/* responsive tweaks */
+/* responsive */
 @media (min-width:900px){
   .grid{grid-template-columns:repeat(3,1fr);}
-  .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
