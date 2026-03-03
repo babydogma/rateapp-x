@@ -1,4 +1,4 @@
-/* style.css — версия A+ (глубина + сцена, без грязи) */
+/* style.css — final (заменить целиком) */
 
 :root{
   --gold: #d4af37;
@@ -7,286 +7,128 @@
   --card-bg-2: #0e0e0f;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
+/* reset */
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
-/* ---------------------------
-   ФОН — ЧИСТЫЙ + ГЛУБИНА СНИЗУ
---------------------------- */
-
-html, body{
-  height:100%;
-  background: var(--bg-black);
-}
+html,body{height:100%;background:var(--bg-black);}
 
 body{
   min-height:100vh;
   color:#e7e3dc;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:calc(env(safe-area-inset-bottom) + 8px);
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:none;
   position:relative;
 }
 
-/* мягкая сцена снизу */
+/* мягкая сцена снизу (чтобы кнопка светилась на фоне) */
 body::before{
   content:"";
   position:fixed;
-  left:0;
-  right:0;
-  bottom:-220px;
-  height:520px;
-
+  left:0;right:0;bottom:-260px;
+  height:560px;
   background:
-    radial-gradient(
-      ellipse at center,
-      rgba(212,175,55,0.08) 0%,
-      rgba(212,175,55,0.04) 30%,
-      transparent 65%
-    );
-
+    radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, rgba(212,175,55,0.04) 30%, transparent 65%);
   pointer-events:none;
   z-index:0;
 }
 
-/* ---------------------------
-   HEADER
---------------------------- */
+/* header */
+.header{padding:30px 20px 10px;text-align:center;font-size:30px;font-weight:700;letter-spacing:1px;color:var(--gold);z-index:2;position:relative;}
+.stats{ text-align:center;font-size:15px;margin-bottom:24px;color:#bda66b;z-index:2; position:relative;}
+.divider{height:1px;margin:0 40px 30px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.35), transparent);z-index:2;position:relative;}
 
-.header{
-  padding:30px 20px 10px;
-  text-align:center;
-  font-size:30px;
-  font-weight:700;
-  letter-spacing:1px;
-  color:var(--gold);
-  position:relative;
-  z-index:2;
-}
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(140px + env(safe-area-inset-bottom));position:relative;z-index:2;}
 
-.stats{
-  text-align:center;
-  font-size:15px;
-  margin-bottom:24px;
-  color:#bda66b;
-  position:relative;
-  z-index:2;
-}
-
-.divider{
-  height:1px;
-  margin:0 40px 30px;
-  background:linear-gradient(
-    to right,
-    transparent,
-    rgba(212,175,55,0.35),
-    transparent
-  );
-  position:relative;
-  z-index:2;
-}
-
-/* ---------------------------
-   GRID
---------------------------- */
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-  padding:20px;
-  padding-bottom:calc(140px + env(safe-area-inset-bottom));
-  position:relative;
-  z-index:2;
-}
-
-/* ---------------------------
-   КАРТОЧКИ
---------------------------- */
-
+/* card */
 .card{
   background:linear-gradient(160deg,var(--card-bg-1),var(--card-bg-2));
-  border-radius:18px;
-  padding:14px;
-  position:relative;
-  transition:transform .2s ease;
-  box-shadow:
-    0 14px 40px rgba(0,0,0,0.7);
+  border-radius:18px;padding:14px;position:relative;transition:transform .2s ease;
+  box-shadow:0 14px 40px rgba(0,0,0,0.7);
 }
+.card:active{transform:translateY(-3px);}
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
 
-.card:active{
-  transform:translateY(-3px);
-}
-
-.card img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:12px;
-}
-
-/* delete */
-
+/* delete (чистый крестик) */
 .delete-btn{
   position:absolute;
-  top:8px;
-  right:8px;
+  top:8px; right:8px;
   padding:6px 8px;
-  background:transparent;
-  border:none;
-  color:var(--gold);
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
+  background:transparent;border:none;color:var(--gold);
+  font-size:18px;font-weight:700;cursor:pointer;
+  transform: translate(24%, -52%); /* немного уменьшил смещение для более точного попадания */
+  z-index:60;
+  -webkit-tap-highlight-color:transparent;
 }
 
 /* inputs */
+textarea{width:100%;margin-top:10px;background:#111;border:1px solid rgba(212,175,55,0.08);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:var(--gold);}
+.created{margin-top:10px;color:#bda66b;font-size:13px;}
 
-textarea{
-  width:100%;
-  margin-top:10px;
-  background:#111;
-  border:1px solid rgba(212,175,55,0.08);
-  border-radius:12px;
-  padding:8px;
-  color:#e7e3dc;
-  resize:none;
-  font-size:13px;
-}
-
-.rating{
-  margin-top:8px;
-  font-weight:600;
-  color:var(--gold);
-}
-
-.created{
-  margin-top:10px;
-  color:#bda66b;
-  font-size:13px;
-}
-
-/* ---------------------------
-   NAV PANEL — СТЕКЛО С ГЛУБИНОЙ
---------------------------- */
-
+/* NAV PANEL */
 .bottom-nav{
-  position:fixed;
-  left:22px;
-  right:22px;
-  bottom:22px;
-  height:82px;
-
-  border-radius:32px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 32px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(18,18,20,0.95),
-      rgba(10,10,12,0.98)
-    );
-
-  backdrop-filter:blur(28px);
-  -webkit-backdrop-filter:blur(28px);
-
-  border:1px solid rgba(212,175,55,0.14);
-
-  box-shadow:
-    0 30px 80px rgba(0,0,0,0.95);
-
+  position:fixed;left:22px;right:22px;bottom:22px;height:82px;border-radius:32px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 32px;
+  background:linear-gradient(180deg, rgba(18,18,20,0.96), rgba(10,10,12,0.99));
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border:1px solid rgba(212,175,55,0.14);box-shadow:0 30px 80px rgba(0,0,0,0.95);
   z-index:60;
 }
 
-/* тонкая золотая линия */
-
+/* тонкая линия сверху панели */
 .bottom-nav::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:40px;
-  right:40px;
-  height:1px;
-  background:linear-gradient(
-    90deg,
-    transparent,
-    rgba(212,175,55,0.45),
-    transparent
-  );
+  content:"";position:absolute;top:0;left:40px;right:40px;height:1px;
+  background:linear-gradient(90deg, transparent, rgba(212,175,55,0.45), transparent);
   opacity:.7;
 }
 
-/* иконки */
-
+/* nav icons */
 .nav-emoji{
-  font-size:26px;
-  background:none;
-  border:0;
-  width:58px;
-  height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:14px;
-  cursor:pointer;
+  font-size:26px;background:none;border:0;width:58px;height:58px;display:flex;align-items:center;justify-content:center;border-radius:14px;cursor:pointer;
 }
 
-/* ---------------------------
-   КНОПКА +
---------------------------- */
-
+/* central add button (with CSS-variable glow for JS control) */
 .add-btn{
-  position:absolute;
-  left:50%;
-  top:-30px;
-  transform:translateX(-50%);
-
-  width:68px;
-  height:68px;
-  border-radius:50%;
-  border:none;
-  cursor:pointer;
-
-  background:
-    radial-gradient(circle at 50% 35%, #f6e08a, #d4af37 75%);
-
-  box-shadow:
-    0 14px 35px rgba(0,0,0,0.95),
-    0 0 26px rgba(212,175,55,0.35),
-    inset 0 -6px 12px rgba(0,0,0,0.25);
-
+  position:absolute;left:50%;top:-30px;transform:translateX(-50%);
+  width:68px;height:68px;border-radius:50%;border:none;cursor:pointer;
+  background:radial-gradient(circle at 50% 35%, #f6e08a, #d4af37 75%);
+  box-shadow:0 14px 35px rgba(0,0,0,0.95), 0 0 calc(26px * var(--glow, 1)) rgba(212,175,55,0.28), inset 0 -6px 12px rgba(0,0,0,0.25);
   z-index:70;
+  /* fallback: png rim */
+}
+.add-btn::before{
+  content:"";
+  position:absolute;inset:-14px;border-radius:50%;
+  background-image:url('/assets/glow-edge.png');
+  background-size:180% 180%;
+  background-position:center;
+  background-repeat:no-repeat;
+  opacity:0.9;mix-blend-mode:screen;pointer-events:none;z-index:-1;
+}
+.add-btn::after{content:"+";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:34px;font-weight:800;color:#1b1b1b;}
+
+/* slider styles with CSS var controlling glow */
+.slider{
+  --glow:0.6;
+  width:100%;margin-top:8px;appearance:none;height:6px;border-radius:6px;background:linear-gradient(to right,#d4af37,#b8860b);box-shadow:0 0 12px rgba(212,175,55,0.35);
+}
+.slider::-webkit-slider-thumb{
+  appearance:none;width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle,#fff,#d4af37);
+  box-shadow:0 0 calc(12px * var(--glow)) rgba(212,175,55,calc(var(--glow) * 0.9)), 0 0 25px rgba(212,175,55,0.45);
+  transition:box-shadow .08s linear, transform .08s linear;
 }
 
-.add-btn::after{
-  content:"+";
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  font-size:34px;
-  font-weight:800;
-  color:#1b1b1b;
-}
-
-/* ---------------------------
-   RESPONSIVE
---------------------------- */
-
+/* responsive */
 @media (max-width:420px){
-  .bottom-nav{ height:76px; bottom:16px; }
-  .add-btn{ width:64px; height:64px; top:-28px; }
+  .bottom-nav{height:76px;bottom:16px;}
+  .add-btn{width:64px;height:64px;top:-28px;}
 }
 
+/* grid wide */
 @media (min-width:900px){
   .grid{grid-template-columns:repeat(3,1fr);}
 }
