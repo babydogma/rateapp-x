@@ -1,10 +1,9 @@
-// script.js — диагностическая, безопасная версия
+// script.js
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 
-// проверка, что либы загружены
 if (!window.supabase) {
-  alert("Ошибка: библиотека Supabase не загружена. Убедись, что <script src=\"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script> подключён перед script.js");
+  alert("Ошибка: Supabase SDK не загружен. Проверь подключение <script> в index.html");
   throw new Error("supabase lib missing");
 }
 
@@ -17,7 +16,6 @@ const photoInput = document.getElementById("photoInput");
 function showError(msg, err) {
   console.error(msg, err);
   try { stats.textContent = "Ошибка: " + (msg || "неизвестно"); } catch(e){}
-  // на телефоне alert — пользователь увидит
   alert((msg || "Ошибка") + (err && err.message ? "\n\n" + err.message : ""));
 }
 
@@ -138,7 +136,6 @@ function buildCardElement(card, index=0){
         .eq("created_at", createdAtRaw);
       if(updateError) throw updateError;
     } catch (e) {
-      // откат UI
       ratingEl.textContent = prev + "/10";
       el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(prev)}`;
       updateStatsFromDOM();
@@ -169,7 +166,7 @@ async function loadCards(){
     });
     updateStatsFromDOM();
   } catch (e) {
-    showError("Ошибка при загрузке карточек — проверь подключение и права таблицы 'cards'", e);
+    showError("Ошибка при загрузке карточек — проверь права таблицы 'cards' и подключение.", e);
   }
 }
 
@@ -180,50 +177,45 @@ photoInput.addEventListener("change", async (ev) => {
   const fileName = Date.now() + "-" + file.name;
 
   try {
-    // 1) upload
     const uploadResp = await supabaseClient
       .storage
       .from("photos")
       .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
-    // supabase v2 возвращает { data, error }
     if(uploadResp.error) throw uploadResp.error;
 
-    // 2) get public url
     const { data: urlData } = supabaseClient
       .storage
       .from("photos")
       .getPublicUrl(fileName);
     const publicUrl = urlData?.publicUrl;
     if(!publicUrl){
-      throw new Error("Не удалось получить publicUrl. Проверь настройки bucket 'photos' (он должен быть public или иметь правила для anon).");
+      throw new Error("Не удалось получить publicUrl. Проверь настройки bucket 'photos'.");
     }
 
-    // 3) insert row
-    const { data: inserted, error: insertError } = await supabaseClient
+    // вставка записи и получение вставленной строки
+    const { data: insertedArr, error: insertError } = await supabaseClient
       .from("cards")
       .insert([{
         image_url: publicUrl,
         text: "",
         rating: 0
       }])
-      .select()
-      .single();
+      .select();
 
     if(insertError) throw insertError;
 
-    // prepend локально
-    const el = buildCardElement(inserted, 0);
+    // insertedArr может быть массив => берем первый элемент
+    const newCard = Array.isArray(insertedArr) ? insertedArr[0] : insertedArr;
+    const el = buildCardElement(newCard, 0);
     grid.insertBefore(el, grid.firstChild);
     updateStatsFromDOM();
     photoInput.value = "";
   } catch (e) {
-    // Частые причины: bucket не существует, права доступа, CORS, RLS для таблицы
-    showError("Ошибка загрузки фото или вставки записи. Частые причины: бакет 'photos' не существует или приватный, либо правила таблицы 'cards' не позволяют anon-пользователю вставлять.", e);
+    showError("Ошибка загрузки фото или вставки записи. Проверь bucket 'photos' и права таблицы 'cards'.", e);
   }
 });
 
-// регистрация sw
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').catch(()=>{/* silent */});
 }
