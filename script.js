@@ -121,19 +121,32 @@ function buildCardElement(card, index=0){
       .eq("created_at", createdAtRaw);
   }, 700);
 
-  // slider change -> optimistic update + DB update, no full reload
+    // slider change -> live UI update while dragging (input) + persist on release (change)
   const slider = el.querySelector(".slider");
   const ratingEl = el.querySelector(".rating");
-  slider.addEventListener("change", async ()=>{
-    const prev = Number(ratingEl.textContent.split("/")[0]) || 0;
-    const newRating = Number(slider.value);
 
+  // 1) live update while dragging: сразу меняем число и свечение карточки
+  slider.addEventListener("input", () => {
+    const newRating = Number(slider.value) || 0;
     ratingEl.textContent = newRating + "/10";
+    // обновляем визуальное свечение (box-shadow) мгновенно
     el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
     updateStatsFromDOM();
+  });
 
+  // 2) on change (release) — сохраняем в БД и откатываем при ошибке
+  slider.addEventListener("change", async () => {
+    const prev = Number(ratingEl.textContent.split("/")[0]) || 0;
+    const newRating = Number(slider.value) || 0;
+
+    // optimistic UI уже сделан на input, теперь persist
     if(!createdAtRaw){
+      // если нет id/created_at — откатываем и сообщаем
       alert("Ошибка обновления рейтинга: uuid/id не найден");
+      slider.value = prev;
+      ratingEl.textContent = prev + "/10";
+      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(prev)}`;
+      updateStatsFromDOM();
       return;
     }
 
@@ -144,12 +157,16 @@ function buildCardElement(card, index=0){
 
     if(updateError){
       console.error(updateError);
+      // rollback UI
+      slider.value = prev;
       ratingEl.textContent = prev + "/10";
       el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(prev)}`;
       updateStatsFromDOM();
       alert("Ошибка обновления рейтинга: " + (updateError.message || updateError));
       return;
     }
+
+    // успех — ничего больше не делаем (UI уже в нужном состоянии)
   });
 
   // category select change -> optimistic + db update
