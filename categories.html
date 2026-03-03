@@ -1,47 +1,55 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>Категории — RateApp X</title>
-
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0e0e0f" />
-
 <link rel="stylesheet" href="/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/script.js" defer></script>
 </head>
 <body>
 
-<div class="header">Категории</div>
-<div class="stats" id="stats">Загрузка...</div>
-<div class="divider"></div>
+<header class="top">
+  <div class="title">Категории</div>
+  <div class="stats" id="stats">Загрузка...</div>
+  <div class="divider"></div>
+</header>
 
-<!-- Категории — оформлены блоками с эмодзи -->
-<div class="categories-grid" id="categoriesGrid">
-  <a class="cat-block" href="/index.html?category=Фильм"><span class="cat-emoji">🎬</span><span>Фильм</span></a>
-  <a class="cat-block" href="/index.html?category=Сериалы"><span class="cat-emoji">📺</span><span>Сериалы</span></a>
-  <a class="cat-block" href="/index.html?category=Еда"><span class="cat-emoji">🍔</span><span>Еда</span></a>
-  <a class="cat-block" href="/index.html?category=Семья"><span class="cat-emoji">👪</span><span>Семья</span></a>
-  <a class="cat-block" href="/index.html?category=Разное"><span class="cat-emoji">🏷️</span><span>Разное</span></a>
-</div>
+<main style="padding:20px;">
+  <div class="cats-grid" id="cats">
+    <!-- blocks are rendered by JS or fallback markup -->
+    <div class="cat-block" data-cat="Фильм">🎬 <span>Фильм</span></div>
+    <div class="cat-block" data-cat="Сериалы">📺 <span>Сериалы</span></div>
+    <div class="cat-block" data-cat="Еда">🍔 <span>Еда</span></div>
+    <div class="cat-block" data-cat="Семья">👪 <span>Семья</span></div>
+    <div class="cat-block" data-cat="Разное">🏷️ <span>Разное</span></div>
+  </div>
 
-<div style="padding:18px;">
-  <a href="/index.html" class="back-link">← На главную</a>
-</div>
+  <div style="margin-top:28px;">
+    <a href="/" class="back">← На главную</a>
+  </div>
+</main>
 
-<!-- Нижняя панель (совпадает с index) -->
-<input id="photoInput" type="file" accept="image/*" style="display:none;" aria-hidden="true"/>
-<nav class="bottom-nav" role="navigation" aria-label="Навигация">
-  <a class="nav-item" id="nav-home-2" href="/index.html" title="Главная">🏠</a>
-  <label for="photoInput" class="nav-add" title="Добавить фото">＋</label>
-  <a class="nav-item" id="nav-cats-2" href="/categories.html" title="Категории">📂</a>
+<nav class="bottom-nav">
+  <button class="nav-btn" onclick="location.href='/'">🏠</button>
+  <div class="nav-center">
+    <label class="add-btn" aria-hidden="true">
+      <input id="photoInput" type="file" accept="image/*">
+      <span class="plus">+</span>
+    </label>
+  </div>
+  <button class="nav-btn">📂</button>
 </nav>
+
+<script>
+/* Клиентская навигация: при клике на категорию — переходим на главную с параметром ?cat=имя */
+document.querySelectorAll(".cat-block").forEach(b=>{
+  b.style.cursor="pointer";
+  b.addEventListener("click", ()=> {
+    const cat = encodeURIComponent(b.dataset.cat || "Разное");
+    location.href = "/?cat=" + cat;
+  });
+});
+</script>
 
 </body>
 </html>
