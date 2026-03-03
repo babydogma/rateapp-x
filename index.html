@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
 <title>RateApp X</title>
 
 <link rel="manifest" href="/manifest.json">
@@ -12,33 +12,39 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
+<!-- подключаем CSS -->
 <link rel="stylesheet" href="/style.css">
 
-<!-- supabase + script подключаем defer чтобы скрипт запускался после парсинга -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/script.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<div class="header">RateApp X</div>
-<div class="stats" id="stats">Загрузка...</div>
-<div class="divider"></div>
+<header class="top">
+  <div class="title">RateApp X</div>
+  <div class="stats" id="stats">Загрузка...</div>
+  <div class="divider"></div>
+</header>
 
-<!-- основная сетка -->
-<div class="grid" id="grid"></div>
+<main>
+  <div id="grid" class="grid"></div>
+</main>
 
-<!-- скрытый input для загрузки (центральная кнопка внутри панели его откроет) -->
-<input id="photoInput" type="file" accept="image/*" style="display:none;" aria-hidden="true"/>
-
-<!-- Нижняя панель -->
+<!-- нижняя панель -->
 <nav class="bottom-nav" role="navigation" aria-label="Навигация">
-  <a class="nav-item" id="nav-home" href="/index.html" title="Главная">🏠</a>
+  <button class="nav-btn" id="nav-home" title="Главная">🏠</button>
 
-  <!-- кнопка добавления внутри панели (меньше размера) -->
-  <label for="photoInput" class="nav-add" title="Добавить фото">＋</label>
+  <!-- центр: кнопка добавления + input (input скрыт, но остаётся тем же id) -->
+  <div class="nav-center">
+    <label class="add-btn" aria-hidden="true">
+      <input id="photoInput" type="file" accept="image/*">
+      <span class="plus">+</span>
+    </label>
+  </div>
 
-  <a class="nav-item" id="nav-cats" href="/categories.html" title="Категории">📂</a>
+  <button class="nav-btn" id="nav-cats" title="Категории">📂</button>
 </nav>
 
+<!-- маленький helper: ссылка на страницу категорий (клиентская навигация) -->
+<script src="/script.js"></script>
 </body>
 </html>
