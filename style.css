@@ -1,37 +1,16 @@
-/* style.css — исправленный (заменить файл целиком)
-   Поддержка ассетов:
-   /assets/particles.png
-   /assets/glow-edge.png
-   /assets/nav-glow.png
-*/
-
-/* базовые переменные и reset */
-:root{
-  --gold: #d4af37;
-  --gold-strong: rgba(212,175,55,1);
-  --gold-soft: rgba(212,175,55,0.18);
-  --bg-dark-1: #0e0e0f;
-  --bg-dark-2: #161618;
-  --card-bg: #111213;
-  --ui-z-cards: 80;      /* карточки и их glow (больше, чем bottom-nav) */
-  --ui-z-panel: 40;      /* нижняя панель */
-}
-
-/* reset */
+/* базовые стили — взяты и скорректированы из твоего дизайна */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
-/* фон */
 html{
   height:100%;
   background:
-    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.06), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.03), transparent 50%),
-    linear-gradient(160deg,var(--bg-dark-1), var(--bg-dark-2) 60%, #0c0c0d);
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
+    linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
 
-/* шум/глиттер */
 body{
   min-height:100vh;
   color:#e7e3dc;
@@ -40,246 +19,102 @@ body{
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
-  position:relative;
-  z-index:1;
-}
-body::after{
-  content:"";
-  pointer-events:none;
-  position:fixed;left:0;top:0;right:0;bottom:0;
-  background-image:
-    radial-gradient(rgba(255,215,150,0.03) 0.5px, transparent 0.5px),
-    radial-gradient(rgba(255,215,150,0.01) 0.5px, transparent 0.5px);
-  background-size: 6px 6px, 18px 18px;
-  mix-blend-mode: screen;
-  opacity:0.07;
-  z-index:2;
 }
 
-/* app surface (все элементы поверх шума) */
-.app-surface{ position:relative; z-index:10; }
-
-/* заголовки */
-.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:#d4af37;}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-/* grid */
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:30;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
 
-/* -------------------- */
-/* КАРТОЧКА */
-/* -------------------- */
+/* карточка */
 .card{
-  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.22));
+  background:#1a1a1c;
   border-radius:18px;
   padding:14px;
   position:relative;
-  overflow:visible;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
   transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-  z-index: var(--ui-z-cards); /* карточки выше панели */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 32px rgba(0,0,0,0.55);
 }
+.card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
+.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
+textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:#d4af37;}
+.slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
+.slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
 
-/* тонкая внутренняя рамка (decorative) */
-.card::after{
-  content:"";
-  position:absolute;
-  inset:6px;
-  border-radius:12px;
-  pointer-events:none;
-  border:1px dotted rgba(212,175,55,0.12);
-  mix-blend-mode: screen;
-  z-index:2;
-}
-
-/* внешний мягкий glow у карточки (свет и тень) */
-.card::before{
-  content:"";
-  position:absolute;
-  left:-8px; right:-8px; top:-8px; bottom:-8px;
-  border-radius:24px;
-  pointer-events:none;
-  /* комбинируем тонкий градиент + тень (уменьшил spread чтобы не лез вверх) */
-  background:
-    radial-gradient(ellipse at top center, rgba(212,175,55,0.10), transparent 20%),
-    linear-gradient(90deg, rgba(212,175,55,0.04), rgba(212,175,55,0.02));
-  box-shadow:
-    0 18px 36px rgba(212,175,55,0.11),
-    0 6px 18px rgba(212,175,55,0.07),
-    0 0 30px rgba(212,175,55,0.10);
-  filter: blur(0.6px);
-  mix-blend-mode: screen;
-  z-index: -1; /* псевдоэлемент находится под карточкой, но потому что карточка выше панели — glow виден корректно */
-}
-
-/* содержимое */
-.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
-.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:var(--gold);}
-textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
-.rating{margin-top:8px;font-weight:600;color:var(--gold);}
-.slider{width:100%;margin-top:8px;appearance:none;height:8px;border-radius:6px;background:linear-gradient(90deg,#2a2a2c,#222);}
-.slider::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,var(--gold), #b8860b);box-shadow:0 6px 18px rgba(212,175,55,0.25);border:2px solid rgba(0,0,0,0.45);}
-
+/* category select */
 .category-select{
   width:100%;
   margin-top:12px;
-  background:linear-gradient(180deg,#141415,#0f0f10);
-  border:1px solid rgba(212,175,55,0.06);
+  background:#141415;
+  border:1px solid rgba(212,175,55,0.12);
   color:#e7e3dc;
-  padding:12px;border-radius:12px;font-size:15px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:15px;
 }
-.created{margin-top:10px;color:#c6b27a;font-size:13px;}
-.card:active{ transform:translateY(-4px); }
 
-/* -------------------- */
-/* НИЖНЯЯ ПАНЕЛЬ */
-/* -------------------- */
+/* created line */
+.created{margin-top:10px;color:#c6b27a;font-size:13px;}
+
+/* --- нижняя панель (новый стиль, уменьшенный, glass + контур) --- */
 .bottom-nav{
   position:fixed;
-  left:20px; right:20px; bottom:14px;
-  height:70px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border-radius:20px;
-  display:flex;align-items:center;justify-content:space-around;
-  padding:10px 28px;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
-  backdrop-filter: blur(10px) saturate(1.1);
-  border:1px solid rgba(212,175,55,0.04);
-  z-index: var(--ui-z-panel); /* панель ниже карточек */
-  overflow:visible;
+  left:14px;
+  right:14px;
+  bottom:12px;
+  height:66px;
+  background:rgba(255,255,255,0.04);
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding:8px 18px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px) saturate(1.1);
+  border:1px solid rgba(212,175,55,0.06);
+  z-index:55;
 }
 
-/* внутренняя тонкая обводка (панели) */
-.bottom-nav .inner-outline{
-  position:absolute;left:6px;right:6px;top:6px;bottom:6px;border-radius:16px;pointer-events:none;
-  border:1px solid rgba(212,175,55,0.03);mix-blend-mode: screen;z-index:var(--ui-z-panel);
+/* эмодзи-кнопки */
+.nav-emoji{
+  font-size:28px;
+  background:none;border:0;cursor:pointer;
+  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.08));
 }
 
-/* текстура/glow у панели — сделано аккуратно, без гигантских box-shadow */
-.bottom-nav::before{
-  content:"";
-  position:absolute;
-  left:4px; right:4px; top:4px; bottom:4px;
-  border-radius:18px;
-  pointer-events:none;
-  background-image: url('/assets/nav-glow.png');
-  background-size: cover;
-  background-position:center;
-  opacity:0.85;
-  filter: blur(0.6px) contrast(1.02) saturate(1.02);
-  mix-blend-mode: screen;
-  z-index: calc(var(--ui-z-panel) - 1); /* под самой панелью */
-}
-
-/* уменьшаю ОГРОМНЫЕ box-shadow, которые раньше лезли вверх */
-.bottom-nav::after{
-  content:"";
-  position:absolute;
-  left:-6px; right:-6px; top:-6px; bottom:-6px;
-  border-radius:22px;
-  pointer-events:none;
-  box-shadow:
-    0 18px 36px rgba(212,175,55,0.08),
-    0 6px 18px rgba(212,175,55,0.05);
-  mix-blend-mode: screen;
-  z-index: calc(var(--ui-z-panel) - 2);
-}
-
-/* nav buttons */
-.nav-emoji{font-size:24px;background:none;border:0;cursor:pointer;filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));z-index: calc(var(--ui-z-panel) + 2);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+/* уменьшенные эмодзи активной */
 .nav-emoji.active{ transform:translateY(-2px); }
 
-/* central add */
+/* большая кнопка + внутри панели — чуть приподнята */
 .add-btn{
-  width:56px;height:56px;border-radius:50%;
-  background:linear-gradient(180deg,#0b0b0b,#0f0f0f);
-  color:var(--gold);border:2px solid rgba(0,0,0,0.35);
+  width:58px;height:58px;border-radius:50%;
+  background:#0f0f0f;color:#d4af37;border:2px solid rgba(212,175,55,0.2);
   display:inline-flex;align-items:center;justify-content:center;font-size:30px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.55);
-  transform:translateY(-6%);
-  cursor:pointer;position:relative;z-index:calc(var(--ui-z-panel) + 10);
+  box-shadow:0 12px 30px rgba(212,175,55,0.16);
+  transform:translateY(-12%);
+  cursor:pointer;
 }
 
-/* тонкая kромка + spot под кнопкой */
-.add-btn::before{
-  content:"";
-  position:absolute;left:-8px;right:-8px;top:-8px;bottom:-8px;border-radius:50%;pointer-events:none;
-  box-shadow: 0 12px 30px rgba(212,175,55,0.12), 0 6px 18px rgba(212,175,55,0.08);
-  mix-blend-mode: screen;
-  z-index: calc(var(--ui-z-panel) - 1);
+/* ---- categories page blocks ---- */
+.categories-grid{
+  padding:18px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
-.add-btn::after{
-  content:"";
-  position:absolute; left:50%; top:50%; width:140px; height:40px; transform:translate(-50%,-40%);
-  background: radial-gradient(ellipse at center, rgba(212,175,55,0.14), transparent 50%);
-  filter: blur(10px);
-  z-index: calc(var(--ui-z-panel) - 2);
-  pointer-events:none;
+.category-block{
+  display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.02);
+  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
+  border:1px solid rgba(212,175,55,0.06);
 }
+.cat-emoji{font-size:30px;}
+.cat-title{font-weight:600;}
+.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
 
-/* categories blocks */
-.categories-grid{padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;position:relative;z-index:30;}
-.category-block{display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;border:1px solid rgba(212,175,55,0.06);box-shadow: 0 8px 30px rgba(0,0,0,0.5);}
-.cat-emoji{font-size:28px;}
-.cat-title{font-weight:700; color:#f0d999;}
-.back-to-main{display:block;margin:28px 20px;font-size:18px;color:var(--gold);text-decoration:none;}
-
-/* -------------------- */
-/* Ассеты: particles / glow-edge / nav-glow */
-/* -------------------- */
-
-/* глобальная золотая пыль (опционально): вставить <div class="gold-particles"></div> в body */
-.gold-particles{
-  position:fixed; inset:0; pointer-events:none;
-  background-image: url('/assets/particles.png');
-  background-repeat: repeat;
-  background-size: 420px;
-  opacity: 0.22;
-  mix-blend-mode: screen;
-  z-index:3;
+/* responsive tweaks */
+@media (min-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr);}
+  .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
-
-/* класс для конкретной карточки, когда нужно усилить glow */
-.card.card-glow{ position:relative; z-index: calc(var(--ui-z-cards) + 2); overflow:visible; }
-.card.card-glow::after{
-  content:"";
-  position:absolute; left:50%; transform:translateX(-50%); bottom:-30px;
-  width:260px; height:120px; border-radius:80px;
-  background-image: url('/assets/particles.png');
-  background-size: 220px 220px; background-repeat: repeat;
-  opacity:0.95; filter: blur(6px) saturate(1.05); z-index: calc(var(--ui-z-cards) - 1); pointer-events:none;
-}
-.card.card-glow::before{
-  content:"";
-  position:absolute; inset:-8px; border-radius:24px; pointer-events:none;
-  background-image: url('/assets/glow-edge.png');
-  background-size: cover; background-position:center;
-  opacity:0.98; filter: blur(0.9px) saturate(1.05) contrast(1.02); mix-blend-mode: screen;
-  z-index: calc(var(--ui-z-cards) + 1);
-}
-
-/* кнопка + использует тот же glow-edge как окантовка (fallback - box-shadow) */
-.add-btn{ position:relative; z-index:calc(var(--ui-z-panel) + 10); }
-.add-btn::after{
-  content:"";
-  position:absolute; inset:-8px; border-radius:50%;
-  pointer-events:none;
-  background-image: url('/assets/glow-edge.png');
-  background-size: 220px 220px; background-position:center;
-  opacity:0.95; filter: blur(1px) saturate(1.05);
-  z-index: calc(var(--ui-z-panel) + 8);
-}
-
-/* mobile tweaks */
-@media (max-width:420px){
-  .gold-particles{ opacity:0.16; background-size: 320px; }
-  .card.card-glow::after{ width:200px; height:90px; bottom:-26px; filter: blur(5px); }
-  .card.card-glow::before{ inset:-6px; filter: blur(0.8px); }
-  .add-btn{ width:52px;height:52px;font-size:26px; }
-  .grid{ gap:14px; padding:18px; }
-}
-
-/* small helpers */
-.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
