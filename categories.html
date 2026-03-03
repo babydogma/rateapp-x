@@ -1,55 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Категории — RateApp X</title>
-<link rel="stylesheet" href="/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Категории — RateApp X</title>
+
+  <link rel="stylesheet" href="/style.css">
+  <meta name="theme-color" content="#0e0e0f" />
 </head>
 <body>
+  <header class="top">
+    <div class="title">Категории</div>
+    <div class="stats">Загрузка...</div>
+    <div class="divider"></div>
+  </header>
 
-<header class="top">
-  <div class="title">Категории</div>
-  <div class="stats" id="stats">Загрузка...</div>
-  <div class="divider"></div>
-</header>
+  <main class="cats-main">
+    <div id="cats" class="cats-grid"></div>
+    <a href="/index.html" class="back">← На главную</a>
+  </main>
 
-<main style="padding:20px;">
-  <div class="cats-grid" id="cats">
-    <!-- blocks are rendered by JS or fallback markup -->
-    <div class="cat-block" data-cat="Фильм">🎬 <span>Фильм</span></div>
-    <div class="cat-block" data-cat="Сериалы">📺 <span>Сериалы</span></div>
-    <div class="cat-block" data-cat="Еда">🍔 <span>Еда</span></div>
-    <div class="cat-block" data-cat="Семья">👪 <span>Семья</span></div>
-    <div class="cat-block" data-cat="Разное">🏷️ <span>Разное</span></div>
-  </div>
+  <nav class="bottom-nav" role="navigation" aria-label="Navigation">
+    <a href="/index.html" class="nav-btn">🏠</a>
+    <a class="add-btn-mini" href="#" onclick="document.getElementById('fakeAdd').click();return false;">＋</a>
+    <a href="/categories.html" class="nav-btn active">📂</a>
+    <input id="fakeAdd" type="file" accept="image/*" style="display:none" onchange="location.href='/'">
+  </nav>
 
-  <div style="margin-top:28px;">
-    <a href="/" class="back">← На главную</a>
-  </div>
-</main>
+  <script>
+    // categories list same as in script.js so UX consistent
+    const CATS = [
+      { id: 'film', title: 'Фильм', emoji: '🎬' },
+      { id: 'series', title: 'Сериалы', emoji: '📺' },
+      { id: 'food', title: 'Еда', emoji: '🍔' },
+      { id: 'family', title: 'Семья', emoji: '👪' },
+      { id: 'other', title: 'Разное', emoji: '🏷️' },
+    ];
 
-<nav class="bottom-nav">
-  <button class="nav-btn" onclick="location.href='/'">🏠</button>
-  <div class="nav-center">
-    <label class="add-btn" aria-hidden="true">
-      <input id="photoInput" type="file" accept="image/*">
-      <span class="plus">+</span>
-    </label>
-  </div>
-  <button class="nav-btn">📂</button>
-</nav>
-
-<script>
-/* Клиентская навигация: при клике на категорию — переходим на главную с параметром ?cat=имя */
-document.querySelectorAll(".cat-block").forEach(b=>{
-  b.style.cursor="pointer";
-  b.addEventListener("click", ()=> {
-    const cat = encodeURIComponent(b.dataset.cat || "Разное");
-    location.href = "/?cat=" + cat;
-  });
-});
-</script>
-
+    const container = document.getElementById('cats');
+    CATS.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'cat-block';
+      b.innerHTML = `<span class="cat-emoji">${c.emoji}</span><span class="cat-title">${c.title}</span>`;
+      b.onclick = () => {
+        // navigate to categories page with a hash we can use to filter
+        location.href = `/categories.html#${c.id}`;
+      };
+      container.appendChild(b);
+    });
+  </script>
 </body>
 </html>
