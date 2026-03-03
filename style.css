@@ -167,15 +167,27 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 /* bottom-nav — контейнер панели */
 .bottom-nav{
   position:fixed;
-  left:14px; right:14px; bottom:14px;
-  height:82px; padding:12px 20px;
+  left:14px; 
+  right:14px; 
+  bottom:14px;
+
+  height:82px; 
+  padding:12px 20px;
   border-radius:20px;
-  display:flex; align-items:center; justify-content:space-between;
+
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between;
+
   background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+
   backdrop-filter: blur(8px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
-  z-index:60; overflow:visible;
+
+  z-index:60; 
+  overflow:visible;
 }
 
 /* тонкая внутренняя обводка панели */
