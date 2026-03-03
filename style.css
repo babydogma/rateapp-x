@@ -128,101 +128,55 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 /* hover/active карточки */
 .card:active{ transform:translateY(-4px); }
 
-/* ---------- NAV + CENTER BUTTON: precise centering ---------- */
-/* bottom-nav остаётся position:fixed и служит контейнером для absolute-кнопки */
+/* bottom-nav / add-btn — окончательный блок (замени существующие правила) */
 .bottom-nav{
   position:fixed;
-  left:14px;
-  right:14px;
-  bottom:14px;           /* мелкая поправка, чтобы было чуть выше */
-  height:82px;           /* больше высоты — даём место для кнопки */
-  padding:12px 20px;
+  left:14px; right:14px; bottom:14px;
+  height:82px; padding:12px 20px;
   border-radius:20px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  display:flex; align-items:center; justify-content:space-between;
   background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
   backdrop-filter: blur(8px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
-  z-index:60;
-  overflow:visible;      /* чтобы glow был виден */
-  position:fixed;        /* важно — кнопка позиционируется относительно этого блока */
+  z-index:60; overflow:visible;
 }
 
-/* внутренний контур (оставляем) */
 .bottom-nav::after{
-  content:"";
-  position:absolute;
-  left:8px; right:8px; top:8px; bottom:8px;
-  border-radius:16px;
-  pointer-events:none;
-  border:1px solid rgba(212,175,55,0.03);
-  mix-blend-mode: screen;
-  z-index:58;
+  content:""; position:absolute; left:8px; right:8px; top:8px; bottom:8px;
+  border-radius:16px; pointer-events:none; border:1px solid rgba(212,175,55,0.03);
+  mix-blend-mode: screen; z-index:58;
 }
 
-/* ---- центральная кнопка: абсолютное, точное центрирование ---- */
-/* позиционируем абсолютно в родителе (bottom-nav) и центрируем по оси X */
 .add-btn{
-  position:absolute;     /* ключевой момент: теперь позиция внутри .bottom-nav */
-  left:50%;
-  top: 0;                /* y = 0 в пределах bottom-nav */
-  transform: translate(-50%, -50%); /* вытащить центр кнопки за верхнюю грань панели */
-  width:66px;
-  height:66px;
-  border-radius:50%;
+  position:absolute; left:50%; top:0;
+  transform: translate(-50%,-50%); /* tune -46/-50/-54% if needed */
+  width:66px; height:66px; border-radius:50%;
   background: radial-gradient(circle at 30% 30%, #111,#0c0c0d);
   border: 3px solid rgba(212,175,55,0.25);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  z-index:70;
-  /* лёгкая тень для объёма */
-  box-shadow:
-    0 12px 30px rgba(0,0,0,0.6),
-    0 6px 18px rgba(212,175,55,0.12);
-  /* цвет текста убираем — плюс будет через ::after */
-  color: transparent;
-  font-size: 0;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70;
+  box-shadow:0 12px 30px rgba(0,0,0,0.6), 0 6px 18px rgba(212,175,55,0.12);
+  color: transparent; font-size:0;
 }
 
-/* мягкий ореол/спот под кнопкой (чуть ниже центра панели) */
 .add-btn::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:54%;                /* чуть ниже центра кнопки — выглядит как "светящийся паз" */
-  transform:translateX(-50%);
-  width:180px;
-  height:48px;
+  content:""; position:absolute; left:50%; top:54%; transform:translateX(-50%);
+  width:180px; height:48px;
   background: radial-gradient(ellipse at center, rgba(212,175,55,0.2), rgba(212,175,55,0.06) 35%, transparent 60%);
-  filter: blur(10px) saturate(1.02);
-  pointer-events:none;
-  z-index:65;
+  filter: blur(10px) saturate(1.02); pointer-events:none; z-index:65;
 }
 
-/* сам символ + через псевдоэлемент, идеально центрирован и с лёгким креном */
 .add-btn::after{
-  content:"+";
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%) rotate(-1.5deg); /* лёгкий угол — как просил */
-  font-size:34px;
-  font-weight:800;
-  color: var(--gold, #d4af37);
+  content:"+"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-1.5deg);
+  font-size:34px; font-weight:800; color: var(--gold, #d4af37);
   text-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 6px rgba(212,175,55,0.12);
-  pointer-events:none;
-  z-index:71;
+  pointer-events:none; z-index:71;
 }
 
-/* fallback / mobile tweaks */
 @media (max-width:420px){
-  .bottom-nav{ left:12px; right:12px; height:72px; padding:10px 16px; bottom:12px; }
-  .add-btn{ width:56px; height:56px; transform: translate(-50%,-50%); }
-  .add-btn::before{ width:140px; height:40px; top:56%; filter:blur(9px); }
+  .bottom-nav{ height:72px; padding:10px 16px; bottom:12px; }
+  .add-btn{ width:56px; height:56px; }
+  .add-btn::before{ width:140px; height:40px; top:56%; filter: blur(9px); }
   .add-btn::after{ font-size:28px; transform:translate(-50%,-50%) rotate(-1.5deg); }
 }
 
