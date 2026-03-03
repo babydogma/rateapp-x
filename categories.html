@@ -1,24 +1,126 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
-<title>Категории — RateApp X</title>
-<link rel="stylesheet" href="/style.css">
-<link rel="manifest" href="/manifest.json">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Категории — RateApp X</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0e0e0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+    html{height:100%;background:
+      radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
+      linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);background-repeat:no-repeat;background-attachment:fixed;}
+    body{min-height:100vh;background:transparent;color:#e7e3dc;padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);}
+    .header{font-size:28px;text-align:center;margin-top:18px;color:#d4af37;font-weight:700;}
+    .sub{ text-align:center;color:#c6b27a;margin-top:6px;margin-bottom:18px;}
+    .divider{height:1px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);margin:0 20px 20px;}
+    .list{padding:10px 20px;}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:12px;}
+    .item .name{font-size:16px;color:#e7e3dc;}
+    .item .count{font-size:14px;color:#c6b27a;}
+    a.back{display:inline-block;margin:18px 20px;color:#d4af37;text-decoration:none;font-weight:600;}
+    .empty{color:#b9aa7a;padding:30px;text-align:center;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="header">Категории</div>
-  <div class="stats" id="stats-cats">Загрузка...</div>
+  <div class="sub" id="sub">Загрузка...</div>
   <div class="divider"></div>
 
-  <div id="cats-root" style="padding:20px;color:#e7e3dc"></div>
+  <a class="back" href="/index.html">← На главную</a>
 
-  <div style="padding:20px;color:#c6b27a">
-    <a href="/" style="color:#d4af37">← На главную</a>
-  </div>
+  <div class="list" id="list"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/script.js"></script>
+<script>
+const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* те же категории, заглавные */
+const CATEGORIES = ['Фильм','Сериалы','Еда','Семья','Разное'];
+
+const sub = document.getElementById('sub');
+const list = document.getElementById('list');
+
+async function loadCategories(){
+  sub.textContent = 'Загрузка...';
+  list.innerHTML = '';
+
+  // получим все карточки (нужно только поле category)
+  const { data, error } = await supabaseClient
+    .from('cards')
+    .select('category');
+
+  if(error){
+    console.error(error);
+    sub.textContent = 'Ошибка загрузки';
+    return;
+  }
+
+  // посчитаем по категориям (учитываем null/empty)
+  const counts = {};
+  (data || []).forEach(r => {
+    const c = r.category || '';
+    const key = c === null ? '' : String(c);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  // Собираем отображаемый список: сначала наши predefined категории (в том порядке), потом "Без категории" если есть, потом любые другие dynamic категории
+  const usedOther = new Set();
+  Object.keys(counts).forEach(k=>{
+    if(k && !CATEGORIES.includes(k)) usedOther.add(k);
+  });
+
+  // render predefined categories
+  let anyShown = false;
+  CATEGORIES.forEach(cat => {
+    const cnt = counts[cat] || 0;
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.innerHTML = `<div class="name">${cat}</div><div class="count">${cnt}</div>`;
+    // кликаем — переходим на главную с фильтром
+    item.addEventListener('click', ()=> {
+      location.href = '/index.html?category=' + encodeURIComponent(cat);
+    });
+    list.appendChild(item);
+    anyShown = anyShown || cnt > 0;
+  });
+
+  // "Без категории"
+  const noCatCount = counts[''] || 0;
+  const noItem = document.createElement('div');
+  noItem.className = 'item';
+  noItem.innerHTML = `<div class="name">— без категории —</div><div class="count">${noCatCount}</div>`;
+  noItem.addEventListener('click', ()=> location.href = '/index.html?category=');
+  list.appendChild(noItem);
+  anyShown = anyShown || noCatCount > 0;
+
+  // любые остальные категории, если есть
+  if(usedOther.size){
+    usedOther.forEach(cat => {
+      const cnt = counts[cat] || 0;
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML = `<div class="name">${cat}</div><div class="count">${cnt}</div>`;
+      item.addEventListener('click', ()=> {
+        location.href = '/index.html?category=' + encodeURIComponent(cat);
+      });
+      list.appendChild(item);
+      anyShown = true;
+    });
+  }
+
+  sub.textContent = anyShown ? '' : 'Пока нет карточек в категориях';
+}
+
+loadCategories();
+</script>
 </body>
 </html>
