@@ -1,120 +1,69 @@
-/* базовые стили — взяты и скорректированы из твоего дизайна */
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-
-html{
-  height:100%;
+/* base */
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+html{height:100%;
   background:
     radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
     radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
     linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
-  background-repeat:no-repeat;
   background-attachment:fixed;
 }
+body{min-height:100vh;color:#e7e3dc;background:transparent;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);-webkit-overflow-scrolling:touch;overscroll-behavior-y:none;}
 
-body{
-  min-height:100vh;
-  color:#e7e3dc;
-  background:transparent;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
-}
+/* header */
+.header{padding:28px 20px 6px;text-align:center;font-size:34px;font-weight:800;color:#d4af37;letter-spacing:0.6px;}
+.stats{color:#c6b27a;text-align:center;font-size:16px;margin-bottom:8px;}
+.divider{height:1px;margin:0 30px 18px;background:linear-gradient(to right,transparent,rgba(212,175,55,0.35),transparent);}
 
-.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:#d4af37;}
-.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
+/* content */
+.content{padding:0 18px 120px;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
 
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+/* card */
+.card{background:#121212;border-radius:18px;padding:14px;position:relative;box-shadow:0 28px 60px -30px rgba(212,175,55,0.45);transition:transform .2s ease,box-shadow .2s ease;}
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;display:block;border:6px solid rgba(0,0,0,0.45);}
+.card .title{margin-top:12px;background:rgba(212,175,55,0.03);padding:14px;border-radius:12px;color:#e7e3dc;font-weight:700;font-size:18px;}
+.rating{margin-top:12px;color:#d4af37;font-weight:700;font-size:20px;}
+.slider{width:100%;margin-top:8px;appearance:none;height:6px;border-radius:6px;background:#2a2a2c;}
+.slider::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:#d4af37;box-shadow:0 2px 4px rgba(0,0,0,0.5);}
 
-/* карточка */
-.card{
-  background:#1a1a1c;
-  border-radius:18px;
-  padding:14px;
-  position:relative;
-  box-shadow:0 20px 40px rgba(0,0,0,0.6);
-  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-}
-.card img{width:100%;height:150px;object-fit:cover;border-radius:14px;}
-.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;}
-textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
-.rating{margin-top:8px;font-weight:600;color:#d4af37;}
-.slider{width:100%;margin-top:8px;appearance:none;height:5px;border-radius:6px;background:#2a2a2c;}
-.slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
+/* category select under slider */
+.select-wrap{margin-top:12px;}
+.select{width:100%;background:#141415;border-radius:12px;padding:12px;border:1px solid rgba(212,175,55,0.08);color:#e7e3dc;font-weight:700;}
 
-/* category select */
-.category-select{
-  width:100%;
-  margin-top:12px;
-  background:#141415;
-  border:1px solid rgba(212,175,55,0.12);
-  color:#e7e3dc;
-  padding:10px 12px;
-  border-radius:12px;
-  font-size:15px;
-}
-
-/* created line */
+/* date */
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
-/* --- нижняя панель (новый стиль, уменьшенный, glass + контур) --- */
-.bottom-nav{
-  position:fixed;
-  left:14px;
-  right:14px;
-  bottom:12px;
-  height:66px;
-  background:rgba(255,255,255,0.04);
-  border-radius:16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
-  padding:8px 18px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-  backdrop-filter: blur(8px) saturate(1.1);
-  border:1px solid rgba(212,175,55,0.06);
-  z-index:55;
+/* delete cross */
+.delete-btn{position:absolute;top:8px;right:10px;color:#d4af37;background:transparent;border:none;font-size:18px;cursor:pointer;}
+
+/* bottom bar - glass */
+.bottom-bar{
+  position:fixed;left:12px;right:12px;bottom:12px;height:72px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border-radius:18px;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px);
+  border:1px solid rgba(212,175,55,0.08);
 }
 
-/* эмодзи-кнопки */
-.nav-emoji{
-  font-size:28px;
-  background:none;border:0;cursor:pointer;
-  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.08));
-}
+/* nav emojis */
+.nav-btn{background:transparent;border:none;font-size:26px;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.6));}
+.nav-btn.active{transform:translateY(-2px);}
 
-/* уменьшенные эмодзи активной */
-.nav-emoji.active{ transform:translateY(-2px); }
+/* centered add button - smaller */
+.add-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 56px;margin:0 10px;}
+.add-btn{width:56px;height:56px;border-radius:50%;background:#0f0f0f;border:3px solid rgba(212,175,55,0.12);color:#d4af37;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(212,175,55,0.12);}
 
-/* большая кнопка + внутри панели — чуть приподнята */
-.add-btn{
-  width:58px;height:58px;border-radius:50%;
-  background:#0f0f0f;color:#d4af37;border:2px solid rgba(212,175,55,0.2);
-  display:inline-flex;align-items:center;justify-content:center;font-size:30px;
-  box-shadow:0 12px 30px rgba(212,175,55,0.16);
-  transform:translateY(-12%);
-  cursor:pointer;
-}
+/* categories page layout */
+.categories-grid-wrap{padding-left:18px;padding-right:18px;}
+.categories-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:20px;padding-bottom:80px;}
+.category-block{display:flex;align-items:center;gap:14px;padding:18px;background:#121212;border-radius:12px;border:1px solid rgba(212,175,55,0.06);color:#d4af37;font-weight:800;font-size:20px;cursor:pointer;}
+.category-block .cat-emoji{font-size:26px;}
 
-/* ---- categories page blocks ---- */
-.categories-grid{
-  padding:18px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.category-block{
-  display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.02);
-  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
-  border:1px solid rgba(212,175,55,0.06);
-}
-.cat-emoji{font-size:30px;}
-.cat-title{font-weight:600;}
-.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
-
-/* responsive tweaks */
-@media (min-width:900px){
-  .grid{grid-template-columns:repeat(3,1fr);}
-  .categories-grid{grid-template-columns:repeat(4,1fr);}
+/* small responsive */
+@media (max-width:420px){
+  .header{font-size:30px}
+  .add-btn{width:50px;height:50px;font-size:26px}
+  .nav-btn{font-size:22px}
+  .card img{height:140px}
 }
