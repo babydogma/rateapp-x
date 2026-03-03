@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>RateApp X</title>
 
 <link rel="manifest" href="/manifest.json">
@@ -12,32 +12,31 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
+<!-- внешний CSS -->
 <link rel="stylesheet" href="/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/script.js" defer></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
 <div class="header">RateApp X</div>
 <div class="stats" id="stats">Загрузка...</div>
 <div class="divider"></div>
-
 <div class="grid" id="grid"></div>
 
-<!-- Нижняя панель с FAB внутри -->
-<nav class="bottom-nav" role="navigation" aria-label="Navigation">
-  <button class="nav-btn" id="homeBtn" title="Главная">🏠</button>
+<!-- скрытый input для загрузки фото -->
+<input id="photoInput" type="file" accept="image/*" style="display:none;">
 
-  <div class="fab-wrap">
-    <!-- label содержит input:file — клик по кнопке откроет селектор -->
-    <label class="fab-label" title="Добавить фото">
-      <input id="photoInput" type="file" accept="image/*">
-      <div class="fab" aria-hidden="true">+</div>
-    </label>
-  </div>
+<!-- нижняя панель (с кнопкой + внутри) -->
+<nav class="bottom-nav" role="navigation" aria-label="Навигация">
+  <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
 
-  <button class="nav-btn" id="catsBtn" title="Категории">📂</button>
+  <button id="addBtn" class="add-btn" title="Добавить фото">+</button>
+
+  <button class="nav-emoji" data-page="categories" title="Категории">📂</button>
 </nav>
 
+<!-- основной скрипт -->
+<script src="/script.js"></script>
 </body>
 </html>
