@@ -190,13 +190,6 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
   overflow:visible;
 }
 
-/* тонкая внутренняя обводка панели */
-.bottom-nav::after{
-  content:""; position:absolute; left:8px; right:8px; top:8px; bottom:8px;
-  border-radius:16px; pointer-events:none; border:1px solid rgba(212,175,55,0.03);
-  mix-blend-mode: screen; z-index:58;
-}
-
 /* nav-emoji — фиксация размера и отступов */
 /* делаем одинаковые боковые области, чтобы расстояния были равными */
 .nav-emoji{
