@@ -171,34 +171,59 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 
 .nav-emoji.active{ transform:translateY(-2px); }
 
-/* центральная кнопка — абсолютно центрируется по горизонтали,
-   и слегка опущена вниз относительно верха панели (top:54%) — так она визуально в середине */
+/* --- glow-image вокруг круглой кнопки + корректное центрирование "+" --- */
 .add-btn{
   position:absolute;
-  left:50%; top:54%; /* 54% -> можно менять на 50/56 если нужно чуть выше/ниже */
-  transform: translate(-50%,-50%);
-  width:66px; height:66px; border-radius:50%;
+  left:50%;
+  top:54%;
+  transform:translate(-50%,-50%);
+  width:66px;
+  height:66px;
+  border-radius:50%;
   background: radial-gradient(circle at 30% 30%, #111,#0c0c0d);
   border: 3px solid rgba(212,175,55,0.25);
-  display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; z-index:70;
   box-shadow:0 12px 30px rgba(0,0,0,0.6), 0 6px 18px rgba(212,175,55,0.12);
-  color: transparent; font-size:0;
+  /* НЕ скрываем color — плюс должен быть видим */
 }
 
-/* мягкий спот-ореол под кнопкой (широкая полоса) */
+/* псевдоэлемент, который рисует внешний «rim»/glow из glow-edge.png */
 .add-btn::before{
-  content:""; position:absolute; left:50%; top:62%; transform:translateX(-50%);
-  width:200px; height:48px; border-radius:40px;
-  background: radial-gradient(ellipse at center, rgba(212,175,55,0.22), rgba(212,175,55,0.06) 35%, transparent 60%);
-  filter: blur(12px) saturate(1.02); pointer-events:none; z-index:65;
+  content: "";
+  position: absolute;
+  inset: -10px;                /* расширяем за пределы кнопки, чтоб было видно кромку */
+  border-radius: 50%;
+  pointer-events: none;
+  background-image: url('/assets/glow-edge.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  /* подстраивай размер: cover, or 140% если надо сильнее */
+  background-size: cover;
+  opacity: 1;
+  filter: blur(0.6px) saturate(1.05) contrast(1.02);
+  mix-blend-mode: screen;      /* часто даёт более «золотой» результат */
+  z-index: 69;
 }
 
-/* сам крестик/плюс — псевдоэлемент для точного контроля */
+/* сам символ "+" как отдельный псевдоэлемент (чтобы не мешать background-image) */
 .add-btn::after{
-  content:"+"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-1.2deg);
-  font-size:34px; font-weight:800; color: var(--gold, #d4af37);
+  content: "+";
+  position: absolute;
+  left:50%; top:50%;
+  transform: translate(-50%,-50%) rotate(-1.2deg);
+  font-size:34px;
+  font-weight:800;
+  color: var(--gold, #d4af37);
   text-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 6px rgba(212,175,55,0.12);
-  pointer-events:none; z-index:71;
+  pointer-events: none;
+  z-index: 71;
+}
+
+/* ретина-оптимизация (опционально) — если сделаешь glow-edge@2x.png */
+@supports (background-image: url('/assets/glow-edge.png')) {
+  /* если позже добавишь 2x, используй image-set: */
+  /* background-image: image-set(url('/assets/glow-edge.png') 1x, url('/assets/glow-edge@2x.png') 2x); */
 }
 
 /* fallback/адаптив */
