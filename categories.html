@@ -2,85 +2,46 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>Категории — RateApp X</title>
-
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0e0e0f" />
-
 <link rel="stylesheet" href="/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<div class="header" id="cats-title">Категории</div>
-<div class="stats" id="stats">Загрузка...</div>
+<div class="header">Категории</div>
+<div class="stats" id="catStats">Загрузка...</div>
 <div class="divider"></div>
 
-<div id="cats-list" style="padding:20px;">
-  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;">
-    <li><a class="category-link" href="?cat=Фильм" style="display:block;padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);color:#d4af37;text-decoration:none;font-size:18px;">🎬  Фильм</a></li>
-    <li><a class="category-link" href="?cat=Сериалы" style="display:block;padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);color:#d4af37;text-decoration:none;font-size:18px;">📺  Сериалы</a></li>
-    <li><a class="category-link" href="?cat=Еда" style="display:block;padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);color:#d4af37;text-decoration:none;font-size:18px;">🍔  Еда</a></li>
-    <li><a class="category-link" href="?cat=Семья" style="display:block;padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);color:#d4af37;text-decoration:none;font-size:18px;">👨‍👩‍👧  Семья</a></li>
-    <li><a class="category-link" href="?cat=Разное" style="display:block;padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);color:#d4af37;text-decoration:none;font-size:18px;">📂  Разное</a></li>
+<div style="padding:24px;">
+  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:18px;">
+    <!-- Имена категорий с заглавной -->
+    <li><a class="cat-link" href="/?cat=Фильм" style="color:#d4af37;text-decoration:none;font-size:20px;">Фильм</a></li>
+    <li><a class="cat-link" href="/?cat=Сериалы" style="color:#d4af37;text-decoration:none;font-size:20px;">Сериалы</a></li>
+    <li><a class="cat-link" href="/?cat=Еда" style="color:#d4af37;text-decoration:none;font-size:20px;">Еда</a></li>
+    <li><a class="cat-link" href="/?cat=Семья" style="color:#d4af37;text-decoration:none;font-size:20px;">Семья</a></li>
+    <li><a class="cat-link" href="/?cat=Разное" style="color:#d4af37;text-decoration:none;font-size:20px;">Разное</a></li>
   </ul>
-</div>
 
-<div id="cats-view" style="display:none;">
-  <div style="padding:8px 20px;">
-    <a class="back-link" id="back-to-cats">← На выбор категорий</a>
-  </div>
-  <div class="grid" id="grid"></div>
-</div>
-
-<input id="photoInput" type="file" accept="image/*" style="display:none">
-
-<div class="bottom-nav-wrap">
-  <div class="bottom-nav">
-    <a class="nav-item" id="nav-home" aria-label="Главная" href="/index.html">🏠</a>
-
-    <div class="fab-wrap">
-      <button class="fab" id="fab-cats" aria-label="Добавить">+</button>
-    </div>
-
-    <a class="nav-item active" id="nav-cats" aria-label="Категории" href="/categories.html">📂</a>
+  <div style="margin-top:26px;">
+    <a href="/" style="color:#d4af37;text-decoration:none;font-size:18px;">← На главную</a>
   </div>
 </div>
 
-<script src="/script.js"></script>
+<!-- Нижняя панель (та же, но активна в категориях) -->
+<nav class="bottom-nav" role="navigation" aria-label="Navigation">
+  <button class="nav-btn" id="cHomeBtn" title="Главная">🏠</button>
+
+  <div class="fab-wrap">
+    <div class="fab" aria-hidden="true">+</div>
+  </div>
+
+  <button class="nav-btn nav-active" id="cCatsBtn" title="Категории">📂</button>
+</nav>
+
 <script>
-document.getElementById('fab-cats')?.addEventListener('click', () => {
-  document.getElementById('photoInput')?.click();
-});
-
-/* show filtered view if ?cat=... */
-document.addEventListener('DOMContentLoaded', () => {
-  const p = new URLSearchParams(location.search);
-  const cat = p.get('cat');
-  if(cat){
-    document.getElementById('cats-list').style.display = 'none';
-    document.getElementById('cats-view').style.display = '';
-    document.getElementById('cats-title').textContent = cat;
-    if(typeof loadCardsFiltered === 'function') loadCardsFiltered(cat);
-  } else {
-    document.getElementById('cats-list').style.display = '';
-    document.getElementById('cats-view').style.display = 'none';
-    document.getElementById('cats-title').textContent = 'Категории';
-  }
-
-  document.getElementById('back-to-cats').addEventListener('click', (ev)=>{
-    ev.preventDefault();
-    history.replaceState({}, '', '/categories.html');
-    document.getElementById('cats-list').style.display = '';
-    document.getElementById('cats-view').style.display = 'none';
-    document.getElementById('cats-title').textContent = 'Категории';
-  });
-});
+document.getElementById('cHomeBtn').addEventListener('click', ()=> window.location.href = '/');
+document.getElementById('cCatsBtn').addEventListener('click', ()=> {/* stay */});
 </script>
+
 </body>
 </html>
