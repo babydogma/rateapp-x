@@ -22,29 +22,28 @@
 <div class="divider"></div>
 <div class="grid" id="grid"></div>
 
-<!-- invisible file input (used by fab) -->
+<!-- hidden file input for add -->
 <input id="photoInput" type="file" accept="image/*" style="display:none">
 
-<!-- bottom nav wrapper -->
+<!-- bottom nav -->
 <div class="bottom-nav-wrap">
   <div class="bottom-nav">
-    <a class="nav-item active" href="/index.html" id="nav-home">
-      <span class="icon">🏠</span>
-      <span class="label">Дом</span>
-    </a>
+    <a class="nav-item active" id="nav-home" aria-label="Главная" href="/index.html">🏠</a>
 
-    <!-- central fab placeholder (actual button) -->
     <div class="fab-wrap">
-      <div class="fab" title="Добавить">+</div>
+      <button class="fab" id="fab" aria-label="Добавить">+</button>
     </div>
 
-    <a class="nav-item" href="/categories.html" id="nav-cats">
-      <span class="icon">📂</span>
-      <span class="label">Категории</span>
-    </a>
+    <a class="nav-item" id="nav-cats" aria-label="Категории" href="/categories.html">📂</a>
   </div>
 </div>
 
 <script src="/script.js"></script>
+<script>
+/* small hookup: fab click -> input click */
+document.getElementById('fab')?.addEventListener('click', () => {
+  document.getElementById('photoInput')?.click();
+});
+</script>
 </body>
 </html>
