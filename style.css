@@ -1,235 +1,292 @@
-/* =========================
-   RateApp X — полный style.css
-   (фон + все UI-стили)
-   ========================= */
+/* style.css — заменитель. Кладём прямо в корень (или в ту же папку, где был старый). */
 
-/* --- RESET / BASE --- */
-*{box-sizing:border-box;margin:0;padding:0}
+/* базовые правила */
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 html,body{height:100%}
-body{
-  min-height:100vh;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  color:#e7e3dc;
-  background:transparent;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain; /* защитит от белого bounce */
-  padding-top:env(safe-area-inset-top);
-  padding-bottom:env(safe-area-inset-bottom);
-  position:relative;
-  overflow-x:hidden;
-}
 
-/* =========================
-   BACKGROUND: velvet + gold glow
-   ========================= */
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:-3;
-  background:linear-gradient(180deg,#0b0b10 0%,#07070a 40%,#050507 100%);
+/* === фон: градиенты + тонкий "шум" для текстуры === */
+html{
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(212,175,55,0.08), transparent 18%),
+    radial-gradient(900px 500px at 85% 90%, rgba(184,134,11,0.04), transparent 20%),
+    linear-gradient(160deg,#070707 0%, #0b0b0c 30%, #101012 60%, #0b0b0b 100%);
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
 
-body::after{
+/* тонкий шум (CSS-only) — легкая "пыль" */
+html::after{
   content:"";
   position:fixed;
   inset:0;
-  z-index:-2;
   pointer-events:none;
-  background:
-    radial-gradient(700px 520px at 22% 72%, rgba(212,175,55,0.24), rgba(212,175,55,0.08) 20%, transparent 60%),
-    radial-gradient(1000px 700px at 82% 18%, rgba(255,220,120,0.08), transparent 60%),
-    radial-gradient(circle at center, transparent 55%, rgba(0,0,0,0.65) 100%);
-  background-repeat:no-repeat;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.02) 0.5px, transparent 0.6px);
+  background-size:6px 6px;
+  mix-blend-mode:overlay;
+  opacity:0.35;
 }
 
-/* уменьшенная детализация на маленьких экранах */
-@media (max-width:420px){
-  body::after{
-    background:
-      radial-gradient(520px 380px at 20% 70%, rgba(212,175,55,0.22), transparent 60%),
-      radial-gradient(700px 500px at 85% 18%, rgba(255,220,120,0.06), transparent 70%),
-      radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.6) 100%);
-  }
+/* удобная прокрутка на iOS, и предотвращаем белый bounce */
+body{
+  min-height:100vh;
+  color:#e7e3dc;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  background:transparent;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
 }
 
-/* =========================
-   LAYOUT
-   ========================= */
-.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:0.6px;color:#d4af37;text-shadow:0 6px 18px rgba(212,175,55,0.12);}
-.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.35), transparent);}
+/* Заголовок + статистика */
+.header{
+  padding:28px 20px 8px;
+  text-align:center;
+  font-size:38px;
+  font-weight:800;
+  letter-spacing:0.6px;
+  color:#d4af37;
+  text-shadow:0 6px 18px rgba(212,175,55,0.12), 0 1px 0 rgba(0,0,0,0.6);
+  /* лёгкое подсвечивание под текстом */
+  display:block;
+}
+.stats{
+  text-align:center;
+  font-size:16px;
+  margin-bottom:18px;
+  color:#d6c08a;
+  opacity:0.95;
+}
+/* разделитель золотая линия */
+.divider{
+  height:1px;
+  margin:0 30px 22px;
+  background:linear-gradient(to right, transparent, rgba(212,175,55,0.45), transparent);
+}
 
-/* Grid: две карточки в ряд, адаптив */
+/* Grid карточек — 2 колонки, аккуратные отступы */
 .grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(2, minmax(160px, 1fr));
   gap:18px;
-  padding:20px;
+  padding:18px;
   padding-bottom:calc(120px + env(safe-area-inset-bottom));
 }
 
-/* =========================
-   CARD
-   ========================= */
+/* Карточка */
 .card{
-  background:#111111;
+  background:linear-gradient(180deg, rgba(20,20,20,0.98), rgba(12,12,12,0.98));
   border-radius:18px;
   padding:14px;
   position:relative;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.06);
-  transition:transform .28s cubic-bezier(.2,1,.22,1), box-shadow .25s ease;
   overflow:hidden;
+  min-height:320px;
+  transition:transform .28s cubic-bezier(.2,.9,.2,1), box-shadow .28s ease;
+  /* внутренний светящийся контур */
+  box-shadow:
+    0 30px 40px -30px rgba(0,0,0,0.7),
+    0 24px 60px -30px rgba(212,175,55,0.12);
+  border:1px solid rgba(212,175,55,0.06);
 }
 
-/* inner glow rim */
+/* тонкая внутренняя рамка (эффект "cavity") */
 .card::before{
   content:"";
   position:absolute;
-  inset:0;
-  border-radius:18px;
-  padding:1px;
+  inset:6px;
+  border-radius:12px;
   pointer-events:none;
-  box-shadow:0 10px 40px rgba(212,175,55,0.06) inset;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5), inset 0 0 18px rgba(212,175,55,0.035);
 }
 
-/* image */
+/* карточка hover / active */
+.card:hover{ transform:translateY(-6px) }
+
+/* изображение */
 .card img{
   width:100%;
-  height:150px;
+  height:180px;
   object-fit:cover;
   border-radius:12px;
   display:block;
-  background:#0f0f0f;
+  box-shadow:0 8px 18px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.02);
 }
 
-/* delete X */
-.delete-btn{
-  position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#c6b27a;z-index:4;
-}
-
-/* description textarea */
+/* textarea / описание */
 textarea{
   width:100%;
-  margin-top:10px;
-  background:rgba(20,20,21,0.6);
-  border:1px solid rgba(212,175,55,0.08);
+  margin-top:12px;
+  background:rgba(20,20,20,0.9);
+  border:1px solid rgba(212,175,55,0.06);
   border-radius:12px;
   padding:12px;
   color:#e7e3dc;
   resize:none;
   font-size:15px;
-  min-height:48px;
+  min-height:46px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.45) inset;
 }
 
-/* rating text */
-.rating{margin-top:8px;font-weight:700;color:#d4af37;font-size:20px;}
+/* рейтинг текст */
+.rating{
+  margin-top:14px;
+  font-weight:800;
+  color:#e0bf55;
+  font-size:20px;
+  text-shadow:0 2px 10px rgba(212,175,55,0.06);
+}
 
-/* slider (unstyled native fallback) */
-input[type="range"].slider{
+/* слайдер (track + thumb) */
+.slider{
   width:100%;
-  margin-top:8px;
+  margin-top:10px;
   -webkit-appearance:none;
   appearance:none;
   height:8px;
-  border-radius:8px;
-  background:linear-gradient(90deg,#2a2a2c,#2a2a2c);
+  border-radius:999px;
+  background:linear-gradient(90deg,#222,#2a2a2c);
   outline:none;
-  box-shadow:none;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,0.02);
 }
-
-/* thumb */
-input[type="range"].slider::-webkit-slider-thumb{
+.slider::-webkit-slider-thumb{
   -webkit-appearance:none;
   appearance:none;
-  width:20px;height:20px;border-radius:50%;
-  background:#d4af37;border:3px solid rgba(0,0,0,0.25);
-  box-shadow:0 4px 10px rgba(212,175,55,0.25);
-  margin-top:-6px;
+  width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(180deg,#f1cf66,#d4af37);
+  box-shadow:0 6px 18px rgba(212,175,55,0.25),0 1px 0 rgba(255,255,255,0.06) inset;
+  border:3px solid rgba(0,0,0,0.35);
+  cursor:pointer;
 }
-input[type="range"].slider::-moz-range-thumb{
-  width:20px;height:20px;border-radius:50%;background:#d4af37;border:3px solid rgba(0,0,0,0.25);
+.slider::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(180deg,#f1cf66,#d4af37);
+  border:3px solid rgba(0,0,0,0.35);
 }
 
-/* select styling */
+/* select (категория) */
 select{
   width:100%;
   margin-top:12px;
-  background:rgba(10,10,11,0.6);
+  background:rgba(12,12,12,0.9);
   color:#e7e3dc;
-  border:1px solid rgba(212,175,55,0.06);
-  padding:12px 14px;
+  padding:12px;
   border-radius:12px;
+  border:1px solid rgba(212,175,55,0.06);
   appearance:none;
   -webkit-appearance:none;
   font-size:15px;
 }
 
-/* created date small */
-.created{margin-top:10px;color:#c6b27a;font-size:13px;}
+/* дата */
+.created{
+  margin-top:12px;
+  color:#d6c08a;
+  font-size:14px;
+}
 
-/* =========================
-   FLOATING ADD BUTTON (bottom nav variant)
-   ========================= */
-.bottom-nav{
+/* кнопка удаления (крестик) */
+.delete-btn{
+  position:absolute;
+  top:10px;
+  right:12px;
+  font-size:18px;
+  cursor:pointer;
+  color:rgba(212,175,55,0.9);
+  z-index:5;
+}
+
+/* === Нижняя панель (glass bar with center + button) === */
+/* контейнер — если у тебя есть свой класс, можно заменить селектор */
+.bottom-bar {
   position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:18px;
-  z-index:40;
-  width:calc(100% - 40px);
-  max-width:720px;
-  height:72px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
-  border-radius:24px;
-  padding:8px 18px;
+  left:12px;
+  right:12px;
+  bottom:calc(12px + env(safe-area-inset-bottom));
+  height:64px;
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.25));
+  box-shadow:0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px) saturate(120%);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  box-shadow:0 18px 40px rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px);
+  padding:0 26px;
+  z-index:80;
   border:1px solid rgba(212,175,55,0.06);
 }
 
-/* nav buttons (emoji) */
-.nav-emoji{
-  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-  font-size:22px;cursor:pointer;
-  background:transparent;border:none;
-}
+/* если панели нет в разметке — используем существующую метку .add-btn-wrapper? 
+   Но по умолчанию наш HTML использует <label class="add-btn"> — стилизуем её отдельно ниже.
+*/
 
-/* center add button smaller and inside nav */
-.nav-add{
+/* плюс-кнопка внутри панели */
+.bottom-bar .center-btn{
   width:56px;height:56px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  background:#0e0e0f;border:2px solid rgba(212,175,55,0.12);
-  box-shadow:0 6px 18px rgba(212,175,55,0.14);
-  font-size:24px;color:#d4af37;cursor:pointer;
-  transform:translateY(-6px);
+  background:linear-gradient(180deg,#0b0b0b,#151515);
+  border:3px solid rgba(212,175,55,0.12);
+  color:#d4af37;
+  box-shadow:0 12px 30px rgba(212,175,55,0.18), 0 2px 0 rgba(0,0,0,0.6) inset;
+  transform:translateY(-8px);
 }
 
-/* make sure it is above nav */
-.nav-add{z-index:45}
-
-/* small active indicator for emoji (remove underlines) */
-.nav-emoji:focus{outline:none}
-
-/* =========================
-   RESPONSIVE
-   ========================= */
-@media (max-width:800px){
-  .grid{grid-template-columns:repeat(1,1fr);padding-bottom:140px}
-  .header{font-size:26px}
-  .bottom-nav{height:64px}
+/* эмодзи слева/справа */
+.bottom-bar .icon{
+  font-size:22px;
+  opacity:0.98;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,0.6));
 }
 
-/* =========================
-   Accessibility / Utility
-   ========================= */
-.hidden{display:none}
-/* small glow helper for card focus */
-.card:focus-within{transform:translateY(-4px);box-shadow:0 30px 70px rgba(212,175,55,0.08)}
+/* маленькая версия, если панель строится по-другому — допустим .add-btn exists */
+.add-btn{
+  /* скрываем старую позицию, если есть — и оставляем видимой только центр-кнопку в панели */
+  position:fixed;
+  right:28px;
+  bottom:28px;
+  width:70px;height:70px;border-radius:50%;
+  background:#111;border:1px solid rgba(212,175,55,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:32px;color:#d4af37;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,0.2);
+  z-index:90;
+}
+
+/* ссылки (категории page) — делаем блоки */
+.categories-list{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:16px;
+  padding:20px;
+}
+.category-tile{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25));
+  border-radius:12px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  color:#e2c86d;
+  font-weight:700;
+  box-shadow:0 12px 30px rgba(212,175,55,0.06);
+  border:1px solid rgba(212,175,55,0.03);
+}
+
+/* fallback для простого списка ссылок (если используется <a>) */
+.categories-list a{
+  text-decoration:none;
+  color:#e2c86d;
+}
+
+/* маленькие вспомогательные правки */
+@media (max-width:520px){
+  .header{font-size:32px}
+  .grid{grid-template-columns:repeat(1, 1fr)}
+  .card{min-height:360px}
+  .bottom-bar{left:10px;right:10px;padding:0 16px}
+}
+
+/* Accessibility: контрастные состояния фокуса (клавиатура) */
+button:focus, a:focus, input:focus, select:focus, textarea:focus{
+  outline:2px solid rgba(212,175,55,0.18);
+  outline-offset:3px;
+  box-shadow:0 8px 30px rgba(212,175,55,0.06);
+}
