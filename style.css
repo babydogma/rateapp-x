@@ -127,101 +127,103 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 
 /* hover/active карточки */
 .card:active{ transform:translateY(-4px); }
-/* --------- bottom-nav tweak: чуть больше вертикального пространства для центровки кнопки --------- */
+
+/* ---------- NAV + CENTER BUTTON: precise centering ---------- */
+/* bottom-nav остаётся position:fixed и служит контейнером для absolute-кнопки */
 .bottom-nav{
   position:fixed;
   left:14px;
   right:14px;
-  bottom:12px;
-  height:74px;                        /* +8px для места под кнопку */
-  background:rgba(255,255,255,0.04);
-  border-radius:18px;
+  bottom:14px;           /* мелкая поправка, чтобы было чуть выше */
+  height:82px;           /* больше высоты — даём место для кнопки */
+  padding:12px 20px;
+  border-radius:20px;
   display:flex;
-  align-items:center;                 /* теперь центрирование внутри блока */
-  justify-content:space-around;
-  padding:10px 18px;                  /* чуть больше сверху/снизу */
-  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  align-items:center;
+  justify-content:space-between;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));
   backdrop-filter: blur(8px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
-  z-index:55;
-  overflow:visible;
+  z-index:60;
+  overflow:visible;      /* чтобы glow был виден */
+  position:fixed;        /* важно — кнопка позиционируется относительно этого блока */
 }
 
-/* внутренняя тонкая обводка (оставляем) */
+/* внутренний контур (оставляем) */
 .bottom-nav::after{
   content:"";
   position:absolute;
-  left:6px; right:6px; top:6px; bottom:6px;
-  border-radius:14px;
+  left:8px; right:8px; top:8px; bottom:8px;
+  border-radius:16px;
   pointer-events:none;
   border:1px solid rgba(212,175,55,0.03);
   mix-blend-mode: screen;
-  z-index:54;
+  z-index:58;
 }
 
-/* --------- add button: чуть ниже и визуально «нестандартный» плюс --------- */
+/* ---- центральная кнопка: абсолютное, точное центрирование ---- */
+/* позиционируем абсолютно в родителе (bottom-nav) и центрируем по оси X */
 .add-btn{
-  width:62px;
-  height:62px;
+  position:absolute;     /* ключевой момент: теперь позиция внутри .bottom-nav */
+  left:50%;
+  top: 0;                /* y = 0 в пределах bottom-nav */
+  transform: translate(-50%, -50%); /* вытащить центр кнопки за верхнюю грань панели */
+  width:66px;
+  height:66px;
   border-radius:50%;
-  background: radial-gradient(circle at 30% 30%, #1c1c1d, #0d0d0e);
-  border:2px solid rgba(212,175,55,0.3);
+  background: radial-gradient(circle at 30% 30%, #111,#0c0c0d);
+  border: 3px solid rgba(212,175,55,0.25);
   display:flex;
   align-items:center;
   justify-content:center;
-  /* скрываем встроенный текст, чтобы не мешал позиционированию — плюс будет рисоваться ::after */
+  cursor:pointer;
+  z-index:70;
+  /* лёгкая тень для объёма */
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.6),
+    0 6px 18px rgba(212,175,55,0.12);
+  /* цвет текста убираем — плюс будет через ::after */
   color: transparent;
   font-size: 0;
-  box-shadow:
-    0 0 20px rgba(212,175,55,0.14),
-    0 6px 24px rgba(212,175,55,0.12);
-  cursor:pointer;
-  position:relative;
-  z-index:70;
-
-  /* смещение вниз, чтобы круг визуально был в середине панели */
-  transform: translateY(6px);
 }
 
-/* нарисуем плюс через псевдоэлемент точно по центру, с маленьким креном */
+/* мягкий ореол/спот под кнопкой (чуть ниже центра панели) */
+.add-btn::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:54%;                /* чуть ниже центра кнопки — выглядит как "светящийся паз" */
+  transform:translateX(-50%);
+  width:180px;
+  height:48px;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.2), rgba(212,175,55,0.06) 35%, transparent 60%);
+  filter: blur(10px) saturate(1.02);
+  pointer-events:none;
+  z-index:65;
+}
+
+/* сам символ + через псевдоэлемент, идеально центрирован и с лёгким креном */
 .add-btn::after{
   content:"+";
   position:absolute;
   left:50%;
   top:50%;
-  transform:translate(-50%,-52%) rotate(-2deg); /* чуть «кривой» — визуально приятнее */
-  color: var(--gold, #d4af37);
+  transform:translate(-50%,-50%) rotate(-1.5deg); /* лёгкий угол — как просил */
   font-size:34px;
-  font-weight:700;
-  line-height:1;
-  text-shadow:
-    0 2px 6px rgba(0,0,0,0.6),
-    0 0 6px rgba(212,175,55,0.18);
+  font-weight:800;
+  color: var(--gold, #d4af37);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 6px rgba(212,175,55,0.12);
   pointer-events:none;
   z-index:71;
 }
 
-/* центральный glow / «спот» под кнопкой (тонкая мягкая корона) */
-.add-btn::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:160px;
-  height:48px;
-  transform:translate(-50%,-4%); /* чуть ниже, чтобы glow был под кнопкой */
-  background: radial-gradient(ellipse at center, rgba(212,175,55,0.18), transparent 40%);
-  filter: blur(10px) saturate(1.05);
-  z-index:60;
-  pointer-events:none;
-}
-
-/* fallback для маленьких экранов */
+/* fallback / mobile tweaks */
 @media (max-width:420px){
-  .bottom-nav{ height:72px; padding:8px 16px; }
-  .add-btn{ width:54px; height:54px; transform: translateY(5px); }
-  .add-btn::after{ font-size:28px; transform:translate(-50%,-50%) rotate(-2deg); }
-  .add-btn::before{ width:120px; height:36px; filter: blur(9px); transform:translate(-50%,-6%); }
+  .bottom-nav{ left:12px; right:12px; height:72px; padding:10px 16px; bottom:12px; }
+  .add-btn{ width:56px; height:56px; transform: translate(-50%,-50%); }
+  .add-btn::before{ width:140px; height:40px; top:56%; filter:blur(9px); }
+  .add-btn::after{ font-size:28px; transform:translate(-50%,-50%) rotate(-1.5deg); }
 }
 
 /* эмодзи кнопки */
