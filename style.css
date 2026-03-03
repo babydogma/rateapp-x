@@ -1,9 +1,8 @@
-/* style.css — версия A (чистый премиум, без грязного glow) */
+/* style.css — версия A+ (глубина + сцена, без грязи) */
 
 :root{
   --gold: #d4af37;
   --bg-black: #050505;
-  --bg-panel: rgba(12,12,14,0.92);
   --card-bg-1: #121213;
   --card-bg-2: #0e0e0f;
 }
@@ -16,7 +15,7 @@
 }
 
 /* ---------------------------
-   ФОН — ЧИСТЫЙ ЧЁРНЫЙ
+   ФОН — ЧИСТЫЙ + ГЛУБИНА СНИЗУ
 --------------------------- */
 
 html, body{
@@ -31,6 +30,28 @@ body{
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
+  position:relative;
+}
+
+/* мягкая сцена снизу */
+body::before{
+  content:"";
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:-220px;
+  height:520px;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(212,175,55,0.08) 0%,
+      rgba(212,175,55,0.04) 30%,
+      transparent 65%
+    );
+
+  pointer-events:none;
+  z-index:0;
 }
 
 /* ---------------------------
@@ -44,6 +65,8 @@ body{
   font-weight:700;
   letter-spacing:1px;
   color:var(--gold);
+  position:relative;
+  z-index:2;
 }
 
 .stats{
@@ -51,6 +74,8 @@ body{
   font-size:15px;
   margin-bottom:24px;
   color:#bda66b;
+  position:relative;
+  z-index:2;
 }
 
 .divider{
@@ -62,6 +87,8 @@ body{
     rgba(212,175,55,0.35),
     transparent
   );
+  position:relative;
+  z-index:2;
 }
 
 /* ---------------------------
@@ -74,10 +101,12 @@ body{
   gap:18px;
   padding:20px;
   padding-bottom:calc(140px + env(safe-area-inset-bottom));
+  position:relative;
+  z-index:2;
 }
 
 /* ---------------------------
-   КАРТОЧКИ — БЕЗ ЗОЛОТОГО ТУМАНА
+   КАРТОЧКИ
 --------------------------- */
 
 .card{
@@ -101,7 +130,7 @@ body{
   border-radius:12px;
 }
 
-/* delete — минимал */
+/* delete */
 
 .delete-btn{
   position:absolute;
@@ -143,7 +172,7 @@ textarea{
 }
 
 /* ---------------------------
-   NAV PANEL — ЧЁРНОЕ СТЕКЛО
+   NAV PANEL — СТЕКЛО С ГЛУБИНОЙ
 --------------------------- */
 
 .bottom-nav{
@@ -160,7 +189,12 @@ textarea{
   justify-content:space-between;
   padding:0 32px;
 
-  background:var(--bg-panel);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18,18,20,0.95),
+      rgba(10,10,12,0.98)
+    );
 
   backdrop-filter:blur(28px);
   -webkit-backdrop-filter:blur(28px);
@@ -168,12 +202,12 @@ textarea{
   border:1px solid rgba(212,175,55,0.14);
 
   box-shadow:
-    0 25px 70px rgba(0,0,0,0.95);
+    0 30px 80px rgba(0,0,0,0.95);
 
   z-index:60;
 }
 
-/* тонкая золотая линия сверху */
+/* тонкая золотая линия */
 
 .bottom-nav::before{
   content:"";
@@ -208,7 +242,6 @@ textarea{
 
 /* ---------------------------
    КНОПКА +
-   ЕДИНСТВЕННЫЙ СВЕТЯЩИЙСЯ ОБЪЕКТ
 --------------------------- */
 
 .add-btn{
@@ -227,8 +260,9 @@ textarea{
     radial-gradient(circle at 50% 35%, #f6e08a, #d4af37 75%);
 
   box-shadow:
-    0 12px 30px rgba(0,0,0,0.9),
-    0 0 22px rgba(212,175,55,0.35);
+    0 14px 35px rgba(0,0,0,0.95),
+    0 0 26px rgba(212,175,55,0.35),
+    inset 0 -6px 12px rgba(0,0,0,0.25);
 
   z-index:70;
 }
