@@ -150,7 +150,7 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 
 .add-btn{
   position:absolute; left:50%; top:0;
-  transform: translate(-50%,-50%); /* tune -46/-50/-54% if needed */
+ .add-btn{ transform: translate(-50%,-54%); }  /* tune -46/-50/-54% if needed */
   width:66px; height:66px; border-radius:50%;
   background: radial-gradient(circle at 30% 30%, #111,#0c0c0d);
   border: 3px solid rgba(212,175,55,0.25);
