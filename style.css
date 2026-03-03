@@ -95,7 +95,58 @@ body::after{
 
 /* содержимое карточки */
 .card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
-.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:var(--gold);}
+/* замените старое правило .delete-btn на это */
+.delete-btn{
+  position: absolute;
+  /* базовая позиция: ровно у правого верхнего угла карточки */
+  top: 8px;
+  right: 8px;
+
+  /* делаем круглый «пятачок», который частично выходит за край */
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* визуал: тёмный полупрозрачный фон + золотой крестик */
+  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(255,255,255,0.02));
+  color: var(--gold);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+
+  /* смещаем центр этого круга на сам кончик угла наружу */
+  transform: translate(50%, -50%); /* 50% вправо, -50% вверх -> на кончик */
+  z-index: 30;
+
+  /* аккуратная тень + лёгкий золотой ободок */
+  box-shadow:
+    0 6px 14px rgba(0,0,0,0.6),
+    0 0 8px rgba(212,175,55,0.06);
+  border: 1px solid rgba(212,175,55,0.06);
+
+  /* чуть более крупная зона клика на тачах */
+  touch-action: manipulation;
+}
+
+/* если хочешь ещё более «выступающий» вариант — подкрути translate (вправо/вверх) */
+.delete-btn--out {
+  transform: translate(65%, -60%); /* пример: сильнее наружу */
+}
+
+/* мобильные мелкие правки */
+@media (max-width:420px){
+  .delete-btn{
+    width:26px;
+    height:26px;
+    font-size:14px;
+    top:7px;
+    right:7px;
+    transform: translate(50%,-50%);
+  }
+}
 textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
 .rating{margin-top:8px;font-weight:600;color:var(--gold);}
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
