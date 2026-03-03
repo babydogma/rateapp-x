@@ -1,16 +1,29 @@
-/* базовые стили — взяты и скорректированы из твоего дизайна */
+/* style.css — исправленный, заменить файл целиком */
+
+/* базовые переменные и reset */
+:root{
+  --gold: #d4af37;
+  --gold-strong: rgba(212,175,55,1);
+  --gold-soft: rgba(212,175,55,0.18);
+  --bg-dark-1: #0e0e0f;
+  --bg-dark-2: #161618;
+  --card-bg: #111213;
+}
+
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
+/* фон и тонкий зернистый шум */
 html{
   height:100%;
   background:
-    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
-    linear-gradient(160deg,#0e0e0f,#161618 60%,#0c0c0d);
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.06), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.03), transparent 50%),
+    linear-gradient(160deg,var(--bg-dark-1), var(--bg-dark-2) 60%, #0c0c0d);
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
 
+/* body + легкий глиттер */
 body{
   min-height:100vh;
   color:#e7e3dc;
@@ -19,93 +32,168 @@ body{
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
+  position:relative;
+}
+body::after{
+  content:"";
+  pointer-events:none;
+  position:fixed;
+  left:0;top:0;right:0;bottom:0;
+  background-image:
+    radial-gradient(rgba(255,215,150,0.03) 0.5px, transparent 0.5px),
+    radial-gradient(rgba(255,215,150,0.01) 0.5px, transparent 0.5px);
+  background-size: 6px 6px, 18px 18px;
+  mix-blend-mode: screen;
+  opacity:0.06;
+  transform:translateZ(0);
+  z-index:1;
 }
 
-.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:#d4af37;}
+/* заголовки и базовые блоки */
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+/* layout */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
 
-/* карточка */
+/* ============================
+   Карточки — фон, внутренняя обводка, золотой glow
+   ============================ */
 .card{
   background: linear-gradient(160deg, #141415, #0f0f10);
-  border-radius: 22px;
-  padding: 14px;
-  position: relative;
+  border-radius:18px;
+  padding:14px;
+  position:relative;
+  overflow:visible;
+  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+  z-index:10;
   box-shadow:
-    0 20px 60px rgba(0,0,0,0.7),
-    0 0 0 1px rgba(212,175,55,0.08),
-    0 0 25px rgba(212,175,55,0.08);
-  transition: transform .3s ease, box-shadow .3s ease;
+    inset 0 1px 0 rgba(255,255,255,0.02),
+    0 16px 40px rgba(0,0,0,0.6);
 }
 
+/* тонкая внутренняя пунктирная рамка */
+.card::after{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:12px;
+  pointer-events:none;
+  border:1px dotted rgba(212,175,55,0.12);
+  mix-blend-mode: screen;
+  z-index:9;
+}
+
+/* внешний мягкий золотой glow */
 .card::before{
   content:"";
   position:absolute;
-  inset:-1px;
+  left:-10px; right:-10px; top:-10px; bottom:-10px;
   border-radius:24px;
-  background: linear-gradient(120deg, rgba(212,175,55,0.25), transparent 40%, rgba(212,175,55,0.25));
-  opacity:.25;
-  filter: blur(12px);
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at top center, rgba(212,175,55,0.12), transparent 25%),
+    linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
+  box-shadow:
+    0 20px 80px rgba(212,175,55,0.14),
+    0 6px 22px rgba(212,175,55,0.08),
+    0 0 40px rgba(212,175,55,0.12);
+  filter:blur(0.8px);
+  opacity:1;
+  mix-blend-mode: screen;
   z-index:-1;
 }
 
-/* category select */
+/* содержимое карточки */
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
+.delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:var(--gold);}
+textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:var(--gold);}
+.created{margin-top:10px;color:#c6b27a;font-size:13px;}
+
+/* category-select */
 .category-select{
   width:100%;
   margin-top:12px;
-  background:#141415;
-  border:1px solid rgba(212,175,55,0.12);
+  background:linear-gradient(180deg,#141415,#0f0f10);
+  border:1px solid rgba(212,175,55,0.06);
   color:#e7e3dc;
-  padding:10px 12px;
+  padding:12px;
   border-radius:12px;
   font-size:15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
 
-/* created line */
-.created{margin-top:10px;color:#c6b27a;font-size:13px;}
+/* hover/active карточки */
+.card:active{ transform:translateY(-4px); }
 
-/* --- нижняя панель (новый стиль, уменьшенный, glass + контур) --- */
+/* ============================
+   Нижняя панель + кнопка +
+   ============================ */
 .bottom-nav{
   position:fixed;
-  left:14px;
-  right:14px;
-  bottom:12px;
-  height:66px;
-  background:rgba(255,255,255,0.04);
-  border-radius:16px;
+  left:20px;
+  right:20px;
+  bottom:14px;
+  height:70px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border-radius:20px;
   display:flex;
   align-items:center;
   justify-content:space-around;
-  padding:8px 18px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-  backdrop-filter: blur(8px) saturate(1.1);
+  padding:10px 28px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(10px) saturate(1.1);
   border:1px solid rgba(212,175,55,0.06);
-  z-index:55;
+  z-index:60;
+  overflow:visible;
+}
+
+/* внутренняя тонкая обводка панели */
+.bottom-nav::after{
+  content:"";
+  position:absolute;
+  left:6px; right:6px; top:6px; bottom:6px;
+  border-radius:16px;
+  pointer-events:none;
+  border:1px solid rgba(212,175,55,0.03);
+  mix-blend-mode: screen;
+  z-index:59;
+}
+
+/* внешний glow панели */
+.bottom-nav::before{
+  content:"";
+  position:absolute;
+  left:-8px; right:-8px; top:-6px; bottom:-6px;
+  border-radius:22px;
+  pointer-events:none;
   box-shadow:
-  0 10px 40px rgba(0,0,0,0.8),
-  0 0 25px rgba(212,175,55,0.08),
-  inset 0 1px 0 rgba(255,255,255,0.04);
+    0 30px 80px rgba(212,175,55,0.12),
+    0 8px 30px rgba(212,175,55,0.08),
+    0 0 40px rgba(212,175,55,0.12);
+  mix-blend-mode: screen;
+  z-index:-1;
 }
 
-/* эмодзи-кнопки */
+/* эмодзи кнопки */
 .nav-emoji{
-  font-size:28px;
+  font-size:24px;
   background:none;border:0;cursor:pointer;
-  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.08));
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));
+  z-index:62;
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
 }
-
-/* уменьшенные эмодзи активной */
 .nav-emoji.active{ transform:translateY(-2px); }
 
-/* большая кнопка + внутри панели — чуть приподнята */
+/* кнопка + */
 .add-btn{
   width:62px;
   height:62px;
   border-radius:50%;
   background: radial-gradient(circle at 30% 30%, #1c1c1d, #0d0d0e);
-  color:#d4af37;
+  color:var(--gold);
   border:2px solid rgba(212,175,55,0.3);
   display:flex;
   align-items:center;
@@ -113,34 +201,44 @@ body{
   font-size:34px;
   box-shadow:
     0 0 20px rgba(212,175,55,0.6),
-    0 0 40px rgba(212,175,55,0.4);
+    0 0 40px rgba(212,175,55,0.4),
+    0 16px 30px rgba(0,0,0,0.65);
   transform:translateY(-18%);
   cursor:pointer;
+  position:relative;
+  z-index:70;
 }
 
-/* ---- categories page blocks ---- */
+/* центральная спот-подсветка под кнопкой */
+.add-btn::after{
+  content:"";
+  position:absolute;
+  left:50%;top:50%;width:140px;height:40px;transform:translate(-50%,-40%);
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.18), transparent 50%);
+  filter:blur(12px);
+  z-index:-2;
+  pointer-events:none;
+}
+
+/* categories */
 .categories-grid{
   padding:18px;
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:12px;
+  position:relative; z-index:10;
 }
 .category-block{
-  display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.02);
-  border-radius:12px;color:#d4af37;text-decoration:none;font-size:20px;
+  display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;
   border:1px solid rgba(212,175,55,0.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
-.cat-emoji{font-size:30px;}
-.cat-title{font-weight:600;}
-.back-to-main{display:block;margin:28px 20px;font-size:18px;color:#d4af37;text-decoration:none;}
+.cat-emoji{font-size:28px;}
+.cat-title{font-weight:700; color: #f0d999;}
+.back-to-main{display:block;margin:28px 20px;font-size:18px;color:var(--gold);text-decoration:none;}
 
-/* responsive tweaks */
-@media (min-width:900px){
-  .grid{grid-template-columns:repeat(3,1fr);}
-  .categories-grid{grid-template-columns:repeat(4,1fr);}
-}
-
-/*slider*/
+/* slider */
 .slider{
   width:100%;
   margin-top:8px;
@@ -150,7 +248,6 @@ body{
   background:linear-gradient(to right,#d4af37,#b8860b);
   box-shadow:0 0 12px rgba(212,175,55,0.4);
 }
-
 .slider::-webkit-slider-thumb{
   appearance:none;
   width:18px;
@@ -162,12 +259,11 @@ body{
     0 0 25px rgba(212,175,55,0.6);
 }
 
-/*svechenie*/
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:radial-gradient(circle at 50% 30%, rgba(212,175,55,0.08), transparent 60%);
-  mix-blend-mode:screen;
+/* responsive */
+@media (min-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr);}
+  .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
+
+/* helpers */
+.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
