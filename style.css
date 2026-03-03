@@ -1,5 +1,5 @@
-/* style.css — обновлённый (заменить файл целиком)
-   Включает поддержку ассетов:
+/* style.css — исправленный (заменить файл целиком)
+   Поддержка ассетов:
    /assets/particles.png
    /assets/glow-edge.png
    /assets/nav-glow.png
@@ -13,11 +13,14 @@
   --bg-dark-1: #0e0e0f;
   --bg-dark-2: #161618;
   --card-bg: #111213;
+  --ui-z-cards: 80;      /* карточки и их glow (больше, чем bottom-nav) */
+  --ui-z-panel: 40;      /* нижняя панель */
 }
 
+/* reset */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
-/* фон и тонкий зернистый шум */
+/* фон */
 html{
   height:100%;
   background:
@@ -28,7 +31,7 @@ html{
   background-attachment:fixed;
 }
 
-/* тонкий «глиттер»/шум поверх фона (через псевдоэлемент body::after) */
+/* шум/глиттер */
 body{
   min-height:100vh;
   color:#e7e3dc;
@@ -38,34 +41,35 @@ body{
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
   position:relative;
+  z-index:1;
 }
 body::after{
   content:"";
   pointer-events:none;
-  position:fixed;
-  left:0;top:0;right:0;bottom:0;
+  position:fixed;left:0;top:0;right:0;bottom:0;
   background-image:
     radial-gradient(rgba(255,215,150,0.03) 0.5px, transparent 0.5px),
     radial-gradient(rgba(255,215,150,0.01) 0.5px, transparent 0.5px);
   background-size: 6px 6px, 18px 18px;
   mix-blend-mode: screen;
-  opacity:0.08;
-  transform:translateZ(0);
-  z-index:1;
+  opacity:0.07;
+  z-index:2;
 }
 
-/* поверхностное затемнение, чтобы элементы были над шумом */
-.app-surface { position:relative; z-index:5; }
+/* app surface (все элементы поверх шума) */
+.app-surface{ position:relative; z-index:10; }
 
-/* заголовки и базовые блоки */
+/* заголовки */
 .header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-/* лэйаут карточек */
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:30;}
 
-/* === КАРТОЧКА: фон, внутренняя обводка, внешняя золотая подсветка === */
+/* -------------------- */
+/* КАРТОЧКА */
+/* -------------------- */
 .card{
   background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.22));
   border-radius:18px;
@@ -73,51 +77,43 @@ body::after{
   position:relative;
   overflow:visible;
   transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-  z-index:10;
-  /* лёгкая внутренняя тень чтобы было глубже */
+  z-index: var(--ui-z-cards); /* карточки выше панели */
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 32px rgba(0,0,0,0.55);
 }
 
-/* внутренний декоративный пунктир (оставляем — это декоративно) */
-.card .inner-dotted {
-  display:none; /* placeholder if needed */
-}
-
-/* Тонкая внутренняя пунктирная рамка у карточки (если нужна) */
+/* тонкая внутренняя рамка (decorative) */
 .card::after{
-  /* раньше использовался для dotted border — теперь используем для тонкой декоративной рамки,
-     но её переопределяем ниже если используются asset-based rim */
   content:"";
   position:absolute;
   inset:6px;
   border-radius:12px;
   pointer-events:none;
-  border:1px dotted rgba(212,175,55,0.15);
+  border:1px dotted rgba(212,175,55,0.12);
   mix-blend-mode: screen;
-  z-index:9;
+  z-index:2;
 }
 
-/* внешняя золотая подсветка — псевдоэлемент расширяет область и даёт плавное свечение.
-   Мы заменяем на использование и градиентов, и image overlay (если есть assets) ниже. */
+/* внешний мягкий glow у карточки (свет и тень) */
 .card::before{
   content:"";
   position:absolute;
-  left:-10px; right:-10px; top:-10px; bottom:-10px;
+  left:-8px; right:-8px; top:-8px; bottom:-8px;
   border-radius:24px;
   pointer-events:none;
-  background: radial-gradient(ellipse at top center, rgba(212,175,55,0.12), transparent 25%),
-              linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
+  /* комбинируем тонкий градиент + тень (уменьшил spread чтобы не лез вверх) */
+  background:
+    radial-gradient(ellipse at top center, rgba(212,175,55,0.10), transparent 20%),
+    linear-gradient(90deg, rgba(212,175,55,0.04), rgba(212,175,55,0.02));
   box-shadow:
-    0 20px 80px rgba(212,175,55,0.14),
-    0 6px 22px rgba(212,175,55,0.08),
-    0 0 40px rgba(212,175,55,0.12);
-  filter:blur(0.6px);
-  opacity:1;
+    0 18px 36px rgba(212,175,55,0.11),
+    0 6px 18px rgba(212,175,55,0.07),
+    0 0 30px rgba(212,175,55,0.10);
+  filter: blur(0.6px);
   mix-blend-mode: screen;
-  z-index:-1;
+  z-index: -1; /* псевдоэлемент находится под карточкой, но потому что карточка выше панели — glow виден корректно */
 }
 
-/* изображения и контент внутри карточки (не трогаем логику) */
+/* содержимое */
 .card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
 .delete-btn{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:var(--gold);}
 textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
@@ -125,271 +121,165 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
 .slider{width:100%;margin-top:8px;appearance:none;height:8px;border-radius:6px;background:linear-gradient(90deg,#2a2a2c,#222);}
 .slider::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,var(--gold), #b8860b);box-shadow:0 6px 18px rgba(212,175,55,0.25);border:2px solid rgba(0,0,0,0.45);}
 
-/* category select */
 .category-select{
   width:100%;
   margin-top:12px;
   background:linear-gradient(180deg,#141415,#0f0f10);
   border:1px solid rgba(212,175,55,0.06);
   color:#e7e3dc;
-  padding:12px;
-  border-radius:12px;
-  font-size:15px;
+  padding:12px;border-radius:12px;font-size:15px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
-
-/* created line */
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
-
-/* Плавный "подпрыг" карточки при hover/active (мелкий эффект) */
 .card:active{ transform:translateY(-4px); }
 
-/* === НИЖНЯЯ ПАНЕЛЬ с внутренней кнопкой и подсветкой === */
+/* -------------------- */
+/* НИЖНЯЯ ПАНЕЛЬ */
+/* -------------------- */
 .bottom-nav{
   position:fixed;
-  left:20px;
-  right:20px;
-  bottom:14px;
+  left:20px; right:20px; bottom:14px;
   height:70px;
   background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
   border-radius:20px;
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
+  display:flex;align-items:center;justify-content:space-around;
   padding:10px 28px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
   backdrop-filter: blur(10px) saturate(1.1);
-  border:1px solid rgba(212,175,55,0.06);
-  z-index:60;
+  border:1px solid rgba(212,175,55,0.04);
+  z-index: var(--ui-z-panel); /* панель ниже карточек */
   overflow:visible;
 }
 
-/* внутренняя тонкая обводка (внутри панели) */
-.bottom-nav::after{
-  content:"";
-  position:absolute;
-  left:6px; right:6px; top:6px; bottom:6px;
-  border-radius:16px;
-  pointer-events:none;
-  border:1px solid rgba(212,175,55,0.03);
-  mix-blend-mode: screen;
-  z-index:59;
+/* внутренняя тонкая обводка (панели) */
+.bottom-nav .inner-outline{
+  position:absolute;left:6px;right:6px;top:6px;bottom:6px;border-radius:16px;pointer-events:none;
+  border:1px solid rgba(212,175,55,0.03);mix-blend-mode: screen;z-index:var(--ui-z-panel);
 }
 
-/* внешняя золотая подсветка у панели */
+/* текстура/glow у панели — сделано аккуратно, без гигантских box-shadow */
 .bottom-nav::before{
   content:"";
   position:absolute;
-  left:-8px; right:-8px; top:-6px; bottom:-6px;
+  left:4px; right:4px; top:4px; bottom:4px;
+  border-radius:18px;
+  pointer-events:none;
+  background-image: url('/assets/nav-glow.png');
+  background-size: cover;
+  background-position:center;
+  opacity:0.85;
+  filter: blur(0.6px) contrast(1.02) saturate(1.02);
+  mix-blend-mode: screen;
+  z-index: calc(var(--ui-z-panel) - 1); /* под самой панелью */
+}
+
+/* уменьшаю ОГРОМНЫЕ box-shadow, которые раньше лезли вверх */
+.bottom-nav::after{
+  content:"";
+  position:absolute;
+  left:-6px; right:-6px; top:-6px; bottom:-6px;
   border-radius:22px;
   pointer-events:none;
   box-shadow:
-    0 30px 80px rgba(212,175,55,0.12),
-    0 8px 30px rgba(212,175,55,0.08),
-    0 0 40px rgba(212,175,55,0.12);
+    0 18px 36px rgba(212,175,55,0.08),
+    0 6px 18px rgba(212,175,55,0.05);
   mix-blend-mode: screen;
-  z-index:-1;
+  z-index: calc(var(--ui-z-panel) - 2);
 }
 
-/* эмодзи-кнопки */
-.nav-emoji{
-  font-size:24px;
-  background:none;border:0;cursor:pointer;
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));
-  z-index:62;
-  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-}
-/* удаляем подчеркивания, меняем цвет при активе */
+/* nav buttons */
+.nav-emoji{font-size:24px;background:none;border:0;cursor:pointer;filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));z-index: calc(var(--ui-z-panel) + 2);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
 .nav-emoji.active{ transform:translateY(-2px); }
 
-/* большая кнопка + внутри панели — центр и с подсветкой */
+/* central add */
 .add-btn{
   width:56px;height:56px;border-radius:50%;
   background:linear-gradient(180deg,#0b0b0b,#0f0f0f);
   color:var(--gold);border:2px solid rgba(0,0,0,0.35);
   display:inline-flex;align-items:center;justify-content:center;font-size:30px;
-  box-shadow:
-    0 20px 50px rgba(0,0,0,0.6),
-    0 6px 24px rgba(212,175,55,0.12);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.55);
   transform:translateY(-6%);
-  cursor:pointer;
-  position:relative;
-  z-index:70;
+  cursor:pointer;position:relative;z-index:calc(var(--ui-z-panel) + 10);
 }
 
-/* золотая обводка и свет у + */
+/* тонкая kромка + spot под кнопкой */
 .add-btn::before{
   content:"";
-  position:absolute;
-  left:-8px;right:-8px;top:-8px;bottom:-8px;border-radius:50%;
-  pointer-events:none;
-  box-shadow:
-    0 18px 40px rgba(212,175,55,0.18),
-    0 6px 18px rgba(212,175,55,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.03);
+  position:absolute;left:-8px;right:-8px;top:-8px;bottom:-8px;border-radius:50%;pointer-events:none;
+  box-shadow: 0 12px 30px rgba(212,175,55,0.12), 0 6px 18px rgba(212,175,55,0.08);
   mix-blend-mode: screen;
-  z-index:-1;
+  z-index: calc(var(--ui-z-panel) - 1);
 }
-
-/* центральная «спот» подсветка под кнопкой */
 .add-btn::after{
   content:"";
-  position:absolute;
-  left:50%;top:50%;width:140px;height:40px;transform:translate(-50%,-40%);
-  background: radial-gradient(ellipse at center, rgba(212,175,55,0.18), transparent 50%);
-  filter:blur(12px);
-  z-index:-2;
+  position:absolute; left:50%; top:50%; width:140px; height:40px; transform:translate(-50%,-40%);
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.14), transparent 50%);
+  filter: blur(10px);
+  z-index: calc(var(--ui-z-panel) - 2);
   pointer-events:none;
 }
 
-/* categories page blocks */
-.categories-grid{
-  padding:18px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  position:relative; z-index:10;
-}
-.category-block{
-  display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
-  border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;
-  border:1px solid rgba(212,175,55,0.06);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
+/* categories blocks */
+.categories-grid{padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;position:relative;z-index:30;}
+.category-block{display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;border:1px solid rgba(212,175,55,0.06);box-shadow: 0 8px 30px rgba(0,0,0,0.5);}
 .cat-emoji{font-size:28px;}
-.cat-title{font-weight:700; color: #f0d999;}
+.cat-title{font-weight:700; color:#f0d999;}
 .back-to-main{display:block;margin:28px 20px;font-size:18px;color:var(--gold);text-decoration:none;}
 
-/* responsive tweaks */
-@media (min-width:900px){
-  .grid{grid-template-columns:repeat(3,1fr);}
-  .categories-grid{grid-template-columns:repeat(4,1fr);}
+/* -------------------- */
+/* Ассеты: particles / glow-edge / nav-glow */
+/* -------------------- */
+
+/* глобальная золотая пыль (опционально): вставить <div class="gold-particles"></div> в body */
+.gold-particles{
+  position:fixed; inset:0; pointer-events:none;
+  background-image: url('/assets/particles.png');
+  background-repeat: repeat;
+  background-size: 420px;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  z-index:3;
+}
+
+/* класс для конкретной карточки, когда нужно усилить glow */
+.card.card-glow{ position:relative; z-index: calc(var(--ui-z-cards) + 2); overflow:visible; }
+.card.card-glow::after{
+  content:"";
+  position:absolute; left:50%; transform:translateX(-50%); bottom:-30px;
+  width:260px; height:120px; border-radius:80px;
+  background-image: url('/assets/particles.png');
+  background-size: 220px 220px; background-repeat: repeat;
+  opacity:0.95; filter: blur(6px) saturate(1.05); z-index: calc(var(--ui-z-cards) - 1); pointer-events:none;
+}
+.card.card-glow::before{
+  content:"";
+  position:absolute; inset:-8px; border-radius:24px; pointer-events:none;
+  background-image: url('/assets/glow-edge.png');
+  background-size: cover; background-position:center;
+  opacity:0.98; filter: blur(0.9px) saturate(1.05) contrast(1.02); mix-blend-mode: screen;
+  z-index: calc(var(--ui-z-cards) + 1);
+}
+
+/* кнопка + использует тот же glow-edge как окантовка (fallback - box-shadow) */
+.add-btn{ position:relative; z-index:calc(var(--ui-z-panel) + 10); }
+.add-btn::after{
+  content:"";
+  position:absolute; inset:-8px; border-radius:50%;
+  pointer-events:none;
+  background-image: url('/assets/glow-edge.png');
+  background-size: 220px 220px; background-position:center;
+  opacity:0.95; filter: blur(1px) saturate(1.05);
+  z-index: calc(var(--ui-z-panel) + 8);
+}
+
+/* mobile tweaks */
+@media (max-width:420px){
+  .gold-particles{ opacity:0.16; background-size: 320px; }
+  .card.card-glow::after{ width:200px; height:90px; bottom:-26px; filter: blur(5px); }
+  .card.card-glow::before{ inset:-6px; filter: blur(0.8px); }
+  .add-btn{ width:52px;height:52px;font-size:26px; }
+  .grid{ gap:14px; padding:18px; }
 }
 
 /* small helpers */
 .fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
-
-
-/* =========================
-   НИЖЕ — добавленные правила для ассетов (glow + particles)
-   вставляй ассеты в /assets/ с именами:
-   - glow-edge.png
-   - nav-glow.png
-   - particles.png
-   ========================= */
-
-/* Золотая пыль по экрану — включается через <div class="gold-particles"></div> в body (опционально) */
-.gold-particles{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background-image: url('/assets/particles.png');
-  background-repeat: repeat;
-  background-size: 420px;
-  opacity: 0.28; /* подбери по вкусу */
-  mix-blend-mode: screen;
-  z-index:2;
-}
-
-/* Убедимся, что карточке можно добавить внешний glow через класс .card-glow */
-.card.card-glow{
-  position:relative;
-  overflow:visible;
-  z-index:12;
-}
-
-/* дополнительный мягкий glow-полос под карточкой (используем particles) */
-.card.card-glow::after{
-  /* переопределяем dotted рамку: этот ::after используется для glow-частиц под карточкой */
-  content:"";
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:-32px;
-  width:260px;
-  height:120px;
-  border-radius:60px;
-  background-image: url('/assets/particles.png');
-  background-size: 220px 220px;
-  background-repeat: repeat;
-  opacity:0.95;
-  filter: blur(6px) saturate(1.05);
-  z-index:1;
-  pointer-events:none;
-}
-
-/* Заменим/усилим яркую тонкую кромку карточки (overlay image), используя ::before */
-.card.card-glow::before{
-  content:"";
-  position:absolute;
-  inset:-8px;
-  border-radius:24px;
-  pointer-events:none;
-  z-index:0;
-  background-image: url('/assets/glow-edge.png');
-  background-size: cover;
-  background-position: center;
-  opacity:0.98;
-  filter: blur(0.9px) saturate(1.05) contrast(1.02);
-  mix-blend-mode: screen;
-}
-
-/* Если нужен дополнительный мягкий ореол под картинкой */
-.card.card-glow .img-orb{
-  display:none;
-}
-
-/* Подсветка нижней панели через ассет (nav-glow) — переопределяем ::before/::after */
-.bottom-nav{
-  overflow:visible;
-  z-index:60;
-}
-
-/* Используем ::after для отображения полосы glow на панели */
-.bottom-nav::after{
-  /* оставляем внутреннюю тонкую обводку (см. выше) — теперь добавляем текстуру поверх */
-  content:"";
-  position:absolute;
-  left:8px; right:8px; top:6px; bottom:6px;
-  border-radius:14px;
-  pointer-events:none;
-  background-image: url('/assets/nav-glow.png');
-  background-size: cover;
-  background-position: center;
-  mix-blend-mode: screen;
-  opacity:0.9;
-  filter: blur(0.6px) contrast(1.03) saturate(1.03);
-  z-index: -1;
-}
-
-/* Кнопка + — тонкая кромка по ассету */
-.add-btn{
-  position:relative;
-  z-index:70;
-}
-.add-btn::after{
-  content:"";
-  position:absolute;
-  inset:-8px;
-  border-radius:50%;
-  pointer-events:none;
-  background-image: url('/assets/glow-edge.png');
-  background-size: 220px 220px;
-  background-position:center;
-  opacity:0.95;
-  filter: blur(1px) saturate(1.05);
-  z-index:-1;
-}
-
-/* Небольшие fallback-правки на случай, если ассеты не найдены */
-@supports (background-image: url('/assets/glow-edge.png')) {
-  /* ассеты поддерживаются, ничего дополнительно не делаем */
-}
-@media (max-width:420px){
-  .gold-particles{ opacity:0.18; background-size: 320px; }
-  .card.card-glow::after{ width:200px; height:90px; bottom:-26px; filter: blur(5px); }
-  .card.card-glow::before{ inset:-6px; filter: blur(0.8px); }
-  .add-btn{ width:52px;height:52px;font-size:26px; }
-}
-
-/* Конец файла */
