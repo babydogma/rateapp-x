@@ -1,16 +1,22 @@
-/* --- Настройки Supabase (оставь как есть) --- */
+/* main script (index.html) — содержит также CATEGORIES и логику */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* --- DOM --- */
+const CATEGORIES = [
+  { id: "Фильм", emoji: "🎬" },
+  { id: "Сериалы", emoji: "📺" },
+  { id: "Еда", emoji: "🍔" },
+  { id: "Семья", emoji: "👪" },
+  { id: "Разное", emoji: "🔖" }
+];
+
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
-const homeBtn = document.getElementById("homeBtn");
-const catsBtn = document.getElementById("catsBtn");
+const addBtn = document.getElementById("addBtn");
 
-/* --- утилиты --- */
+/* утиль: формат даты -> DD.MM.YYYY */
 function formatDateSimple(datestr){
   if(!datestr) return "";
   const d = new Date(datestr);
@@ -25,7 +31,13 @@ function getGlowColor(rating){
   return `hsl(${hue}, 80%, 55%)`;
 }
 
-/* --- Статистика из DOM --- */
+/* read query param */
+function getQueryParam(name){
+  const url = new URL(location.href);
+  return url.searchParams.get(name);
+}
+
+/* обновление статистики на основе DOM (без перезапроса) */
 function updateStatsFromDOM(){
   const cards = Array.from(grid.querySelectorAll(".card"));
   const count = cards.length;
@@ -42,14 +54,16 @@ function updateStatsFromDOM(){
   stats.textContent = `Средняя оценка: ${(sum/count).toFixed(1)} • Карточек: ${count}`;
 }
 
-/* --- Создать DOM карточку --- */
+/* строим DOM-карточку (вставляем <select class="category-select">) */
 function buildCardElement(card, index=0){
   const el = document.createElement("div");
   el.className = "card";
-  el.style.animationDelay = (index * 0.07) + "s";
   el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
 
   const createdAtRaw = card.created_at;
+
+  // category default
+  const categoryVal = card.category || "Разное";
 
   el.innerHTML = `
     <img src="${card.image_url || ""}">
@@ -57,10 +71,21 @@ function buildCardElement(card, index=0){
     <textarea placeholder="Описание">${card.text || ""}</textarea>
     <div class="rating">${card.rating || 0}/10</div>
     <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
+    <select class="category-select"></select>
     <div class="created">${formatDateSimple(createdAtRaw)}</div>
   `;
 
-  // удаление
+  // populate category select
+  const sel = el.querySelector(".category-select");
+  CATEGORIES.forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.id;
+    if(c.id === categoryVal) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  // delete handler (same as before)
   el.querySelector(".delete-btn").onclick = async () => {
     if(!createdAtRaw){
       alert("Ошибка удаления: uuid/id не найден для этой карточки");
@@ -78,34 +103,39 @@ function buildCardElement(card, index=0){
       return;
     }
 
+    // плавно удаляем из DOM
     el.classList.add("fade-out");
-    setTimeout(() => {
+    setTimeout(()=> {
       if(el.parentNode) el.parentNode.removeChild(el);
       updateStatsFromDOM();
     }, 260);
   };
 
-  // правка текста — debounce
-  el.querySelector("textarea").oninput = debounce(async (e) => {
+  // textarea oninput debounce -> update text
+  el.querySelector("textarea").oninput = debounce(async (e)=> {
     const txt = e.target.value;
+    if(!createdAtRaw) return;
     await supabaseClient
       .from("cards")
       .update({ text: txt })
       .eq("created_at", createdAtRaw);
   }, 700);
 
-  // слайдер (оптимистичный update)
+  // slider change -> optimistic update + DB update, no full reload
   const slider = el.querySelector(".slider");
   const ratingEl = el.querySelector(".rating");
-
-  slider.addEventListener("change", async () => {
+  slider.addEventListener("change", async ()=>{
     const prev = Number(ratingEl.textContent.split("/")[0]) || 0;
     const newRating = Number(slider.value);
 
-    // оптимистичный UI
     ratingEl.textContent = newRating + "/10";
     el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
     updateStatsFromDOM();
+
+    if(!createdAtRaw){
+      alert("Ошибка обновления рейтинга: uuid/id не найден");
+      return;
+    }
 
     const { error: updateError } = await supabaseClient
       .from("cards")
@@ -122,15 +152,50 @@ function buildCardElement(card, index=0){
     }
   });
 
+  // category select change -> optimistic + db update
+  sel.addEventListener("change", async () => {
+    const prev = card.category || "Разное";
+    const newCat = sel.value;
+
+    // optimistic visually nothing else needed except stats maybe
+    // update DB
+    if(!createdAtRaw) {
+      alert("Ошибка обновления категории: uuid/id не найден");
+      sel.value = prev;
+      return;
+    }
+
+    const { error: upd } = await supabaseClient
+      .from("cards")
+      .update({ category: newCat })
+      .eq("created_at", createdAtRaw);
+
+    if(upd){
+      console.error(upd);
+      sel.value = prev;
+      alert("Ошибка обновления категории: " + (upd.message || upd));
+      return;
+    }
+    // update local card.category for future prev uses
+    card.category = newCat;
+  });
+
   return el;
 }
 
-/* --- Загрузка карточек --- */
+/* загрузка карточек (с учётом фильтра ?category=) */
 async function loadCards(){
-  const { data, error } = await supabaseClient
+  const categoryFilter = getQueryParam('category');
+  let query = supabaseClient
     .from("cards")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if(categoryFilter){
+    query = query.eq('category', categoryFilter);
+  }
+
+  const { data, error } = await query;
 
   if(error){
     console.error(error);
@@ -138,23 +203,13 @@ async function loadCards(){
     return;
   }
 
-  // фильтр по категории, если параметр в URL есть
-  const urlParams = new URLSearchParams(window.location.search);
-  const catParam = urlParams.get('cat');
-  let cards = data || [];
-
-  if(catParam){
-    const wanted = catParam.toString().toLowerCase();
-    cards = cards.filter(c => ((c.category || '') + '').toLowerCase() === wanted);
-  }
-
   grid.innerHTML = "";
-  if(!cards || cards.length === 0){
+  if(!data || data.length === 0){
     updateStatsFromDOM();
     return;
   }
 
-  cards.forEach((card, i) => {
+  data.forEach((card,i)=>{
     const el = buildCardElement(card, i);
     grid.appendChild(el);
   });
@@ -162,7 +217,7 @@ async function loadCards(){
   updateStatsFromDOM();
 }
 
-/* --- Загрузка фото и вставка записи --- */
+/* загрузка фото -> storage -> insert + prepend в DOM (default category Разное) */
 photoInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if(!file) return;
@@ -193,7 +248,7 @@ photoInput.addEventListener("change", async (e) => {
       image_url: publicUrl,
       text: "",
       rating: 0,
-      category: "" /* оставляем пустой, можно обновить позже */
+      category: "Разное"
     }])
     .select()
     .limit(1);
@@ -211,33 +266,37 @@ photoInput.addEventListener("change", async (e) => {
   photoInput.value = "";
 });
 
-/* debounce */
+/* add button opens file dialog */
+addBtn.addEventListener("click", ()=> photoInput.click());
+
+/* nav emoji buttons for quick switch */
+document.querySelectorAll('.nav-emoji').forEach(btn=>{
+  btn.onclick = () => {
+    const page = btn.dataset.page;
+    if(page === 'home') location.href = '/index.html';
+    if(page === 'categories') location.href = '/categories.html';
+  };
+});
+
+/* helper debounce */
 function debounce(fn, ms){
   let t;
   return (...a) => {
     clearTimeout(t);
-    t = setTimeout(() => fn(...a), ms);
+    t = setTimeout(()=> fn(...a), ms);
   };
 }
 
-/* --- NAV (простая навигация между страницами) --- */
-homeBtn.addEventListener("click", () => {
-  homeBtn.classList.add("nav-active");
-  catsBtn.classList.remove("nav-active");
-  // переключаем на главную (убираем возможный фильтр в URL)
-  window.location.href = '/';
-});
-catsBtn.addEventListener("click", () => {
-  catsBtn.classList.add("nav-active");
-  homeBtn.classList.remove("nav-active");
-  window.location.href = '/categories.html';
-});
-
-/* регистрация service worker */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js').catch(()=>{/* silent */});
+/* if page opened with ?openUpload=1 we open file dialog */
+if(getQueryParam('openUpload') === '1'){
+  // small delay to ensure DOM ready
+  setTimeout(()=> { photoInput.click(); }, 300);
 }
 
-/* старт */
-homeBtn.classList.add("nav-active");
+/* service worker registration (silent failure ok) */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js').catch(()=>{/* ignore */});
+}
+
+/* старт загрузки */
 loadCards();
