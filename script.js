@@ -1,22 +1,26 @@
-/* main script (index.html) — содержит также CATEGORIES и логику */
+/* --- Supabase setup (оставь ключи как есть) --- */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* DOM */
+const grid = document.getElementById('grid');
+const stats = document.getElementById('stats');
+const photoInput = document.getElementById('photoInput');
+const addBtn = document.getElementById('addBtn');
+const homeBtn = document.getElementById('homeBtn');
+const catsBtn = document.getElementById('catsBtn');
+
+/* categories list (id matches DB friendly values) */
 const CATEGORIES = [
-  { id: "Фильм", emoji: "🎬" },
-  { id: "Сериалы", emoji: "📺" },
-  { id: "Еда", emoji: "🍔" },
-  { id: "Семья", emoji: "👪" },
-  { id: "Разное", emoji: "🔖" }
+  { id: 'film', label: 'Фильм', emoji: '🎬' },
+  { id: 'series', label: 'Сериалы', emoji: '📺' },
+  { id: 'food', label: 'Еда', emoji: '🍔' },
+  { id: 'family', label: 'Семья', emoji: '👪' },
+  { id: 'other', label: 'Разное', emoji: '🏷️' }
 ];
 
-const grid = document.getElementById("grid");
-const stats = document.getElementById("stats");
-const photoInput = document.getElementById("photoInput");
-const addBtn = document.getElementById("addBtn");
-
-/* утиль: формат даты -> DD.MM.YYYY */
+/* helpers */
 function formatDateSimple(datestr){
   if(!datestr) return "";
   const d = new Date(datestr);
@@ -30,273 +34,125 @@ function getGlowColor(rating){
   const hue = 10 + (rating * 4);
   return `hsl(${hue}, 80%, 55%)`;
 }
+function debounce(fn,ms=600){let t; return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);}}
 
-/* read query param */
-function getQueryParam(name){
-  const url = new URL(location.href);
-  return url.searchParams.get(name);
-}
-
-/* обновление статистики на основе DOM (без перезапроса) */
-function updateStatsFromDOM(){
-  const cards = Array.from(grid.querySelectorAll(".card"));
-  const count = cards.length;
-  if(count === 0){
-    stats.textContent = "Пока нет карточек";
-    return;
-  }
-  let sum = 0;
-  cards.forEach(c => {
-    const ratingText = c.querySelector(".rating")?.textContent || "0/10";
-    const num = Number(ratingText.split("/")[0]) || 0;
-    sum += num;
-  });
-  stats.textContent = `Средняя оценка: ${(sum/count).toFixed(1)} • Карточек: ${count}`;
-}
-
-/* строим DOM-карточку (вставляем <select class="category-select">) */
-function buildCardElement(card, index=0){
-  const el = document.createElement("div");
-  el.className = "card";
-  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
+/* build a card element */
+function buildCardElement(card, idx=0){
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.style.boxShadow = `0 28px 60px -30px ${getGlowColor(card.rating||0)}`;
 
   const createdAtRaw = card.created_at;
 
-  // category default
-  const categoryVal = card.category || "Разное";
-
   el.innerHTML = `
-    <img src="${card.image_url || ""}">
-    <div class="delete-btn">✕</div>
-    <textarea placeholder="Описание">${card.text || ""}</textarea>
+    <button class="delete-btn" title="Удалить">✕</button>
+    <img src="${card.image_url||''}" alt="">
+    <div class="title">${card.text || 'Описание'}</div>
     <div class="rating">${card.rating || 0}/10</div>
-    <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
-    <select class="category-select"></select>
+    <input type="range" min="0" max="10" value="${card.rating||0}" class="slider">
+    <div class="select-wrap">
+      <select class="select">
+        ${CATEGORIES.map(c=>`<option value="${c.id}" ${c.id===card.category?'selected':''}>${c.label}</option>`).join('')}
+      </select>
+    </div>
     <div class="created">${formatDateSimple(createdAtRaw)}</div>
   `;
 
-  // populate category select
-  const sel = el.querySelector(".category-select");
-  CATEGORIES.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.id;
-    if(c.id === categoryVal) opt.selected = true;
-    sel.appendChild(opt);
-  });
-
-  // delete handler (same as before)
-  el.querySelector(".delete-btn").onclick = async () => {
-    if(!createdAtRaw){
-      alert("Ошибка удаления: uuid/id не найден для этой карточки");
-      return;
-    }
-
-    const { error: delError } = await supabaseClient
-      .from("cards")
-      .delete()
-      .eq("created_at", createdAtRaw);
-
-    if(delError){
-      console.error(delError);
-      alert("Ошибка удаления: " + (delError.message || delError));
-      return;
-    }
-
-    // плавно удаляем из DOM
-    el.classList.add("fade-out");
-    setTimeout(()=> {
-      if(el.parentNode) el.parentNode.removeChild(el);
-      updateStatsFromDOM();
-    }, 260);
+  // delete
+  el.querySelector('.delete-btn').onclick = async () => {
+    if(!createdAtRaw){ alert('Ошибка удаления: ключ не найден'); return; }
+    const { error } = await supabase.from('cards').delete().eq('created_at', createdAtRaw);
+    if(error){ console.error(error); alert('Ошибка удаления: '+(error.message||error)); return; }
+    el.remove();
+    updateStatsFromDOM();
   };
 
-  // textarea oninput debounce -> update text
-  el.querySelector("textarea").oninput = debounce(async (e)=> {
-    const txt = e.target.value;
-    if(!createdAtRaw) return;
-    await supabaseClient
-      .from("cards")
-      .update({ text: txt })
-      .eq("created_at", createdAtRaw);
-  }, 700);
-
-  // slider change -> optimistic update + DB update, no full reload
-  const slider = el.querySelector(".slider");
-  const ratingEl = el.querySelector(".rating");
-  slider.addEventListener("change", async ()=>{
-    const prev = Number(ratingEl.textContent.split("/")[0]) || 0;
-    const newRating = Number(slider.value);
-
-    ratingEl.textContent = newRating + "/10";
-    el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
+  // slider change — optimistic update; rollback on error
+  const slider = el.querySelector('.slider');
+  const ratingEl = el.querySelector('.rating');
+  slider.addEventListener('input', () => {
+    ratingEl.textContent = slider.value + '/10';
+    el.style.boxShadow = `0 28px 60px -30px ${getGlowColor(Number(slider.value))}`;
     updateStatsFromDOM();
-
-    if(!createdAtRaw){
-      alert("Ошибка обновления рейтинга: uuid/id не найден");
-      return;
-    }
-
-    const { error: updateError } = await supabaseClient
-      .from("cards")
-      .update({ rating: newRating })
-      .eq("created_at", createdAtRaw);
-
-    if(updateError){
-      console.error(updateError);
-      ratingEl.textContent = prev + "/10";
-      el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(prev)}`;
-      updateStatsFromDOM();
-      alert("Ошибка обновления рейтинга: " + (updateError.message || updateError));
-      return;
-    }
+  });
+  slider.addEventListener('change', async () => {
+    const newRating = Number(slider.value);
+    const { error } = await supabase.from('cards').update({ rating: newRating }).eq('created_at', createdAtRaw);
+    if(error){ console.error(error); alert('Ошибка: '+(error.message||error)); await loadCards(); }
   });
 
-  // category select change -> optimistic + db update
-  sel.addEventListener("change", async () => {
-    const prev = card.category || "Разное";
-    const newCat = sel.value;
-
-    // optimistic visually nothing else needed except stats maybe
-    // update DB
-    if(!createdAtRaw) {
-      alert("Ошибка обновления категории: uuid/id не найден");
-      sel.value = prev;
-      return;
-    }
-
-    const { error: upd } = await supabaseClient
-      .from("cards")
-      .update({ category: newCat })
-      .eq("created_at", createdAtRaw);
-
-    if(upd){
-      console.error(upd);
-      sel.value = prev;
-      alert("Ошибка обновления категории: " + (upd.message || upd));
-      return;
-    }
-    // update local card.category for future prev uses
-    card.category = newCat;
+  // category change
+  el.querySelector('.select').addEventListener('change', async (e) => {
+    const newCat = e.target.value;
+    const { error } = await supabase.from('cards').update({ category: newCat }).eq('created_at', createdAtRaw);
+    if(error){ console.error(error); alert('Ошибка обновления категории'); }
   });
 
   return el;
 }
 
-/* загрузка карточек (с учётом фильтра ?category=) */
+/* update stats by DOM (fast) */
+function updateStatsFromDOM(){
+  const cards = Array.from(document.querySelectorAll('.card'));
+  if(cards.length===0){ stats.textContent = 'Пока нет карточек'; return; }
+  let sum=0;
+  cards.forEach(c=>{
+    const v = Number((c.querySelector('.rating')?.textContent||'0/10').split('/')[0])||0;
+    sum+=v;
+  });
+  stats.textContent = `Средняя оценка: ${(sum/cards.length).toFixed(1)} • Карточек: ${cards.length}`;
+}
+
+/* load cards (optionally filtered by category from URL param) */
 async function loadCards(){
-  const categoryFilter = getQueryParam('category');
-  let query = supabaseClient
-    .from("cards")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const url = new URL(location.href);
+  const categoryFilter = url.searchParams.get('category');
 
-  if(categoryFilter){
-    query = query.eq('category', categoryFilter);
-  }
+  const { data, error } = await supabase.from('cards')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  const { data, error } = await query;
+  if(error){ console.error(error); stats.textContent='Ошибка загрузки'; return; }
+  grid.innerHTML = '';
+  const arr = Array.isArray(data)?data:[];
 
-  if(error){
-    console.error(error);
-    stats.textContent = "Ошибка загрузки";
-    return;
-  }
+  const filtered = categoryFilter ? arr.filter(d=>d.category===categoryFilter) : arr;
 
-  grid.innerHTML = "";
-  if(!data || data.length === 0){
-    updateStatsFromDOM();
-    return;
-  }
-
-  data.forEach((card,i)=>{
-    const el = buildCardElement(card, i);
+  filtered.forEach((card,i)=>{
+    const el = buildCardElement(card,i);
     grid.appendChild(el);
   });
 
   updateStatsFromDOM();
 }
 
-/* загрузка фото -> storage -> insert + prepend в DOM (default category Разное) */
-photoInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
+/* upload flow */
+addBtn && addBtn.addEventListener('click', ()=>photoInput && photoInput.click());
+homeBtn && (homeBtn.onclick = ()=>location.href = '/');
+catsBtn && (catsBtn.onclick = ()=>location.href = '/categories.html');
+
+photoInput && photoInput.addEventListener('change', async (e)=>{
+  const file = e.target.files && e.target.files[0];
   if(!file) return;
-
-  const fileName = Date.now() + "-" + file.name;
-
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("photos")
-    .upload(fileName, file);
-
-  if(uploadError){
-    console.error(uploadError);
-    alert("Ошибка загрузки");
-    return;
-  }
-
-  const { data } = supabaseClient
-    .storage
-    .from("photos")
-    .getPublicUrl(fileName);
-
-  const publicUrl = data.publicUrl;
-
-  const { data: inserted, error: insertError } = await supabaseClient
-    .from("cards")
-    .insert([{
-      image_url: publicUrl,
-      text: "",
-      rating: 0,
-      category: "Разное"
-    }])
+  const fileName = Date.now() + '-' + file.name.replace(/\s+/g,'_');
+  const { error: uploadError } = await supabase.storage.from('photos').upload(fileName, file);
+  if(uploadError){ console.error(uploadError); alert('Ошибка загрузки'); return; }
+  const { data } = supabase.storage.from('photos').getPublicUrl(fileName);
+  const publicUrl = data?.publicUrl || '';
+  const { data: inserted, error: insertError } = await supabase.from('cards')
+    .insert([{ image_url: publicUrl, text: '', rating: 0, category: 'other' }])
     .select()
     .limit(1);
-
-  if(insertError){
-    console.error(insertError);
-    alert("Ошибка записи в БД");
-    return;
-  }
-
-  const newCard = Array.isArray(inserted) ? inserted[0] : inserted;
+  if(insertError){ console.error(insertError); alert('Ошибка записи'); return; }
+  const newCard = Array.isArray(inserted)?inserted[0]:inserted;
   const el = buildCardElement(newCard, 0);
   grid.insertBefore(el, grid.firstChild);
   updateStatsFromDOM();
-  photoInput.value = "";
+  photoInput.value = '';
 });
 
-/* add button opens file dialog */
-addBtn.addEventListener("click", ()=> photoInput.click());
+/* register service worker silently */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/service-worker.js').catch(()=>{}); }
 
-/* nav emoji buttons for quick switch */
-document.querySelectorAll('.nav-emoji').forEach(btn=>{
-  btn.onclick = () => {
-    const page = btn.dataset.page;
-    if(page === 'home') location.href = '/index.html';
-    if(page === 'categories') location.href = '/categories.html';
-  };
-});
-
-/* helper debounce */
-function debounce(fn, ms){
-  let t;
-  return (...a) => {
-    clearTimeout(t);
-    t = setTimeout(()=> fn(...a), ms);
-  };
-}
-
-/* if page opened with ?openUpload=1 we open file dialog */
-if(getQueryParam('openUpload') === '1'){
-  // small delay to ensure DOM ready
-  setTimeout(()=> { photoInput.click(); }, 300);
-}
-
-/* service worker registration (silent failure ok) */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js').catch(()=>{/* ignore */});
-}
-
-/* старт загрузки */
+/* start */
 loadCards();
