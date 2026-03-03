@@ -1,272 +1,236 @@
-/* style.css — исправленный, заменить файл целиком */
+/* style.css — версия A (чистый премиум, без грязного glow) */
 
-/* базовые переменные и reset */
 :root{
   --gold: #d4af37;
-  --gold-strong: rgba(212,175,55,1);
-  --gold-soft: rgba(212,175,55,0.18);
-  --bg-dark-1: #0e0e0f;
-  --bg-dark-2: #161618;
-  --card-bg: #111213;
+  --bg-black: #050505;
+  --bg-panel: rgba(12,12,14,0.92);
+  --card-bg-1: #121213;
+  --card-bg-2: #0e0e0f;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 
-/* фон и тонкий зернистый шум */
-html{
+/* ---------------------------
+   ФОН — ЧИСТЫЙ ЧЁРНЫЙ
+--------------------------- */
+
+html, body{
   height:100%;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.06), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.03), transparent 50%),
-    linear-gradient(160deg,var(--bg-dark-1), var(--bg-dark-2) 60%, #0c0c0d);
-  background-repeat:no-repeat;
-  background-attachment:fixed;
+  background: var(--bg-black);
 }
 
-/* body + легкий глиттер */
 body{
   min-height:100vh;
   color:#e7e3dc;
-  background:transparent;
   padding-top: env(safe-area-inset-top);
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
-  position:relative;
-}
-body::after{
-  content:"";
-  pointer-events:none;
-  position:fixed;
-  left:0;top:0;right:0;bottom:0;
-  background-image:
-    radial-gradient(rgba(255,215,150,0.03) 0.5px, transparent 0.5px),
-    radial-gradient(rgba(255,215,150,0.01) 0.5px, transparent 0.5px);
-  background-size: 6px 6px, 18px 18px;
-  mix-blend-mode: screen;
-  opacity:0.06;
-  transform:translateZ(0);
-  z-index:1;
 }
 
-/* заголовки и базовые блоки */
-.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
-.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
+/* ---------------------------
+   HEADER
+--------------------------- */
 
-/* layout */
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
+.header{
+  padding:30px 20px 10px;
+  text-align:center;
+  font-size:30px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:var(--gold);
+}
 
-/* ============================
-   Карточки — фон, внутренняя обводка, золотой glow
-   ============================ */
+.stats{
+  text-align:center;
+  font-size:15px;
+  margin-bottom:24px;
+  color:#bda66b;
+}
+
+.divider{
+  height:1px;
+  margin:0 40px 30px;
+  background:linear-gradient(
+    to right,
+    transparent,
+    rgba(212,175,55,0.35),
+    transparent
+  );
+}
+
+/* ---------------------------
+   GRID
+--------------------------- */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  padding:20px;
+  padding-bottom:calc(140px + env(safe-area-inset-bottom));
+}
+
+/* ---------------------------
+   КАРТОЧКИ — БЕЗ ЗОЛОТОГО ТУМАНА
+--------------------------- */
+
 .card{
-  background: linear-gradient(160deg, #141415, #0f0f10);
+  background:linear-gradient(160deg,var(--card-bg-1),var(--card-bg-2));
   border-radius:18px;
   padding:14px;
   position:relative;
-  overflow:visible;
-  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-  z-index:10;
+  transition:transform .2s ease;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.02),
-    0 16px 40px rgba(0,0,0,0.6);
+    0 14px 40px rgba(0,0,0,0.7);
 }
 
-/* внешний мягкий золотой glow */
-.card::before{
-  content:"";
-  position:absolute;
-  left:-10px; right:-10px; top:-10px; bottom:-10px;
-  border-radius:24px;
-  pointer-events:none;
-  background:
-    radial-gradient(ellipse at top center, rgba(212,175,55,0.12), transparent 25%),
-    linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
-  box-shadow:
-  0 15px 50px rgba(212,175,55,0.08),
-  0 4px 16px rgba(212,175,55,0.05);
-  filter:blur(0.8px);
-  opacity:1;
-  mix-blend-mode: screen;
-  z-index:-1;
+.card:active{
+  transform:translateY(-3px);
 }
 
-/* содержимое карточки */
-.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
-/* DELETE: чистый крестик (без круга), но с удобной зоной клика */
-.delete-btn{
-  position: absolute;
-  top: 8px;               /* поставь близко к углу карточки */
-  right: 8px;
-
-  /* не делаем большого круга — размер по содержимому */
-  width: auto;
-  height: auto;
-  padding: 6px 8px;       /* зона клика */
-  border-radius: 6px;
-
-  /* чистый визуал: прозрачный фон, без тени и обводки */
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-
-  /* крестик (цвет золотой) */
-  color: var(--gold);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  text-decoration: none;
-
-  /* смещаем так, чтобы крестик стоял на кончике угла */
-  transform: translate(35%, -50%);
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  z-index: 60;
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-}
-
-/* на мобильных чуть уменьшим */
-@media (max-width:420px){
-  .delete-btn{
-    top:7px;
-    right:7px;
-    padding:5px 7px;
-    font-size:16px;
-  }
-}
-textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
-.rating{margin-top:8px;font-weight:600;color:var(--gold);}
-.created{margin-top:10px;color:#c6b27a;font-size:13px;}
-
-/* category-select */
-.category-select{
+.card img{
   width:100%;
-  margin-top:12px;
-  background:linear-gradient(180deg,#141415,#0f0f10);
-  border:1px solid rgba(212,175,55,0.06);
-  color:#e7e3dc;
-  padding:12px;
+  height:150px;
+  object-fit:cover;
   border-radius:12px;
-  font-size:15px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
 
-/* hover/active карточки */
-.card:active{ transform:translateY(-4px); }
+/* delete — минимал */
+
+.delete-btn{
+  position:absolute;
+  top:8px;
+  right:8px;
+  padding:6px 8px;
+  background:transparent;
+  border:none;
+  color:var(--gold);
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* inputs */
+
+textarea{
+  width:100%;
+  margin-top:10px;
+  background:#111;
+  border:1px solid rgba(212,175,55,0.08);
+  border-radius:12px;
+  padding:8px;
+  color:#e7e3dc;
+  resize:none;
+  font-size:13px;
+}
+
+.rating{
+  margin-top:8px;
+  font-weight:600;
+  color:var(--gold);
+}
+
+.created{
+  margin-top:10px;
+  color:#bda66b;
+  font-size:13px;
+}
+
+/* ---------------------------
+   NAV PANEL — ЧЁРНОЕ СТЕКЛО
+--------------------------- */
 
 .bottom-nav{
   position:fixed;
   left:22px;
   right:22px;
   bottom:22px;
-  height:84px;
+  height:82px;
 
-  border-radius:34px;
+  border-radius:32px;
 
   display:flex;
   align-items:center;
   justify-content:space-between;
   padding:0 32px;
 
-  background: rgba(10,10,12,0.82);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
+  background:var(--bg-panel);
 
-  border:1px solid rgba(255,215,0,0.18);
+  backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:blur(28px);
+
+  border:1px solid rgba(212,175,55,0.14);
 
   box-shadow:
-  0 25px 70px rgba(0,0,0,0.9),
-  0 0 30px rgba(212,175,55,0.08);
+    0 25px 70px rgba(0,0,0,0.95);
 
   z-index:60;
 }
+
+/* тонкая золотая линия сверху */
 
 .bottom-nav::before{
   content:"";
   position:absolute;
   top:0;
-  left:30px;
-  right:30px;
+  left:40px;
+  right:40px;
   height:1px;
-
-  background: linear-gradient(
+  background:linear-gradient(
     90deg,
     transparent,
-    rgba(212,175,55,0.5),
+    rgba(212,175,55,0.45),
     transparent
   );
-
-  opacity:0.6;
+  opacity:.7;
 }
 
 /* иконки */
+
 .nav-emoji{
   font-size:26px;
   background:none;
   border:0;
-  cursor:pointer;
-
   width:58px;
   height:58px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   border-radius:14px;
-
-  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.7));
+  cursor:pointer;
 }
 
-/* ============================
-   ЦЕНТРАЛЬНАЯ КНОПКА +
-   ============================ */
+/* ---------------------------
+   КНОПКА +
+   ЕДИНСТВЕННЫЙ СВЕТЯЩИЙСЯ ОБЪЕКТ
+--------------------------- */
 
 .add-btn{
   position:absolute;
   left:50%;
-  top:-28px;
+  top:-30px;
   transform:translateX(-50%);
 
-  width:66px;
-  height:66px;
+  width:68px;
+  height:68px;
   border-radius:50%;
   border:none;
   cursor:pointer;
 
   background:
-    radial-gradient(circle at 50% 40%, #f5d97a 0%, #d4af37 75%);
+    radial-gradient(circle at 50% 35%, #f6e08a, #d4af37 75%);
 
   box-shadow:
-    0 10px 25px rgba(0,0,0,0.85),
-    0 0 18px rgba(212,175,55,0.35),
-    inset 0 2px 6px rgba(255,255,255,0.25);
+    0 12px 30px rgba(0,0,0,0.9),
+    0 0 22px rgba(212,175,55,0.35);
 
   z-index:70;
-}
-
-/* glow-edge png теперь мягче */
-.add-btn::before{
-  content:"";
-  position:absolute;
-  inset:-14px;
-  border-radius:50%;
-
-  background-image:url('/assets/glow-edge.png');
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-
-  opacity:0.8;
-  mix-blend-mode:screen;
-
-  pointer-events:none;
-  z-index:-1;
 }
 
 .add-btn::after{
@@ -280,56 +244,15 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
   color:#1b1b1b;
 }
 
-/* адаптив */
+/* ---------------------------
+   RESPONSIVE
+--------------------------- */
+
 @media (max-width:420px){
-  .bottom-nav{ height:76px; bottom:14px; }
+  .bottom-nav{ height:76px; bottom:16px; }
   .add-btn{ width:64px; height:64px; top:-28px; }
 }
 
-/* categories layout */
-.categories-grid{
-  padding:18px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  position:relative; z-index:10;
-}
-.category-block{
-  display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
-  border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;
-  border:1px solid rgba(212,175,55,0.06);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
-.cat-emoji{font-size:28px;}
-.cat-title{font-weight:700; color: #f0d999;}
-.back-to-main{display:block;margin:28px 20px;font-size:18px;color:var(--gold);text-decoration:none;}
-
-/* slider */
-.slider{
-  width:100%;
-  margin-top:8px;
-  appearance:none;
-  height:6px;
-  border-radius:6px;
-  background:linear-gradient(to right,#d4af37,#b8860b);
-  box-shadow:0 0 12px rgba(212,175,55,0.4);
-}
-.slider::-webkit-slider-thumb{
-  appearance:none;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:radial-gradient(circle,#fff,#d4af37);
-  box-shadow:
-    0 0 12px rgba(212,175,55,0.8),
-    0 0 25px rgba(212,175,55,0.6);
-}
-
-/* responsive */
 @media (min-width:900px){
   .grid{grid-template-columns:repeat(3,1fr);}
-  .categories-grid{grid-template-columns:repeat(4,1fr);}
 }
-
-/* helpers */
-.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
