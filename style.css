@@ -29,17 +29,37 @@ body {
 .lux-card-wrapper::before {
   content: "";
   position: absolute;
-  inset: -2px;
-  border-radius: 34px;
+  inset: -3px;
+  border-radius: 36px;
   background: linear-gradient(
-    145deg,
-    #ffcc66,
+    135deg,
+    #ffdd88,
     #ff9900,
     #ffcc66
   );
   z-index: 0;
-  filter: blur(12px);
-  opacity: .8;
+  filter: blur(18px);
+  opacity: .9;
+}
+
+.lux-card-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    #ffdd88,
+    #ff9900,
+    #ffcc66
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 0;
 }
 
 /* ---------- CARD BODY ---------- */
