@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>RateApp X</title>
+
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e0e0f" />
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="header">RateApp X</div>
+<div class="stats" id="stats">Загрузка...</div>
+<div class="divider"></div>
+<div class="grid" id="grid"></div>
+
+<label class="add-btn">+
+  <input id="photoInput" type="file" accept="image/*">
+</label>
+
+<!-- Нижняя панель -->
+<div class="bottom-nav">
+  <a href="index.html" class="active">Главная</a>
+  <a href="categories.html">Категории</a>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
