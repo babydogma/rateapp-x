@@ -1,44 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>RateApp X</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>RateApp X</title>
 
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0e0e0f" />
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e0e0f" />
 
-  <link rel="stylesheet" href="/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="/script.js" defer></script>
+<!-- внешний CSS -->
+<link rel="stylesheet" href="/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <header class="top">
-    <div class="title">RateApp X</div>
-    <div id="stats" class="stats">Загрузка...</div>
-    <div class="divider"></div>
-  </header>
 
-  <main>
-    <section id="grid" class="grid"></section>
-  </main>
+<div class="header">RateApp X</div>
+<div class="stats" id="stats">Загрузка...</div>
+<div class="divider"></div>
+<div class="grid" id="grid"></div>
 
-  <!-- bottom navigation with central add -->
-  <nav class="bottom-nav" role="navigation" aria-label="Navigation">
-    <button id="nav-home" class="nav-btn" title="Главная">🏠</button>
+<!-- скрытый input для загрузки фото -->
+<input id="photoInput" type="file" accept="image/*" style="display:none;">
 
-    <label class="add-btn" title="Добавить">
-      <input id="photoInput" type="file" accept="image/*" hidden>
-      <span class="add-inner">＋</span>
-    </label>
+<!-- нижняя панель (с кнопкой + внутри) -->
+<nav class="bottom-nav" role="navigation" aria-label="Навигация">
+  <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
 
-    <button id="nav-cats" class="nav-btn" title="Категории">📂</button>
-  </nav>
+  <button id="addBtn" class="add-btn" title="Добавить фото">+</button>
 
-  <!-- service worker registration will be done in script.js -->
+  <button class="nav-emoji" data-page="categories" title="Категории">📂</button>
+</nav>
+
+<!-- основной скрипт -->
+<script src="/script.js"></script>
 </body>
 </html>
