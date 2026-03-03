@@ -253,3 +253,142 @@ button:focus, .nav-emoji:focus, .add-btn:focus, .category-block:focus, .card .de
   outline: 3px solid rgba(212,175,55,0.14);
   outline-offset: 3px;
 }
+
+/* ==========================
+   GOLD EDGE EFFECT (cards, nav, add button)
+   Insert at end of style.css
+   ========================== */
+
+/* helper gold color */
+:root{
+  --gold-strong: rgba(212,175,55,1);
+  --gold-mid: rgba(212,175,55,0.9);
+  --gold-soft: rgba(212,175,55,0.18);
+}
+
+/* make sure card is above its glow pseudo-element */
+.card{
+  position: relative; /* already is, but reinforce */
+  z-index: 1;
+  overflow: visible; /* allow glow outside */
+  border: 1px solid rgba(212,175,55,0.06); /* faint inner border for structure */
+  background-clip: padding-box;
+}
+
+/* OUTER GLow: thin bright rim + soft halo */
+.card::before{
+  content: "";
+  position: absolute;
+  inset: -6px; /* how far glow extends */
+  border-radius: calc(18px + 6px); /* card radius + offset */
+  background: linear-gradient(180deg, rgba(255,214,129,0.03), rgba(255,200,90,0.08));
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(8px);
+  mix-blend-mode: screen;
+  opacity: 1;
+}
+
+/* SHARP GOLD RIM (thin) */
+.card::after{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(18px + 1px);
+  background:
+    linear-gradient(90deg, rgba(255,215,120,0.0), rgba(255,215,120,0.95), rgba(255,215,120,0.0));
+  pointer-events: none;
+  z-index: 2;
+  filter: blur(1px);
+  opacity: 0.95;
+}
+
+/* ensure contents sit above rim */
+.card > * { position: relative; z-index: 3; }
+
+/* bottom shadow glow under card (to emulate light reflection) */
+.card[data-has-glow="true"]{
+  box-shadow: 0 40px 80px rgba(212,140,20,0.12), 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* NAV (bottom panel) gold edge */
+.bottom-nav{
+  position: fixed; /* already set, re-declare visual layers */
+  z-index: 55;
+  overflow: visible;
+}
+
+/* outer soft halo for nav */
+.bottom-nav::before{
+  content: "";
+  position: absolute;
+  left: -8px; right: -8px; top: -8px; bottom: -8px;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.02) 30%, transparent 60%);
+  filter: blur(10px);
+  pointer-events:none;
+  z-index: -1;
+}
+
+/* subtle inner golden rim for nav */
+.bottom-nav::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events:none;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(255,215,120,0.03), rgba(255,200,90,0.05));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), inset 0 0 0 1px rgba(212,175,55,0.06);
+}
+
+/* add-button: halo + inner gold ring */
+.add-btn{
+  position: relative;
+  z-index: 10;
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow:
+    0 12px 30px rgba(212,175,55,0.18),
+    inset 0 0 0 2px rgba(212,175,55,0.12);
+}
+
+/* ring around the + (thin bright rim) */
+.add-btn::before{
+  content:"";
+  position:absolute;
+  inset:-6px;
+  border-radius:50%;
+  background: radial-gradient(circle at 50% 40%, rgba(255,215,120,0.65), rgba(212,175,55,0.06) 40%, transparent 60%);
+  filter: blur(6px);
+  pointer-events:none;
+  z-index: -1;
+}
+
+/* slightly shrink shadow on press */
+.add-btn:active{ transform: translateY(-8%) scale(.99); box-shadow: 0 8px 18px rgba(212,175,55,0.14); }
+
+/* tweak slider thumb glow */
+.slider::-webkit-slider-thumb{
+  box-shadow: 0 6px 18px rgba(212,175,55,0.22);
+  border: 3px solid rgba(212,175,55,0.08);
+}
+
+/* small performant grain overlay to emulate sparkle (optional):
+   If you have an asset 'gold-grain.png' put it in /assets and uncomment background-image */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.20;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.02), transparent 8%),
+    radial-gradient(circle at 80% 90%, rgba(255,205,100,0.01), transparent 12%);
+  filter: blur(2px);
+}
+
+/* optional: slightly intensify glow for currently hovered/active card */
+.card:hover::before{ filter: blur(9px); opacity:1; }
+.card:hover::after{ filter: blur(1.2px); opacity:1; }
