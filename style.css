@@ -1,8 +1,6 @@
-/* style.css */
+/* --- БАЗА --- */
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-
-html{
-  height:100%;
+html{height:100%;
   background:
     radial-gradient(circle at 20% 10%, rgba(212,175,55,0.08), transparent 40%),
     radial-gradient(circle at 80% 90%, rgba(184,134,11,0.05), transparent 50%),
@@ -10,7 +8,6 @@ html{
   background-repeat:no-repeat;
   background-attachment:fixed;
 }
-
 body{
   min-height:100vh;
   color:#e7e3dc;
@@ -21,22 +18,20 @@ body{
   overscroll-behavior-y: none;
 }
 
-/* Header / stats */
+/* --- Шапка / статистика --- */
 .header{padding:25px 20px 10px;text-align:center;font-size:24px;font-weight:600;letter-spacing:1px;color:#d4af37;}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
 
-/* Grid / cards */
+/* --- Сетка карточек --- */
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+
+/* --- Карточка --- */
 .card{
-  background:#1a1a1c;
-  border-radius:18px;
-  padding:14px;
-  position:relative;
+  background:#1a1a1c;border-radius:18px;padding:14px;position:relative;
   box-shadow:0 20px 40px rgba(0,0,0,0.6);
   transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-  opacity:0;
-  transform:translateY(20px) scale(.98);
+  opacity:0; transform:translateY(20px) scale(.98);
   animation:cardReveal .55s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 @keyframes cardReveal{
@@ -54,99 +49,80 @@ textarea{width:100%;margin-top:10px;background:#141415;border:1px solid rgba(212
 .slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:#d4af37;}
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
-/* select */
-.select-cat{
-  margin-top:12px;
-  width:100%;
-  background:#141415;
-  border:1px solid rgba(212,175,55,0.15);
-  color:#e7e3dc;
-  padding:10px 12px;
-  border-radius:12px;
-  font-size:14px;
-}
-
-/* Bottom nav container (wrap safe-area) */
-.bottom-nav-wrap{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  padding:8px calc(12px + env(safe-area-inset-bottom));
-  z-index:60;
-  pointer-events:none;
-}
-
-/* Bottom panel */
+/* --- Нижняя панель (nav) --- */
 .bottom-nav{
-  pointer-events:auto;
-  position:relative;
-  height:78px;
-  border-radius:14px 14px 0 0;
-  background:linear-gradient(180deg, rgba(0,0,0,0.34), rgba(0,0,0,0.6));
-  border-top:1px solid rgba(212,175,55,0.06);
+  position:fixed;
+  left:12px; right:12px;
+  bottom:12px;
+  height:86px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:20px;
-  padding:0 28px;
-  box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+  padding:12px 24px;
+  z-index:1200;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.28));
+  border-radius:16px;
+  border:1px solid rgba(212,175,55,0.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
 }
 
-/* nav item: just emoji now, no text label */
-.nav-item{
+/* nav кнопки (эмодзи) */
+.nav-btn{
+  background:transparent;
+  border:none;
+  font-size:30px;
+  color:#d4af37;
+  cursor:pointer;
+  line-height:1;
   display:flex;
   align-items:center;
   justify-content:center;
+  width:56px;
+  height:56px;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn:focus{outline: none;}
+
+/* FAB wrapper — внутри панели, по центру */
+.fab-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 72px;
+  margin: 0 6px;
+}
+
+/* сама кнопка */
+.fab{
   width:64px;
   height:64px;
-  border-radius:12px;
-  cursor:pointer;
-  user-select:none;
-  font-size:28px;
-  color: rgba(212,175,55,0.7);
-  background: transparent;
-  transition: background .18s ease, color .18s ease, transform .12s ease;
-}
-.nav-item:hover{ background: rgba(212,175,55,0.03); transform:translateY(-2px); }
-.nav-item.active{ color: #d4af37; box-shadow: 0 6px 18px rgba(212,175,55,0.08); background: rgba(255,255,255,0.02); }
-
-/* FAB centered between icons (inside panel). slightly smaller than before */
-.fab-wrap{
-  position:absolute;
-  left:50%;
-  top:-22px;
-  transform:translateX(-50%);
-  pointer-events:auto;
-  z-index:70;
-}
-.fab{
-  width:66px;
-  height:66px;
   border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#111;
-  border:1px solid rgba(212,175,55,0.35);
+  background:#0e0e0f;
+  border:2px solid rgba(212,175,55,0.25);
   color:#d4af37;
+  display:flex;align-items:center;justify-content:center;
   font-size:30px;
-  box-shadow:0 18px 40px rgba(212,175,55,0.12);
+  box-shadow:0 6px 24px rgba(212,175,55,0.18);
   cursor:pointer;
-  transition: transform .12s ease;
-}
-.fab:active{ transform: translateY(2px) scale(.995); }
-
-/* small visual divider above browser UI (optional) */
-.bottom-nav::after{
-  content:"";
-  position:absolute;
-  left:0;right:0;bottom:-6px;
-  height:6px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.6));
-  border-radius:0 0 12px 12px;
-  pointer-events:none;
+  transform: translateY(-10px);
+  z-index:10;
 }
 
-/* utility to hide inline labels if present (defensive) */
-.nav-item .label{display:none !important;}
+/* label+input — делаем input полноразмерным и кликабельным */
+.fab-label{position:relative; display:inline-block; width:64px; height:64px;}
+.fab-label input[type=file]{position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;}
+
+/* активный таб визуал */
+.nav-active{
+  box-shadow: inset 0 -4px 0 0 rgba(212,175,55,0.25);
+  border-radius:8px;
+}
+
+/* responsive */
+@media (max-width:420px){
+  .grid{grid-template-columns:repeat(2,1fr); gap:12px; padding-left:12px; padding-right:12px;}
+  .bottom-nav{padding-left:18px;padding-right:18px;height:92px;}
+}
