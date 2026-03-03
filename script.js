@@ -59,7 +59,7 @@ function buildCardElement(card, index=0){
   const el = document.createElement("div");
   el.className = "card";
   el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
-
+  el.classList.add("card-glow");
   const createdAtRaw = card.created_at;
 
   // category default
