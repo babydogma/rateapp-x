@@ -12,8 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
-<!-- внешний CSS -->
-<link rel="stylesheet" href="/style.css?v=20260303-1">
+<link rel="stylesheet" href="/style.css?v=20260303-2">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -24,19 +23,16 @@
 <div class="divider"></div>
 <div class="grid" id="grid"></div>
 
-<!-- скрытый input для загрузки фото -->
 <input id="photoInput" type="file" accept="image/*" style="display:none;">
 
-<!-- нижняя панель (с кнопкой + внутри) -->
 <nav class="bottom-nav" role="navigation" aria-label="Навигация">
   <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
 
-  <button id="addBtn" class="add-btn" title="Добавить фото">+</button>
+  <button id="addBtn" class="add-btn" title="Добавить фото"></button>
 
   <button class="nav-emoji" data-page="categories" title="Категории">📂</button>
 </nav>
 
-<!-- основной скрипт -->
 <script src="/script.js"></script>
 </body>
 </html>
