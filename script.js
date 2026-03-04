@@ -7,7 +7,7 @@
 ========================= */
 
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4"; 
+const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
@@ -39,6 +39,52 @@ function getCategories(){
 
 function saveCategories(cats){
   localStorage.setItem("categories", JSON.stringify(cats));
+}
+
+/* ===== УДАЛЕНИЕ КАТЕГОРИИ ===== */
+
+async function deleteCategory(categoryId){
+
+  if(categoryId === "Разное"){
+    alert('Категорию "Разное" удалить нельзя');
+    return;
+  }
+
+  const confirmDelete = confirm(
+    `Удалить категорию "${categoryId}"?\nКарточки будут перемещены в "Разное".`
+  );
+
+  if(!confirmDelete) return;
+
+  try{
+
+    /* 1. гарантируем наличие Разное */
+    let categories = getCategories();
+    let misc = categories.find(c => c.id === "Разное");
+
+    if(!misc){
+      misc = { id: "Разное", emoji: "🔖" };
+      categories.push(misc);
+      saveCategories(categories);
+    }
+
+    /* 2. перенос карточек */
+    await supabaseClient
+      .from("cards")
+      .update({ category: "Разное" })
+      .eq("category", categoryId);
+
+    /* 3. удаляем категорию из localStorage */
+    categories = categories.filter(c => c.id !== categoryId);
+    saveCategories(categories);
+
+    alert("Категория удалена");
+
+    window.location.reload();
+
+  } catch {
+    alert("Ошибка удаления категории");
+  }
 }
 
 /* =========================
@@ -198,13 +244,6 @@ function setupCardEvents(el, card){
   const ratingEl = el.querySelector(".rating");
   const select = el.querySelector(".category-select");
 
-  img.addEventListener("click", ()=>{
-    if(!img.src) return;
-    DOM.modalImg.src = img.src;
-    DOM.imageModal.classList.add("active");
-  });
-
-  /* categories */
   getCategories().forEach(c=>{
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -259,7 +298,7 @@ function setupCardEvents(el, card){
 }
 
 /* =========================
-   9. INIT
+   INIT
 ========================= */
 
 async function init(){
@@ -294,53 +333,8 @@ async function init(){
 }
 
 /* =========================
-   EVENTS
+   NAVIGATION
 ========================= */
-
-if(DOM.photoInput){
-  DOM.photoInput.addEventListener("change", async (e)=>{
-
-    const file = e.target.files[0];
-    if(!file) return;
-
-    try{
-      const publicUrl = await API.uploadPhoto(file);
-
-      const newCard = await API.insertCard({
-        image_url: publicUrl,
-        text: "",
-        rating: 0,
-        category: state.activeCategory || "Разное"
-      });
-
-      if(!state.activeCategory || newCard.category === state.activeCategory){
-        state.cards.unshift(newCard);
-        renderCards();
-        renderStats();
-      }
-
-    } catch{
-      alert("Ошибка загрузки фото");
-    }
-
-    DOM.photoInput.value = "";
-  });
-}
-
-if(DOM.addBtn){
-  DOM.addBtn.addEventListener("click", ()=>{
-    DOM.photoInput.click();
-  });
-}
-
-if(DOM.imageModal){
-  DOM.imageModal.addEventListener("click", ()=>{
-    DOM.imageModal.classList.remove("active");
-    DOM.modalImg.src = "";
-  });
-}
-
-/* NAVIGATION */
 
 document.querySelectorAll(".nav-emoji").forEach(btn => {
   btn.addEventListener("click", () => {
