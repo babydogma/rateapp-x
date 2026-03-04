@@ -71,7 +71,7 @@ function createCategoryBlock(cat){
 
 function renderCategoryBlocks(){
   categoriesGrid.innerHTML = "";
-  CATEGORIES.forEach(c=>{
+  getCategories().forEach(c=>{
     categoriesGrid.appendChild(createCategoryBlock(c));
   });
   catsStats.textContent = ""; // not used here
