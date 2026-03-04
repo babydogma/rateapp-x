@@ -58,7 +58,6 @@ async function deleteCategory(categoryId){
 
   try{
 
-    /* 1. гарантируем наличие Разное */
     let categories = getCategories();
     let misc = categories.find(c => c.id === "Разное");
 
@@ -68,18 +67,15 @@ async function deleteCategory(categoryId){
       saveCategories(categories);
     }
 
-    /* 2. перенос карточек */
     await supabaseClient
       .from("cards")
       .update({ category: "Разное" })
       .eq("category", categoryId);
 
-    /* 3. удаляем категорию из localStorage */
     categories = categories.filter(c => c.id !== categoryId);
     saveCategories(categories);
 
     alert("Категория удалена");
-
     window.location.reload();
 
   } catch {
@@ -244,6 +240,13 @@ function setupCardEvents(el, card){
   const ratingEl = el.querySelector(".rating");
   const select = el.querySelector(".category-select");
 
+  // ===== ОТКРЫТИЕ МОДАЛКИ =====
+  img.addEventListener("click", () => {
+    if (!card.image_url) return;
+    DOM.modalImg.src = card.image_url;
+    DOM.imageModal.classList.add("active");
+  });
+
   getCategories().forEach(c=>{
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -298,41 +301,6 @@ function setupCardEvents(el, card){
 }
 
 /* =========================
-   INIT
-========================= */
-
-async function init(){
-
-  try{
-    state.loading = true;
-
-    const cards = await API.fetchCards();
-    const categoryFromUrl = getCategoryFromUrl();
-
-    state.activeCategory = categoryFromUrl;
-
-    if(categoryFromUrl){
-      state.cards = cards.filter(c => c.category === categoryFromUrl);
-      if(DOM.stats){
-        DOM.stats.textContent = `Категория: ${categoryFromUrl}`;
-      }
-    } else {
-      state.cards = cards;
-    }
-
-    renderCards();
-    renderStats();
-
-  } catch{
-    if(DOM.stats){
-      DOM.stats.textContent = "Ошибка загрузки";
-    }
-  } finally{
-    state.loading = false;
-  }
-}
-
-/* =========================
    NAVIGATION
 ========================= */
 
@@ -379,6 +347,49 @@ if (DOM.photoInput) {
     }
 
   });
+}
+
+/* ===== ЗАКРЫТИЕ МОДАЛКИ ===== */
+
+if (DOM.imageModal) {
+  DOM.imageModal.addEventListener("click", () => {
+    DOM.imageModal.classList.remove("active");
+  });
+}
+
+/* =========================
+   INIT
+========================= */
+
+async function init(){
+
+  try{
+    state.loading = true;
+
+    const cards = await API.fetchCards();
+    const categoryFromUrl = getCategoryFromUrl();
+
+    state.activeCategory = categoryFromUrl;
+
+    if(categoryFromUrl){
+      state.cards = cards.filter(c => c.category === categoryFromUrl);
+      if(DOM.stats){
+        DOM.stats.textContent = `Категория: ${categoryFromUrl}`;
+      }
+    } else {
+      state.cards = cards;
+    }
+
+    renderCards();
+    renderStats();
+
+  } catch{
+    if(DOM.stats){
+      DOM.stats.textContent = "Ошибка загрузки";
+    }
+  } finally{
+    state.loading = false;
+  }
 }
 
 init();
