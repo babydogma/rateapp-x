@@ -37,8 +37,8 @@ body::after{
 .header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
 .divider {
-  height: 4px;
-  margin: 28px 0;
+  height: 2px;
+  margin: 28px 40;
   border-radius: 3px;
 
   background: linear-gradient(
@@ -51,7 +51,7 @@ body::after{
   );
 
   background-size: 300% 100%;
-  animation: shine 3s linear infinite;
+  animation: shine 6s linear infinite;
 }
 
 @keyframes shine {
