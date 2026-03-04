@@ -93,31 +93,21 @@ body::after{
 }
 
 .card{
-  --borderColor: #d4af37;
-  --angle: 0deg;
+  --angle:0deg;
+  --hue:0;
 
-  position: relative;
-  border-radius: 18px;
-  padding: 14px;
-  border: 2px solid transparent;
+  border:2px solid transparent;
 
   background:
-  linear-gradient(#141415, #0f0f10) padding-box,
-  conic-gradient(
-    from var(--angle),
-    #ff2a2a,
-    #c026ff,
-    #3b82f6,
-    #10b981,
-    #ff2a2a
-  ) border-box;
+    linear-gradient(#141415,#0f0f10) padding-box,
+    conic-gradient(
+      from var(--angle),
+      hsl(var(--hue) 85% 55%),
+      hsl(calc(var(--hue) + 20) 90% 60%),
+      hsl(var(--hue) 85% 55%)
+    ) border-box;
 
-  animation: spin 6s linear infinite;
-}
-
-@keyframes spin {
-  from { --angle: 0deg; }
-  to { --angle: 360deg; }
+  animation:spin 4s linear infinite;
 }
 
 /* содержимое карточки */
