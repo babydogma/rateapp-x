@@ -39,10 +39,25 @@ body::after{
 .divider {
   height: 2px;
   margin: 28px 40px;
-  border-radius: 2px;
-  overflow: hidden;
   position: relative;
-  background: rgba(201,168,79,0.15);
+  overflow: hidden;
+  background: rgba(201,168,79,0.2);
+
+  /* Плавное сужение по бокам */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
 }
 
 .divider::before {
@@ -62,12 +77,8 @@ body::after{
 }
 
 @keyframes shine {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(-100%);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
 }
 /* layout */
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
