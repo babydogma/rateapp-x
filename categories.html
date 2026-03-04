@@ -21,20 +21,17 @@
   <div class="stats" id="catsStats"></div>
   <div class="divider"></div>
 
-  <!-- СПИСОК КАТЕГОРИЙ -->
   <div id="categoriesGrid" class="categories-grid"></div>
 
-  <!-- ОТДЕЛЬНАЯ КНОПКА СОЗДАНИЯ -->
   <div class="category-block category-block--add" id="addCategoryBtn">
     <div class="cat-emoji">＋</div>
     <div class="cat-title">Новая категория</div>
   </div>
 
-  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
   <nav class="bottom-nav" role="navigation" aria-label="Навигация">
-    <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
-    <button id="addBtnCats" class="add-btn" title="Добавить фото"></button>
-    <button class="nav-emoji active" data-page="categories" title="Категории">📂</button>
+    <button class="nav-emoji" data-page="home">🏠</button>
+    <button id="addBtnCats" class="add-btn"></button>
+    <button class="nav-emoji active" data-page="categories">📂</button>
   </nav>
 
 <script>
@@ -77,18 +74,64 @@ const catsStats = document.getElementById("catsStats");
 const addCategoryBtn = document.getElementById("addCategoryBtn");
 
 /* =========================
+   DELETE CATEGORY
+========================= */
+
+async function deleteCategory(categoryId){
+
+  if(categoryId === "Разное"){
+    alert('Категорию "Разное" удалить нельзя');
+    return;
+  }
+
+  const confirmDelete = confirm(
+    `Удалить категорию "${categoryId}"?\nКарточки будут перемещены в "Разное".`
+  );
+
+  if(!confirmDelete) return;
+
+  try{
+
+    await supabaseClient
+      .from("cards")
+      .update({ category: "Разное" })
+      .eq("category", categoryId);
+
+    let cats = getCategories();
+    cats = cats.filter(c => c.id !== categoryId);
+    saveCategories(cats);
+
+    renderCategoryBlocks();
+
+  } catch{
+    alert("Ошибка удаления категории");
+  }
+}
+
+/* =========================
    RENDER
 ========================= */
 
 function createCategoryBlock(cat){
-  const el = document.createElement("a");
+
+  const el = document.createElement("div");
   el.className = "category-block";
-  el.href = "/index.html?category=" + encodeURIComponent(cat.id);
 
   el.innerHTML = `
     <div class="cat-emoji">${cat.emoji}</div>
     <div class="cat-title">${cat.id}</div>
+    <button class="category-delete">✕</button>
   `;
+
+  el.addEventListener("click", (e)=>{
+    if(e.target.classList.contains("category-delete")) return;
+    window.location.href = "/index.html?category=" + encodeURIComponent(cat.id);
+  });
+
+  el.querySelector(".category-delete").addEventListener("click", (e)=>{
+    e.stopPropagation();
+    deleteCategory(cat.id);
+  });
 
   return el;
 }
