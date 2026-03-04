@@ -36,7 +36,32 @@ body::after{
 /* заголовки и базовые блоки */
 .header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-.divider{height:1px;margin:0 30px 20px;background:linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);}
+.divider {
+  height: 4px;
+  margin: 28px 0;
+  border-radius: 3px;
+
+  background: linear-gradient(
+    270deg,
+    rgba(201,168,79,0.2),
+    rgba(201,168,79,1),
+    rgba(255,215,120,1),
+    rgba(201,168,79,1),
+    rgba(201,168,79,0.2)
+  );
+
+  background-size: 300% 100%;
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
 
 /* layout */
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
