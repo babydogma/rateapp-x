@@ -23,13 +23,22 @@ const state = {
    3. CONSTANTS
 ========================= */
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { id: "Фильм", emoji: "🎬" },
   { id: "Сериалы", emoji: "📺" },
   { id: "Еда", emoji: "🍔" },
   { id: "Семья", emoji: "👪" },
   { id: "Разное", emoji: "🔖" }
 ];
+
+function getCategories(){
+  const saved = localStorage.getItem("categories");
+  return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+}
+
+function saveCategories(cats){
+  localStorage.setItem("categories", JSON.stringify(cats));
+}
 
 /* =========================
    4. DOM
