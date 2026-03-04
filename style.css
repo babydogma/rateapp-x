@@ -94,15 +94,30 @@ body::after{
   background:
     linear-gradient(#141415, #0f0f10) padding-box,
     linear-gradient(
-      135deg,
-      transparent 10%,
-      #d4af37,
-      transparent 90%
+      90deg,
+      transparent 0%,
+      transparent 40%,
+      #d4af37 50%,
+      transparent 60%,
+      transparent 100%
     ) border-box;
 
-  border: 1.5px solid transparent;
+  background-size: 100% 100%, 300% 300%;
+  background-position: 0 0, 0% 50%;
 
+  border: 1.5px solid transparent;
   box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+
+  animation: borderMove 5s linear infinite;
+}
+
+@keyframes borderMove {
+  from {
+    background-position: 0 0, 0% 50%;
+  }
+  to {
+    background-position: 0 0, 100% 50%;
+  }
 }
 
 /* содержимое карточки */
