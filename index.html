@@ -12,41 +12,77 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
-<!-- внешний CSS -->
 <link rel="stylesheet" href="/style.css">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-  
+
 <body>
 
+  <!-- =========================
+       IMAGE MODAL
+  ========================== -->
   <div id="imageModal" class="image-modal">
-  <img id="modalImg">
-</div>
+    <img id="modalImg" alt="Preview">
+  </div>
 
-<div class="header">RateApp X</div>
+  <!-- =========================
+       APP WRAPPER
+  ========================== -->
+  <main class="app">
 
-<div class="divider"></div>
+    <!-- Header -->
+    <header class="header">
+      RateApp X
+    </header>
 
-<div class="stats" id="stats">Загрузка...</div>
+    <div class="divider"></div>
 
-<div class="divider"></div>
+    <!-- Stats -->
+    <section class="stats" id="stats">
+      Загрузка...
+    </section>
 
-<div class="grid" id="grid"></div>
+    <div class="divider"></div>
 
-<!-- скрытый input для загрузки фото -->
-<input id="photoInput" type="file" accept="image/*" style="display:none;">
+    <!-- Cards Grid -->
+    <section class="layout-grid" id="grid"></section>
 
-<!-- нижняя панель (с кнопкой + внутри) -->
-<nav class="bottom-nav" role="navigation" aria-label="Навигация">
-  <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
+  </main>
 
-  <button id="addBtn" class="add-btn" title="Добавить фото">+</button>
+  <!-- Hidden File Input -->
+  <input id="photoInput" type="file" accept="image/*" hidden>
 
-  <button class="nav-emoji" data-page="categories" title="Категории">📂</button>
-</nav>
+  <!-- =========================
+       Bottom Navigation
+  ========================== -->
+  <nav class="bottom-nav" role="navigation" aria-label="Навигация">
 
-<!-- основной скрипт -->
-<script src="/script.js"></script>
+    <button 
+      class="nav-emoji" 
+      data-page="home" 
+      title="Главная"
+      aria-label="Главная"
+    >
+      🏠
+    </button>
+
+    <button 
+      id="addBtn" 
+      class="add-btn" 
+      aria-label="Добавить фото"
+    ></button>
+
+    <button 
+      class="nav-emoji" 
+      data-page="categories" 
+      title="Категории"
+      aria-label="Категории"
+    >
+      📂
+    </button>
+
+  </nav>
+
+  <script src="/script.js"></script>
 </body>
 </html>
