@@ -226,10 +226,11 @@ body {
 .card__delete {
   position: absolute;
 
-  top: 8px;
-  right: 8px;
+  top: -2px;
+  right: -2px;
 
-  padding: 4px; 
+  padding: 6px;
+
   border: none;
   background: none;
 
@@ -237,8 +238,9 @@ body {
   font-size: 20px;
   font-weight: 600;
 
-  cursor: pointer;
+  line-height: 1;
 
+  cursor: pointer;
   z-index: var(--z-fab);
 
   transition:
