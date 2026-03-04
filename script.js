@@ -344,4 +344,10 @@ document.querySelectorAll(".nav-emoji").forEach(btn => {
   });
 });
 
+if (DOM.addBtn && DOM.photoInput) {
+  DOM.addBtn.addEventListener("click", () => {
+    DOM.photoInput.click();
+  });
+}
+
 init();
