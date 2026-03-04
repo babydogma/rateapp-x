@@ -29,9 +29,9 @@ function formatDateSimple(datestr){
   return `${dd}.${mm}.${yy}`;
 }
 
-function getGlowColor(rating){
-  const hue = 10 + (rating * 4);
-  return `hsl(${hue}, 80%, 55%)`;
+/* НОВАЯ ФУНКЦИЯ ЦВЕТА */
+function getHue(rating){
+  return (rating / 10) * 150; // 0 = красный, 10 = изумруд
 }
 
 function getQueryParam(name){
@@ -63,10 +63,13 @@ function buildCardElement(card){
 
   const el = document.createElement("div");
   el.className = "card";
-  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
 
   const createdAtRaw = card.created_at;
   const categoryVal = card.category || "Разное";
+
+  /* УСТАНАВЛИВАЕМ НАЧАЛЬНЫЙ ЦВЕТ РАМКИ */
+  const initialHue = getHue(card.rating || 0);
+  el.style.setProperty('--hue', initialHue);
 
   el.innerHTML = `
     <img src="${card.image_url || ""}">
@@ -77,14 +80,14 @@ function buildCardElement(card){
     <select class="category-select"></select>
     <div class="created">${formatDateSimple(createdAtRaw)}</div>
   `;
+
   const img = el.querySelector("img");
 
-img.addEventListener("click", () => {
-  if(!img.src) return;
-
-  modalImg.src = img.src;
-  imageModal.classList.add("active");
-});
+  img.addEventListener("click", () => {
+    if(!img.src) return;
+    modalImg.src = img.src;
+    imageModal.classList.add("active");
+  });
 
   /* категории */
   const sel = el.querySelector(".category-select");
@@ -134,35 +137,34 @@ img.addEventListener("click", () => {
 
   let previousRating = Number(slider.value) || 0;
 
-  // initial progress
   slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
+  slider.style.setProperty('--hue', initialHue);
 
-  /* 1) во время перетаскивания */
   slider.addEventListener("input", () => {
 
     const newRating = Number(slider.value) || 0;
+    const newHue = getHue(newRating);
 
     ratingEl.textContent = newRating + "/10";
 
     slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
-
-    el.style.boxShadow =
-      `0 35px 60px -25px ${getGlowColor(newRating)}`;
+    slider.style.setProperty('--hue', newHue);
+    el.style.setProperty('--hue', newHue);
 
     updateStatsFromDOM();
   });
 
-  /* 2) при отпускании — сохраняем */
   slider.addEventListener("change", async () => {
 
     const newRating = Number(slider.value) || 0;
+    const newHue = getHue(newRating);
 
     if(!createdAtRaw){
       slider.value = previousRating;
       ratingEl.textContent = previousRating + "/10";
       slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      el.style.boxShadow =
-        `0 35px 60px -25px ${getGlowColor(previousRating)}`;
+      slider.style.setProperty('--hue', getHue(previousRating));
+      el.style.setProperty('--hue', getHue(previousRating));
       updateStatsFromDOM();
       return;
     }
@@ -176,8 +178,8 @@ img.addEventListener("click", () => {
       slider.value = previousRating;
       ratingEl.textContent = previousRating + "/10";
       slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      el.style.boxShadow =
-        `0 35px 60px -25px ${getGlowColor(previousRating)}`;
+      slider.style.setProperty('--hue', getHue(previousRating));
+      el.style.setProperty('--hue', getHue(previousRating));
       updateStatsFromDOM();
       alert("Ошибка обновления рейтинга");
       return;
@@ -186,7 +188,6 @@ img.addEventListener("click", () => {
     previousRating = newRating;
   });
 
-  /* категория */
   sel.addEventListener("change", async () => {
     if(!createdAtRaw) return;
 
@@ -259,10 +260,8 @@ photoInput.addEventListener("change", async (e) => {
   photoInput.value = "";
 });
 
-/* кнопка + */
 addBtn.addEventListener("click", ()=> photoInput.click());
 
-/* debounce */
 function debounce(fn, ms){
   let t;
   return (...a) => {
@@ -271,7 +270,6 @@ function debounce(fn, ms){
   };
 }
 
-/* service worker */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
 }
