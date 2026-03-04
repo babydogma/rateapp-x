@@ -16,11 +16,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const state = {
   cards: [],
-  loading: false
+  loading: false,
+  activeCategory: null
 };
 
 /* =========================
-   3. CONSTANTS
+   3. CATEGORIES
 ========================= */
 
 const DEFAULT_CATEGORIES = [
@@ -76,8 +77,13 @@ function debounce(fn, ms){
   };
 }
 
+function getCategoryFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("category");
+}
+
 /* =========================
-   6. API LAYER
+   6. API
 ========================= */
 
 const API = {
@@ -136,7 +142,7 @@ const API = {
 };
 
 /* =========================
-   7. UI LAYER
+   7. UI
 ========================= */
 
 function renderStats(){
@@ -148,14 +154,14 @@ function renderStats(){
   const sum = state.cards.reduce((acc,c)=> acc + (c.rating || 0), 0);
   const avg = (sum / state.cards.length).toFixed(1);
 
-  DOM.stats.textContent = `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
+  DOM.stats.textContent =
+    `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
 }
 
 function buildCardElement(card){
 
   const el = document.createElement("div");
   el.className = "card";
-
   el.style.setProperty('--hue', getHue(card.rating || 0));
 
   el.innerHTML = `
@@ -169,7 +175,6 @@ function buildCardElement(card){
   `;
 
   setupCardEvents(el, card);
-
   return el;
 }
 
@@ -193,7 +198,6 @@ function setupCardEvents(el, card){
   const ratingEl = el.querySelector(".rating");
   const select = el.querySelector(".category-select");
 
-  /* modal */
   img.addEventListener("click", ()=>{
     if(!img.src) return;
     DOM.modalImg.src = img.src;
@@ -209,7 +213,6 @@ function setupCardEvents(el, card){
     select.appendChild(opt);
   });
 
-  /* delete */
   delBtn.addEventListener("click", async ()=>{
     try{
       await API.deleteCard(card.created_at);
@@ -221,7 +224,6 @@ function setupCardEvents(el, card){
     }
   });
 
-  /* textarea */
   textarea.addEventListener("input", debounce(async (e)=>{
     try{
       await API.updateCard("created_at", card.created_at, { text: e.target.value });
@@ -229,11 +231,9 @@ function setupCardEvents(el, card){
     } catch{}
   }, 600));
 
-  /* slider */
   slider.addEventListener("input", ()=>{
     const newRating = Number(slider.value);
     ratingEl.textContent = newRating + "/10";
-    slider.style.setProperty('--progress', (newRating/10)*100 + '%');
     el.style.setProperty('--hue', getHue(newRating));
   });
 
@@ -248,7 +248,6 @@ function setupCardEvents(el, card){
     }
   });
 
-  /* category */
   select.addEventListener("change", async ()=>{
     try{
       await API.updateCard("created_at", card.created_at, { category: select.value });
@@ -257,7 +256,6 @@ function setupCardEvents(el, card){
       alert("Ошибка обновления категории");
     }
   });
-
 }
 
 /* =========================
@@ -268,104 +266,88 @@ async function init(){
 
   try{
     state.loading = true;
+
     const cards = await API.fetchCards();
-    state.cards = cards;
+    const categoryFromUrl = getCategoryFromUrl();
+
+    state.activeCategory = categoryFromUrl;
+
+    if(categoryFromUrl){
+      state.cards = cards.filter(c => c.category === categoryFromUrl);
+      if(DOM.stats){
+        DOM.stats.textContent = `Категория: ${categoryFromUrl}`;
+      }
+    } else {
+      state.cards = cards;
+    }
+
     renderCards();
     renderStats();
+
   } catch{
-    DOM.stats.textContent = "Ошибка загрузки";
+    if(DOM.stats){
+      DOM.stats.textContent = "Ошибка загрузки";
+    }
   } finally{
     state.loading = false;
   }
-
-}
-
-DOM.photoInput.addEventListener("change", async (e)=>{
-
-  const file = e.target.files[0];
-  if(!file) return;
-
-  try{
-    const publicUrl = await API.uploadPhoto(file);
-
-    const newCard = await API.insertCard({
-      image_url: publicUrl,
-      text: "",
-      rating: 0,
-      category: "Разное"
-    });
-
-    state.cards.unshift(newCard);
-    renderCards();
-    renderStats();
-
-  } catch{
-    alert("Ошибка загрузки фото");
-  }
-
-  DOM.photoInput.value = "";
-});
-
-DOM.addBtn.addEventListener("click", ()=>{
-  DOM.photoInput.click();
-});
-
-DOM.imageModal.addEventListener("click", ()=>{
-  DOM.imageModal.classList.remove("active");
-  DOM.modalImg.src = "";
-});
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
 }
 
 /* =========================
-   NAVIGATION
+   EVENTS
 ========================= */
+
+if(DOM.photoInput){
+  DOM.photoInput.addEventListener("change", async (e)=>{
+
+    const file = e.target.files[0];
+    if(!file) return;
+
+    try{
+      const publicUrl = await API.uploadPhoto(file);
+
+      const newCard = await API.insertCard({
+        image_url: publicUrl,
+        text: "",
+        rating: 0,
+        category: state.activeCategory || "Разное"
+      });
+
+      if(!state.activeCategory || newCard.category === state.activeCategory){
+        state.cards.unshift(newCard);
+        renderCards();
+        renderStats();
+      }
+
+    } catch{
+      alert("Ошибка загрузки фото");
+    }
+
+    DOM.photoInput.value = "";
+  });
+}
+
+if(DOM.addBtn){
+  DOM.addBtn.addEventListener("click", ()=>{
+    DOM.photoInput.click();
+  });
+}
+
+if(DOM.imageModal){
+  DOM.imageModal.addEventListener("click", ()=>{
+    DOM.imageModal.classList.remove("active");
+    DOM.modalImg.src = "";
+  });
+}
+
+/* NAVIGATION */
 
 document.querySelectorAll(".nav-emoji").forEach(btn => {
   btn.addEventListener("click", () => {
-
     const page = btn.dataset.page;
-
-    if(page === "home"){
-      window.location.href = "/index.html";
-    }
-
-    if(page === "categories"){
-      window.location.href = "/categories.html";
-    }
-
+    if(page === "home") window.location.href = "/index.html";
+    if(page === "categories") window.location.href = "/categories.html";
   });
 });
-
-/* =========================
-   FOR CATEGORIES
-========================= */
-
-const addCategoryBtn = document.getElementById("addCategoryBtn");
-
-if(addCategoryBtn){
-  addCategoryBtn.addEventListener("click", () => {
-
-    const name = prompt("Введите название категории:");
-    if(!name || !name.trim()) return;
-
-    const cats = getCategories();
-
-    if(cats.some(c => c.id === name.trim())){
-      alert("Такая категория уже существует");
-      return;
-    }
-
-    cats.push({
-      id: name.trim(),
-      emoji: "📁"
-    });
-
-    saveCategories(cats);
-    alert("Категория добавлена");
-  });
-}
 
 init();
