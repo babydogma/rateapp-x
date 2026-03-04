@@ -1,5 +1,6 @@
-/* style.css — исправленный */
+/* style.css — исправленный, заменить файл целиком */
 
+/* базовые переменные и reset */
 :root{
   --gold: #d4af37;
   --gold-strong: rgba(212,175,55,1);
@@ -16,6 +17,7 @@ html{
   background:#000;
 }
 
+/* body + легкий глиттер */
 body{
   min-height:100vh;
   color:#e7e3dc;
@@ -27,11 +29,13 @@ body{
   position:relative;
 }
 
-body::after{ display:none; }
+body::after{
+  display:none;
+}
 
+/* заголовки и базовые блоки */
 .header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
 .stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
-
 .divider {
   height: 2px;
   margin: 28px 40px;
@@ -39,15 +43,35 @@ body::after{ display:none; }
   overflow: hidden;
   background: rgba(201,168,79,0.2);
 
-  -webkit-mask-image: linear-gradient(to right,transparent 0%,black 15%,black 85%,transparent 100%);
-  mask-image: linear-gradient(to right,transparent 0%,black 15%,black 85%,transparent 100%);
+  /* Плавное сужение по бокам */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
 }
 
 .divider::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg,transparent 0%,rgba(255,215,120,0.9) 50%,transparent 100%);
+
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,215,120,0.9) 50%,
+    transparent 100%
+  );
+
   transform: translateX(100%);
   animation: shine 4s linear infinite;
 }
@@ -56,93 +80,241 @@ body::after{ display:none; }
   from { transform: translateX(100%); }
   to { transform: translateX(-100%); }
 }
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-  padding:20px;
-  padding-bottom:calc(120px + env(safe-area-inset-bottom));
-  position:relative;
-  z-index:10;
-}
+/* layout */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px;padding-bottom:calc(120px + env(safe-area-inset-bottom)); position:relative; z-index:10;}
 
 /* ============================
-   КАРТОЧКИ — АНИМИРОВАННАЯ РАМКА
+   Карточки — фон, внутренняя обводка, золотой glow
    ============================ */
-
-@property --angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
 .card{
-  --angle:0deg;
-  --hue:0;
-
-  position:relative;
-  border-radius:18px;
-  padding:14px;
-  border:2px solid transparent;
+  border-radius: 18px;
+  padding: 14px;
+  position: relative;
 
   background:
-    linear-gradient(#141415,#0f0f10) padding-box,
-    conic-gradient(
-      from var(--angle),
-      hsl(var(--hue) 90% 55%),
-      hsl(calc(var(--hue) + 25) 95% 60%),
-      hsl(var(--hue) 90% 55%)
+    linear-gradient(#141415, #0f0f10) padding-box,
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 40%,
+      #d4af37 50%,
+      transparent 60%,
+      transparent 100%
     ) border-box;
 
-  animation:spin 4s linear infinite;
+  background-size: 100% 100%, 300% 300%;
+  background-position: 0 0, 0% 50%;
+
+  border: 1.5px solid transparent;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+
+  animation: borderMove 5s linear infinite;
 }
 
-@keyframes spin {
-  to { --angle:360deg; }
+@keyframes borderMove {
+  from {
+    background-position: 0 0, 0% 50%;
+  }
+  to {
+    background-position: 0 0, 100% 50%;
+  }
 }
 
+/* содержимое карточки */
 .card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
-
+/* DELETE: чистый крестик (без круга), но с удобной зоной клика */
 .delete-btn{
   position: absolute;
-  top: 8px;
+  top: 8px;               /* поставь близко к углу карточки */
   right: 8px;
-  padding: 6px 8px;
+
+  /* не делаем большого круга — размер по содержимому */
+  width: auto;
+  height: auto;
+  padding: 6px 8px;       /* зона клика */
   border-radius: 6px;
+
+  /* чистый визуал: прозрачный фон, без тени и обводки */
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+
+  /* крестик (цвет золотой) */
   color: var(--gold);
   font-size: 18px;
   font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+
+  /* смещаем так, чтобы крестик стоял на кончике угла */
   transform: translate(6px, -50%);
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   z-index: 60;
   cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
-textarea{
-  width:100%;
-  margin-top:10px;
-  background:linear-gradient(180deg,#141415,#0f0f10);
-  border:1px solid rgba(212,175,55,0.06);
-  border-radius:12px;
-  padding:8px;
-  color:#e7e3dc;
-  resize:none;
-  font-size:13px;
+/* на мобильных чуть уменьшим */
+@media (max-width:420px){
+  .delete-btn{
+    top:7px;
+    right:7px;
+    padding:5px 7px;
+    font-size:16px;
+  }
 }
-
-.rating{margin-top:8px;font-weight:600;color:#fff;}
+textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0f0f10);border:1px solid rgba(212,175,55,0.06);border-radius:12px;padding:8px;color:#e7e3dc;resize:none;font-size:13px;}
+.rating{margin-top:8px;font-weight:600;color:var(--gold);}
 .created{margin-top:10px;color:#c6b27a;font-size:13px;}
 
+/* category-select */
+.category-select{
+  width:100%;
+  margin-top:12px;
+  background:linear-gradient(180deg,#141415,#0f0f10);
+  border:1px solid rgba(212,175,55,0.06);
+  color:#e7e3dc;
+  padding:12px;
+  border-radius:12px;
+  font-size:15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* hover/active карточки */
+.card:active{ transform:translateY(-4px); }
+
 /* ============================
-   SLIDER (ДИНАМИЧЕСКИЙ ЦВЕТ)
+   НИЖНЯЯ ПАНЕЛЬ: выравнивание кнопок
    ============================ */
 
+/* bottom-nav — контейнер панели */
+.bottom-nav{
+  position:fixed;
+  left:14px; 
+  right:14px; 
+  bottom:14px;
+
+  height:82px; 
+  padding:12px 20px;
+  border-radius:20px;
+
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between;
+
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));
+
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+
+  backdrop-filter: blur(8px) saturate(1.1);
+  border:1px solid rgba(212,175,55,0.06);
+
+  z-index:60; 
+  overflow:visible;
+}
+
+/* nav-emoji — фиксация размера и отступов */
+/* делаем одинаковые боковые области, чтобы расстояния были равными */
+.nav-emoji{
+  font-size:24px;
+  background:none;border:0;cursor:pointer;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));
+  z-index:62;
+  width:56px; height:56px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 12px; /* расстояние к центру */
+}
+
+/* дополнительные отступы от краёв — равняем отношение к центру */
+.bottom-nav > .nav-emoji:first-child{ margin-left:22px; }
+.bottom-nav > .nav-emoji:last-child{ margin-right:22px; }
+
+.nav-emoji.active{ transform:translateY(-2px); }
+
+.add-btn{
+  position:absolute;
+  left:50%;
+  top:54%;
+  transform:translate(-50%,-50%);
+
+  width:60px;
+  height:60px;
+  border-radius:50%;
+
+  /* тёмная база */
+  background:
+    radial-gradient(circle at 50% 45%,
+      rgba(212,175,55,0.35) 0%,
+      rgba(212,175,55,0.15) 25%,
+      #111 60%,
+      #0c0c0d 100%);
+
+  border:none;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+
+  /* мягкое внешнее свечение */
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.7),
+    0 0 18px rgba(212,175,55,0.25),
+    0 0 35px rgba(212,175,55,0.15);
+
+  z-index:70;
+}
+
+.add-btn::after{
+  content:"+";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+
+  font-size:30px;
+  font-weight:700;
+  color:#f5e3a1;
+
+  text-shadow:
+    0 0 6px rgba(212,175,55,0.7),
+    0 0 12px rgba(212,175,55,0.5);
+}
+
+/* fallback/адаптив */
+@media (max-width:420px){
+  .bottom-nav{ height:72px; padding:10px 16px; bottom:12px; }
+  .add-btn{ width:56px; height:56px; }
+  .add-btn::before{ width:160px; height:40px; top:62%; filter: blur(10px); }
+  .add-btn::after{ font-size:28px; transform:translate(-50%,-50%) rotate(-1.2deg); }
+  .nav-emoji{ width:48px; height:48px; margin:0 8px; }
+  .bottom-nav > .nav-emoji:first-child{ margin-left:14px; }
+  .bottom-nav > .nav-emoji:last-child{ margin-right:14px; }
+}
+
+/* categories layout */
+.categories-grid{
+  padding:18px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  position:relative; z-index:10;
+}
+.category-block{
+  display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius:12px;color:var(--gold);text-decoration:none;font-size:20px;
+  border:1px solid rgba(212,175,55,0.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+.cat-emoji{font-size:28px;}
+.cat-title{font-weight:700; color: #f0d999;}
+.back-to-main{display:block;margin:28px 20px;font-size:18px;color:var(--gold);text-decoration:none;}
+
+/* slider */
 .slider{
   width:100%;
   margin-top:8px;
@@ -152,21 +324,25 @@ textarea{
 
   background:linear-gradient(
     to right,
-    hsl(var(--hue) 90% 55%) var(--progress, 0%),
+    #d4af37 var(--progress, 0%),
     #2a2a2a var(--progress, 0%)
   );
 
-  box-shadow:0 0 12px hsl(var(--hue) 90% 55% / 0.4);
+  box-shadow:0 0 12px rgba(212,175,55,0.4);
   transition: background 0.15s ease;
 }
-
 .slider::-webkit-slider-thumb{
   appearance:none;
   width:18px;
   height:18px;
   border-radius:50%;
-  background:hsl(var(--hue) 90% 55%);
-  box-shadow:0 0 15px hsl(var(--hue) 90% 55%);
+  background:radial-gradient(circle,#fff,#d4af37);
+
+  box-shadow:
+    0 0 12px rgba(212,175,55,0.8),
+    0 0 25px rgba(212,175,55,0.6);
+
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
   cursor:pointer;
 }
 
@@ -177,4 +353,42 @@ textarea{
 /* responsive */
 @media (min-width:900px){
   .grid{grid-template-columns:repeat(3,1fr);}
+  .categories-grid{grid-template-columns:repeat(4,1fr);}
+}
+
+/* helpers */
+.fade-out{opacity:0;transform:translateY(12px) scale(.98);transition:all .26s ease;}
+
+/* ===== IMAGE MODAL ===== */
+
+.image-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(10px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.25s ease;
+  z-index:9999;
+}
+
+.image-modal.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.image-modal img{
+  max-width:90%;
+  max-height:85%;
+  border-radius:20px;
+  box-shadow:0 40px 80px rgba(0,0,0,0.6);
+  transform:scale(0.9);
+  transition:transform 0.25s ease;
+}
+
+.image-modal.active img{
+  transform:scale(1);
 }
