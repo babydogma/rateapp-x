@@ -29,6 +29,37 @@ function formatDateSimple(datestr){
   return `${dd}.${mm}.${yy}`;
 }
 
+/* ===== НОВАЯ ПАЛИТРА ===== */
+function getGlowColor(rating){
+
+  const palette = [
+    { stop: 0,  color: [190, 30, 45] },
+    { stop: 3,  color: [120, 40, 200] },
+    { stop: 5,  color: [212, 175, 55] },
+    { stop: 7,  color: [0, 170, 120] },
+    { stop: 10, color: [0, 255, 200] }
+  ];
+
+  for (let i = 0; i < palette.length - 1; i++) {
+    const current = palette[i];
+    const next = palette[i + 1];
+
+    if (rating >= current.stop && rating <= next.stop) {
+
+      const range = next.stop - current.stop;
+      const progress = (rating - current.stop) / range;
+
+      const r = Math.round(current.color[0] + (next.color[0] - current.color[0]) * progress);
+      const g = Math.round(current.color[1] + (next.color[1] - current.color[1]) * progress);
+      const b = Math.round(current.color[2] + (next.color[2] - current.color[2]) * progress);
+
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+  }
+
+  return "rgb(212,175,55)";
+}
+
 function getQueryParam(name){
   const url = new URL(location.href);
   return url.searchParams.get(name);
@@ -59,6 +90,9 @@ function buildCardElement(card){
   const el = document.createElement("div");
   el.className = "card";
 
+  /* ===== УСТАНОВКА ЦВЕТА РАМКИ ===== */
+  el.style.setProperty('--borderColor', getGlowColor(card.rating || 0));
+
   const createdAtRaw = card.created_at;
   const categoryVal = card.category || "Разное";
 
@@ -80,7 +114,6 @@ function buildCardElement(card){
     imageModal.classList.add("active");
   });
 
-  /* категории */
   const sel = el.querySelector(".category-select");
   CATEGORIES.forEach(c=>{
     const opt = document.createElement("option");
@@ -90,7 +123,6 @@ function buildCardElement(card){
     sel.appendChild(opt);
   });
 
-  /* удаление */
   el.querySelector(".delete-btn").onclick = async () => {
     if(!createdAtRaw) return;
 
@@ -111,7 +143,6 @@ function buildCardElement(card){
     }, 260);
   };
 
-  /* textarea */
   el.querySelector("textarea").oninput = debounce(async (e)=> {
     if(!createdAtRaw) return;
 
@@ -137,6 +168,9 @@ function buildCardElement(card){
     ratingEl.textContent = newRating + "/10";
     slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
 
+    /* ===== ОБНОВЛЕНИЕ ЦВЕТА РАМКИ ===== */
+    el.style.setProperty('--borderColor', getGlowColor(newRating));
+
     updateStatsFromDOM();
   });
 
@@ -148,6 +182,7 @@ function buildCardElement(card){
       slider.value = previousRating;
       ratingEl.textContent = previousRating + "/10";
       slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
+      el.style.setProperty('--borderColor', getGlowColor(previousRating));
       updateStatsFromDOM();
       return;
     }
@@ -161,6 +196,7 @@ function buildCardElement(card){
       slider.value = previousRating;
       ratingEl.textContent = previousRating + "/10";
       slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
+      el.style.setProperty('--borderColor', getGlowColor(previousRating));
       updateStatsFromDOM();
       alert("Ошибка обновления рейтинга");
       return;
@@ -169,7 +205,6 @@ function buildCardElement(card){
     previousRating = newRating;
   });
 
-  /* категория */
   sel.addEventListener("change", async () => {
     if(!createdAtRaw) return;
 
@@ -242,10 +277,8 @@ photoInput.addEventListener("change", async (e) => {
   photoInput.value = "";
 });
 
-/* кнопка + */
 addBtn.addEventListener("click", ()=> photoInput.click());
 
-/* debounce */
 function debounce(fn, ms){
   let t;
   return (...a) => {
@@ -254,7 +287,6 @@ function debounce(fn, ms){
   };
 }
 
-/* service worker */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
 }
