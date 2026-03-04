@@ -18,14 +18,6 @@ const addBtn = document.getElementById("addBtn");
 const imageModal = document.getElementById("imageModal");
 const modalImg = document.getElementById("modalImg");
 
-/* ===== ПЛАВНЫЙ ПЕРЕХОД ОТ КРАСНОГО К ИЗУМРУДУ ===== */
-/* 0 → 0deg (красный)
-   10 → 150deg (изумруд)
-*/
-function getHue(rating){
-  return (rating / 10) * 150;
-}
-
 /* утиль */
 function formatDateSimple(datestr){
   if(!datestr) return "";
@@ -35,6 +27,11 @@ function formatDateSimple(datestr){
   const mm = String(d.getMonth()+1).padStart(2,"0");
   const yy = d.getFullYear();
   return `${dd}.${mm}.${yy}`;
+}
+
+function getGlowColor(rating){
+  const hue = 10 + (rating * 4);
+  return `hsl(${hue}, 80%, 55%)`;
 }
 
 function getQueryParam(name){
@@ -66,13 +63,10 @@ function buildCardElement(card){
 
   const el = document.createElement("div");
   el.className = "card";
+  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
 
   const createdAtRaw = card.created_at;
   const categoryVal = card.category || "Разное";
-
-  /* ===== УСТАНОВКА НАЧАЛЬНОГО ЦВЕТА ===== */
-  const initialHue = getHue(card.rating || 0);
-  el.style.setProperty('--hue', initialHue);
 
   el.innerHTML = `
     <img src="${card.image_url || ""}">
@@ -83,14 +77,14 @@ function buildCardElement(card){
     <select class="category-select"></select>
     <div class="created">${formatDateSimple(createdAtRaw)}</div>
   `;
-
   const img = el.querySelector("img");
 
-  img.addEventListener("click", () => {
-    if(!img.src) return;
-    modalImg.src = img.src;
-    imageModal.classList.add("active");
-  });
+img.addEventListener("click", () => {
+  if(!img.src) return;
+
+  modalImg.src = img.src;
+  imageModal.classList.add("active");
+});
 
   /* категории */
   const sel = el.querySelector(".category-select");
@@ -140,32 +134,35 @@ function buildCardElement(card){
 
   let previousRating = Number(slider.value) || 0;
 
-  function updateVisual(value){
-    const percent = (value / 10) * 100;
-    const hue = getHue(value);
+  // initial progress
+  slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
 
-    slider.style.setProperty('--progress', percent + '%');
-    slider.style.setProperty('--hue', hue);
-    el.style.setProperty('--hue', hue);
-
-    ratingEl.textContent = value + "/10";
-  }
-
-  updateVisual(previousRating);
-
+  /* 1) во время перетаскивания */
   slider.addEventListener("input", () => {
+
     const newRating = Number(slider.value) || 0;
-    updateVisual(newRating);
+
+    ratingEl.textContent = newRating + "/10";
+
+    slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
+
+    el.style.boxShadow =
+      `0 35px 60px -25px ${getGlowColor(newRating)}`;
+
     updateStatsFromDOM();
   });
 
+  /* 2) при отпускании — сохраняем */
   slider.addEventListener("change", async () => {
 
     const newRating = Number(slider.value) || 0;
 
     if(!createdAtRaw){
       slider.value = previousRating;
-      updateVisual(previousRating);
+      ratingEl.textContent = previousRating + "/10";
+      slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
+      el.style.boxShadow =
+        `0 35px 60px -25px ${getGlowColor(previousRating)}`;
       updateStatsFromDOM();
       return;
     }
@@ -177,7 +174,10 @@ function buildCardElement(card){
 
     if(error){
       slider.value = previousRating;
-      updateVisual(previousRating);
+      ratingEl.textContent = previousRating + "/10";
+      slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
+      el.style.boxShadow =
+        `0 35px 60px -25px ${getGlowColor(previousRating)}`;
       updateStatsFromDOM();
       alert("Ошибка обновления рейтинга");
       return;
