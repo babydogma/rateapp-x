@@ -123,12 +123,16 @@ function buildCardElement(card, index=0){
 
     // slider change -> live UI update while dragging (input) + persist on release (change)
   const slider = el.querySelector(".slider");
+  const percent = (slider.value / 10) * 100;
+slider.style.setProperty('--progress', percent + '%');
   const ratingEl = el.querySelector(".rating");
 
   // 1) live update while dragging: сразу меняем число и свечение карточки
   slider.addEventListener("input", () => {
     const newRating = Number(slider.value) || 0;
     ratingEl.textContent = newRating + "/10";
+    const percent = (slider.value / 10) * 100;
+slider.style.setProperty('--progress', percent + '%');
     // обновляем визуальное свечение (box-shadow) мгновенно
     el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(newRating)}`;
     updateStatsFromDOM();
