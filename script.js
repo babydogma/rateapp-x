@@ -1,68 +1,18 @@
-/* main script (index.html) — содержит также CATEGORIES и логику */
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const CATEGORIES = [
-  { id: "Фильм", emoji: "🎬" },
-  { id: "Сериалы", emoji: "📺" },
-  { id: "Еда", emoji: "🍔" },
-  { id: "Семья", emoji: "👪" },
-  { id: "Разное", emoji: "🔖" }
-];
 
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 const addBtn = document.getElementById("addBtn");
-const imageModal = document.getElementById("imageModal");
-const modalImg = document.getElementById("modalImg");
 
-/* утиль */
-function formatDateSimple(datestr){
-  if(!datestr) return "";
-  const d = new Date(datestr);
-  if(isNaN(d)) return "";
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yy = d.getFullYear();
-  return `${dd}.${mm}.${yy}`;
-}
-
-/* ===== НОВАЯ ПАЛИТРА ===== */
-function getGlowColor(rating){
-
-  const palette = [
-    { stop: 0,  color: [190, 30, 45] },
-    { stop: 3,  color: [120, 40, 200] },
-    { stop: 5,  color: [212, 175, 55] },
-    { stop: 7,  color: [0, 170, 120] },
-    { stop: 10, color: [0, 255, 200] }
-  ];
-
-  for (let i = 0; i < palette.length - 1; i++) {
-    const current = palette[i];
-    const next = palette[i + 1];
-
-    if (rating >= current.stop && rating <= next.stop) {
-
-      const range = next.stop - current.stop;
-      const progress = (rating - current.stop) / range;
-
-      const r = Math.round(current.color[0] + (next.color[0] - current.color[0]) * progress);
-      const g = Math.round(current.color[1] + (next.color[1] - current.color[1]) * progress);
-      const b = Math.round(current.color[2] + (next.color[2] - current.color[2]) * progress);
-
-      return `rgb(${r}, ${g}, ${b})`;
-    }
-  }
-
-  return "rgb(212,175,55)";
-}
-
-function getQueryParam(name){
-  const url = new URL(location.href);
-  return url.searchParams.get(name);
+/* ===== ПЕРЕХОД ОТ КРАСНОГО К ИЗУМРУДУ ===== */
+/* 0 → 0deg (красный)
+   10 → 150deg (изумруд)
+*/
+function getHue(rating){
+  return (rating / 10) * 150;
 }
 
 function updateStatsFromDOM(){
@@ -77,186 +27,74 @@ function updateStatsFromDOM(){
   let sum = 0;
   cards.forEach(c => {
     const ratingText = c.querySelector(".rating")?.textContent || "0/10";
-    const num = Number(ratingText.split("/")[0]) || 0;
-    sum += num;
+    sum += Number(ratingText.split("/")[0]) || 0;
   });
 
-  stats.textContent = `Средняя оценка: ${(sum/count).toFixed(1)} • Карточек: ${count}`;
+  stats.textContent =
+    `Средняя оценка: ${(sum/count).toFixed(1)} • Карточек: ${count}`;
 }
 
-/* строим карточку */
 function buildCardElement(card){
 
   const el = document.createElement("div");
   el.className = "card";
 
-  /* ===== УСТАНОВКА ЦВЕТА РАМКИ ===== */
-  el.style.setProperty('--borderColor', getGlowColor(card.rating || 0));
-
-  const createdAtRaw = card.created_at;
-  const categoryVal = card.category || "Разное";
-
   el.innerHTML = `
     <img src="${card.image_url || ""}">
-    <div class="delete-btn">✕</div>
     <textarea placeholder="Описание">${card.text || ""}</textarea>
     <div class="rating">${card.rating || 0}/10</div>
     <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
-    <select class="category-select"></select>
-    <div class="created">${formatDateSimple(createdAtRaw)}</div>
+    <div class="created">${new Date().toLocaleDateString()}</div>
   `;
-
-  const img = el.querySelector("img");
-
-  img.addEventListener("click", () => {
-    if(!img.src) return;
-    modalImg.src = img.src;
-    imageModal.classList.add("active");
-  });
-
-  const sel = el.querySelector(".category-select");
-  CATEGORIES.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.id;
-    if(c.id === categoryVal) opt.selected = true;
-    sel.appendChild(opt);
-  });
-
-  el.querySelector(".delete-btn").onclick = async () => {
-    if(!createdAtRaw) return;
-
-    const { error } = await supabaseClient
-      .from("cards")
-      .delete()
-      .eq("created_at", createdAtRaw);
-
-    if(error){
-      alert("Ошибка удаления");
-      return;
-    }
-
-    el.classList.add("fade-out");
-    setTimeout(()=> {
-      el.remove();
-      updateStatsFromDOM();
-    }, 260);
-  };
-
-  el.querySelector("textarea").oninput = debounce(async (e)=> {
-    if(!createdAtRaw) return;
-
-    await supabaseClient
-      .from("cards")
-      .update({ text: e.target.value })
-      .eq("created_at", createdAtRaw);
-  }, 700);
-
-  /* ===== SLIDER LOGIC ===== */
 
   const slider = el.querySelector(".slider");
   const ratingEl = el.querySelector(".rating");
 
-  let previousRating = Number(slider.value) || 0;
+  function updateVisual(){
 
-  slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
+    const value = Number(slider.value);
+    const percent = (value / 10) * 100;
+    const hue = getHue(value);
 
-  slider.addEventListener("input", () => {
+    slider.style.setProperty("--progress", percent + "%");
+    slider.style.setProperty("--hue", hue);
+    el.style.setProperty("--hue", hue);
 
-    const newRating = Number(slider.value) || 0;
+    ratingEl.textContent = value + "/10";
+  }
 
-    ratingEl.textContent = newRating + "/10";
-    slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
+  slider.addEventListener("input", updateVisual);
 
-    /* ===== ОБНОВЛЕНИЕ ЦВЕТА РАМКИ ===== */
-    el.style.setProperty('--borderColor', getGlowColor(newRating));
-
-    updateStatsFromDOM();
-  });
-
-  slider.addEventListener("change", async () => {
-
-    const newRating = Number(slider.value) || 0;
-
-    if(!createdAtRaw){
-      slider.value = previousRating;
-      ratingEl.textContent = previousRating + "/10";
-      slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      el.style.setProperty('--borderColor', getGlowColor(previousRating));
-      updateStatsFromDOM();
-      return;
-    }
-
-    const { error } = await supabaseClient
-      .from("cards")
-      .update({ rating: newRating })
-      .eq("created_at", createdAtRaw);
-
-    if(error){
-      slider.value = previousRating;
-      ratingEl.textContent = previousRating + "/10";
-      slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      el.style.setProperty('--borderColor', getGlowColor(previousRating));
-      updateStatsFromDOM();
-      alert("Ошибка обновления рейтинга");
-      return;
-    }
-
-    previousRating = newRating;
-  });
-
-  sel.addEventListener("change", async () => {
-    if(!createdAtRaw) return;
-
-    const { error } = await supabaseClient
-      .from("cards")
-      .update({ category: sel.value })
-      .eq("created_at", createdAtRaw);
-
-    if(error){
-      alert("Ошибка обновления категории");
-    }
-  });
+  updateVisual();
 
   return el;
 }
 
-/* загрузка карточек */
+/* загрузка */
 async function loadCards(){
 
-  let query = supabaseClient
+  const { data } = await supabaseClient
     .from("cards")
     .select("*")
     .order("created_at", { ascending: false });
 
-  const { data, error } = await query;
-
-  if(error){
-    stats.textContent = "Ошибка загрузки";
-    return;
-  }
-
   grid.innerHTML = "";
-
-  data.forEach(card=>{
+  data.forEach(card => {
     grid.appendChild(buildCardElement(card));
   });
 
   updateStatsFromDOM();
 }
 
-/* загрузка фото */
-photoInput.addEventListener("change", async (e) => {
+/* добавление */
+photoInput.addEventListener("change", async (e)=>{
 
   const file = e.target.files[0];
   if(!file) return;
 
   const fileName = Date.now() + "-" + file.name;
 
-  await supabaseClient
-    .storage
-    .from("photos")
-    .upload(fileName, file);
+  await supabaseClient.storage.from("photos").upload(fileName, file);
 
   const { data } =
     supabaseClient.storage.from("photos").getPublicUrl(fileName);
@@ -265,35 +103,15 @@ photoInput.addEventListener("change", async (e) => {
     .from("cards")
     .insert([{
       image_url: data.publicUrl,
-      text: "",
-      rating: 0,
-      category: "Разное"
+      rating: 0
     }])
     .select()
     .limit(1);
 
   grid.prepend(buildCardElement(inserted[0]));
   updateStatsFromDOM();
-  photoInput.value = "";
 });
 
 addBtn.addEventListener("click", ()=> photoInput.click());
-
-function debounce(fn, ms){
-  let t;
-  return (...a) => {
-    clearTimeout(t);
-    t = setTimeout(()=> fn(...a), ms);
-  };
-}
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
-}
-
-imageModal.addEventListener("click", () => {
-  imageModal.classList.remove("active");
-  modalImg.src = "";
-});
 
 loadCards();
