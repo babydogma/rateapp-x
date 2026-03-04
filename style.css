@@ -216,9 +216,9 @@ textarea{width:100%;margin-top:10px;background:linear-gradient(180deg,#141415,#0
   transform: translate(-50%,-50%);
   width:66px; height:66px; border-radius:50%;
   background: radial-gradient(circle at 30% 30%, #111,#0c0c0d);
-  border: 3px solid rgba(212,175,55,0.25);
+  border: 0;
   display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70;
-  box-shadow:0 12px 30px rgba(0,0,0,0.6), 0 6px 18px rgba(212,175,55,0.12);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
   color: transparent; font-size:0;
 }
 
