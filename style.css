@@ -90,26 +90,26 @@ body::after{
   position: relative;
   border-radius: 24px;
   background: #111;
-  overflow: hidden;
+  overflow: visible;
   z-index: 1;
 }
-/* внешний мягкий золотой glow */
+
 .card::before {
   content: "";
   position: absolute;
-  inset: -40px; /* поднимаем glow выше карточки */
+  inset: -20px;
   z-index: -1;
-  border-radius: 40px;
+  border-radius: 32px;
 
   background: radial-gradient(
-    circle at center,
-    rgba(255,215,120,0.45) 0%,
-    rgba(255,215,120,0.25) 40%,
-    rgba(255,215,120,0.1) 60%,
-    transparent 75%
+    ellipse at center,
+    rgba(255, 215, 120, 0.25) 0%,
+    rgba(255, 215, 120, 0.18) 30%,
+    rgba(255, 215, 120, 0.08) 55%,
+    transparent 70%
   );
 
-  filter: blur(40px);
+  filter: blur(35px);
 }
 
 /* содержимое карточки */
