@@ -310,4 +310,24 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
 }
 
+/* =========================
+   NAVIGATION
+========================= */
+
+document.querySelectorAll(".nav-emoji").forEach(btn => {
+  btn.addEventListener("click", () => {
+
+    const page = btn.dataset.page;
+
+    if(page === "home"){
+      window.location.href = "/index.html";
+    }
+
+    if(page === "categories"){
+      window.location.href = "/categories.html";
+    }
+
+  });
+});
+
 init();
