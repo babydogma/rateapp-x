@@ -15,6 +15,8 @@ const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
 const photoInput = document.getElementById("photoInput");
 const addBtn = document.getElementById("addBtn");
+const imageModal = document.getElementById("imageModal");
+const modalImg = document.getElementById("modalImg");
 
 /* утиль */
 function formatDateSimple(datestr){
@@ -75,6 +77,14 @@ function buildCardElement(card){
     <select class="category-select"></select>
     <div class="created">${formatDateSimple(createdAtRaw)}</div>
   `;
+  const img = el.querySelector("img");
+
+img.addEventListener("click", () => {
+  if(!img.src) return;
+
+  modalImg.src = img.src;
+  imageModal.classList.add("active");
+});
 
   /* категории */
   const sel = el.querySelector(".category-select");
@@ -265,5 +275,10 @@ function debounce(fn, ms){
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
 }
+
+imageModal.addEventListener("click", () => {
+  imageModal.classList.remove("active");
+  modalImg.src = "";
+});
 
 loadCards();
