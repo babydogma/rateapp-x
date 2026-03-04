@@ -201,7 +201,7 @@ function setupCardEvents(el, card){
   });
 
   /* categories */
-  CATEGORIES.forEach(c=>{
+  getCategories().forEach(c=>{
     const opt = document.createElement("option");
     opt.value = c.id;
     opt.textContent = c.id;
