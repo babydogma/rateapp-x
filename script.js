@@ -350,4 +350,35 @@ if (DOM.addBtn && DOM.photoInput) {
   });
 }
 
+if (DOM.photoInput) {
+  DOM.photoInput.addEventListener("change", async (e) => {
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+
+      const imageUrl = await API.uploadPhoto(file);
+
+      const newCard = await API.insertCard({
+        image_url: imageUrl,
+        text: "",
+        rating: 0,
+        category: "Разное"
+      });
+
+      state.cards.unshift(newCard);
+      renderCards();
+      renderStats();
+
+      DOM.photoInput.value = "";
+
+    } catch (err) {
+      alert("Ошибка добавления карточки");
+      console.error(err);
+    }
+
+  });
+}
+
 init();
