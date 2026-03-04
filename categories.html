@@ -21,6 +21,10 @@
   <div class="divider"></div>
 
   <div id="categoriesGrid" class="categories-grid"></div>
+  <div class="category-block category-block--add" id="addCategoryBtn">
+  <div class="cat-emoji">＋</div>
+  <div class="cat-title">Новая категория</div>
+</div>
 
   <!-- нижняя панель (тот же блок для консистентности) -->
   <nav class="bottom-nav" role="navigation" aria-label="Навигация">
@@ -33,13 +37,22 @@
 
 <script>
 /* --- CATEGORIES list (copy of script.js) --- */
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { id: "Фильм", emoji: "🎬" },
   { id: "Сериалы", emoji: "📺" },
   { id: "Еда", emoji: "🍔" },
   { id: "Семья", emoji: "👪" },
   { id: "Разное", emoji: "🔖" }
 ];
+
+function getCategories(){
+  const saved = localStorage.getItem("categories");
+  return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+}
+
+function saveCategories(cats){
+  localStorage.setItem("categories", JSON.stringify(cats));
+}
 
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
