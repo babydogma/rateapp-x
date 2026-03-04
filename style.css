@@ -86,38 +86,37 @@ body::after{
 /* ============================
    Карточки — фон, внутренняя обводка, золотой glow
    ============================ */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .card{
+  --angle: 0deg;
+  --hue: 0;
+
   border-radius: 18px;
   padding: 14px;
   position: relative;
 
+  border: 2px solid transparent;
+
   background:
-    linear-gradient(#141415, #0f0f10) padding-box,
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      transparent 40%,
-      #d4af37 50%,
-      transparent 60%,
-      transparent 100%
+    linear-gradient(#141415,#0f0f10) padding-box,
+    conic-gradient(
+      from var(--angle),
+      hsl(var(--hue), 90%, 55%),
+      transparent 30%,
+      transparent 70%,
+      hsl(var(--hue), 90%, 55%)
     ) border-box;
 
-  background-size: 100% 100%, 300% 300%;
-  background-position: 0 0, 0% 50%;
-
-  border: 1.5px solid transparent;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
-
-  animation: borderMove 5s linear infinite;
+  animation: rotateBorder 4s linear infinite;
 }
 
-@keyframes borderMove {
-  from {
-    background-position: 0 0, 0% 50%;
-  }
-  to {
-    background-position: 0 0, 100% 50%;
-  }
+@keyframes rotateBorder {
+  to { --angle: 360deg; }
 }
 
 /* содержимое карточки */
