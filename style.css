@@ -8,7 +8,6 @@
 
 :root {
 
-  /* Colors */
   --color-gold: #d4af37;
   --color-gold-soft: rgba(212,175,55,0.18);
   --color-gold-border: rgba(212,175,55,0.06);
@@ -20,18 +19,15 @@
   --color-text-primary: #e7e3dc;
   --color-text-secondary: #c6b27a;
 
-  /* Radius */
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 20px;
 
-  /* Spacing */
   --space-xs: 6px;
   --space-sm: 10px;
   --space-md: 18px;
   --space-lg: 25px;
 
-  /* Z-index */
   --z-base: 1;
   --z-nav: 50;
   --z-fab: 60;
@@ -221,36 +217,18 @@ body {
   color: var(--color-text-secondary);
 }
 
-/* Delete button */
-
 .card__delete {
   position: absolute;
-
   top: -5px;
   right: -3px;
-
   padding: 6px;
-
   border: none;
   background: none;
-
   color: var(--color-gold);
   font-size: 20px;
   font-weight: 600;
-
-  line-height: 1;
-
   cursor: pointer;
   z-index: var(--z-fab);
-
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
-}
-
-.card__delete:active {
-  transform: scale(0.85);
-  opacity: 0.7;
 }
 
 /* =========================================================
@@ -263,15 +241,12 @@ body {
   appearance: none;
   height: 6px;
   border-radius: 6px;
-
   background: linear-gradient(
     to right,
     var(--color-gold) var(--progress, 0%),
     #2a2a2a var(--progress, 0%)
   );
-
   box-shadow: 0 0 12px rgba(212,175,55,0.4);
-  transition: background 0.15s ease;
 }
 
 .slider::-webkit-slider-thumb {
@@ -280,16 +255,9 @@ body {
   height: 18px;
   border-radius: 50%;
   background: radial-gradient(circle, #fff, var(--color-gold));
-
   box-shadow:
     0 0 12px rgba(212,175,55,0.8),
     0 0 25px rgba(212,175,55,0.6);
-
-  cursor: pointer;
-}
-
-.slider:active::-webkit-slider-thumb {
-  transform: scale(1.15);
 }
 
 /* =========================================================
@@ -317,7 +285,7 @@ body {
   );
 
   border: 1px solid var(--color-gold-border);
-  backdrop-filter: blur(8px) saturate(1.1);
+  backdrop-filter: blur(8px);
 
   box-shadow: 0 30px 80px rgba(0,0,0,0.6);
   z-index: var(--z-nav);
@@ -326,15 +294,12 @@ body {
 .nav-emoji {
   width: 56px;
   height: 56px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 24px;
   background: none;
   border: none;
-  cursor: pointer;
 }
 
 .add-btn {
@@ -342,29 +307,12 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-
   width: 60px;
   height: 60px;
   border-radius: 50%;
   border: none;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: radial-gradient(
-    circle at 50% 45%,
-    rgba(212,175,55,0.35) 0%,
-    rgba(212,175,55,0.15) 25%,
-    #111 60%,
-    #0c0c0d 100%
-  );
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.7),
-    0 0 18px rgba(212,175,55,0.25);
-
-  z-index: var(--z-fab);
+  background: radial-gradient(circle at 50% 45%, rgba(212,175,55,0.35), #111 70%);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
 }
 
 .add-btn::after {
@@ -382,16 +330,12 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(10px);
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
-
   z-index: var(--z-modal);
 }
 
@@ -404,17 +348,72 @@ body {
   max-width: 90%;
   max-height: 85%;
   border-radius: var(--radius-lg);
-  box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-  transform: scale(0.9);
-  transition: transform 0.25s ease;
-}
-
-.image-modal.active img {
-  transform: scale(1);
 }
 
 /* =========================================================
-   10. ANIMATIONS
+   10. CATEGORIES COMPONENT
+========================================================= */
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding: 0 18px;
+}
+
+.category-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-secondary),
+    var(--color-bg-primary)
+  );
+  border: 1px solid var(--color-gold-border);
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+
+.category-block:active {
+  transform: scale(0.98);
+  border-color: var(--color-gold);
+}
+
+/* ===== КНОПКА СОЗДАНИЯ ===== */
+
+.category-block--add {
+  margin: 28px 18px 120px 18px;
+  border: 2px dashed rgba(212,175,55,0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(212,175,55,0.05),
+    rgba(0,0,0,0.2)
+  );
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.category-block--add:active {
+  transform: scale(0.97);
+  opacity: 1;
+}
+
+.cat-emoji {
+  font-size: 22px;
+}
+
+.cat-title {
+  font-size: 16px;
+}
+
+/* =========================================================
+   11. ANIMATIONS
    ========================================================= */
 
 @keyframes shine {
@@ -424,83 +423,4 @@ body {
 
 @keyframes rotateBorder {
   to { --angle: 360deg; }
-}
-
-/* =========================================================
-   11. RESPONSIVE
-   ========================================================= */
-
-@media (min-width: 900px) {
-  .layout-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .layout-categories {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 420px) {
-  .bottom-nav {
-    height: 72px;
-  }
-
-  .add-btn {
-    width: 56px;
-    height: 56px;
-  }
-
-  .nav-emoji {
-    width: 48px;
-    height: 48px;
-  }
-}
-
-/* =========================================================
-   12. CATEGORIES COMPONENT
-========================================================= */
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
-}
-
-.category-block {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-
-  padding: 16px;
-  border-radius: var(--radius-md);
-
-  text-decoration: none;
-  color: var(--color-text-primary);
-  font-weight: 600;
-
-  background: linear-gradient(
-    180deg,
-    var(--color-bg-secondary),
-    var(--color-bg-primary)
-  );
-
-  border: 1px solid var(--color-gold-border);
-
-  transition:
-    transform 0.15s ease,
-    border-color 0.2s ease;
-}
-
-.category-block:active {
-  transform: scale(0.98);
-  border-color: var(--color-gold);
-}
-
-.cat-emoji {
-  font-size: 22px;
-}
-
-.cat-title {
-  font-size: 16px;
 }
