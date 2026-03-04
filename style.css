@@ -1,35 +1,75 @@
-/* style.css */
+/* style.css — исправленный */
 
 :root{
   --gold: #d4af37;
+  --gold-strong: rgba(212,175,55,1);
+  --gold-soft: rgba(212,175,55,0.18);
+  --bg-dark-1: #0e0e0f;
+  --bg-dark-2: #161618;
+  --card-bg: #111213;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
 html{
+  height:100%;
   background:#000;
 }
 
 body{
   min-height:100vh;
   color:#e7e3dc;
-  padding-bottom:120px;
+  background:transparent;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  position:relative;
 }
 
-/* layout */
+body::after{ display:none; }
+
+.header{padding:25px 20px 10px;text-align:center;font-size:28px;font-weight:700;letter-spacing:1px;color:var(--gold);}
+.stats{text-align:center;font-size:15px;margin-bottom:20px;color:#c6b27a;}
+
+.divider {
+  height: 2px;
+  margin: 28px 40px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(201,168,79,0.2);
+
+  -webkit-mask-image: linear-gradient(to right,transparent 0%,black 15%,black 85%,transparent 100%);
+  mask-image: linear-gradient(to right,transparent 0%,black 15%,black 85%,transparent 100%);
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,transparent 0%,rgba(255,215,120,0.9) 50%,transparent 100%);
+  transform: translateX(100%);
+  animation: shine 4s linear infinite;
+}
+
+@keyframes shine {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
 .grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:18px;
   padding:20px;
+  padding-bottom:calc(120px + env(safe-area-inset-bottom));
+  position:relative;
+  z-index:10;
 }
 
-/* ===== АНИМИРОВАННАЯ РАМКА ===== */
+/* ============================
+   КАРТОЧКИ — АНИМИРОВАННАЯ РАМКА
+   ============================ */
 
 @property --angle {
   syntax: "<angle>";
@@ -42,8 +82,8 @@ body{
   --hue:0;
 
   position:relative;
-  padding:14px;
   border-radius:18px;
+  padding:14px;
   border:2px solid transparent;
 
   background:
@@ -51,49 +91,57 @@ body{
     conic-gradient(
       from var(--angle),
       hsl(var(--hue) 90% 55%),
-      hsl(calc(var(--hue) + 30) 95% 60%),
+      hsl(calc(var(--hue) + 25) 95% 60%),
       hsl(var(--hue) 90% 55%)
     ) border-box;
 
-  animation:spin 5s linear infinite;
+  animation:spin 4s linear infinite;
 }
 
-@keyframes spin{
-  to{ --angle:360deg; }
+@keyframes spin {
+  to { --angle:360deg; }
 }
 
-/* контент */
-.card img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:12px;
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;}
+
+.delete-btn{
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--gold);
+  font-size: 18px;
+  font-weight: 700;
+  transform: translate(6px, -50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 60;
+  cursor: pointer;
 }
 
 textarea{
   width:100%;
   margin-top:10px;
-  background:#141415;
-  border:1px solid rgba(255,255,255,0.05);
+  background:linear-gradient(180deg,#141415,#0f0f10);
+  border:1px solid rgba(212,175,55,0.06);
   border-radius:12px;
   padding:8px;
-  color:#fff;
+  color:#e7e3dc;
   resize:none;
-}
-
-.rating{
-  margin-top:8px;
-  font-weight:600;
-  color:#fff;
-}
-
-.created{
-  margin-top:10px;
   font-size:13px;
-  color:#aaa;
 }
 
-/* ===== СЛАЙДЕР ===== */
+.rating{margin-top:8px;font-weight:600;color:#fff;}
+.created{margin-top:10px;color:#c6b27a;font-size:13px;}
+
+/* ============================
+   SLIDER (ДИНАМИЧЕСКИЙ ЦВЕТ)
+   ============================ */
 
 .slider{
   width:100%;
@@ -101,11 +149,15 @@ textarea{
   appearance:none;
   height:6px;
   border-radius:6px;
+
   background:linear-gradient(
     to right,
-    hsl(var(--hue) 90% 55%) var(--progress,0%),
-    #2a2a2a var(--progress,0%)
+    hsl(var(--hue) 90% 55%) var(--progress, 0%),
+    #2a2a2a var(--progress, 0%)
   );
+
+  box-shadow:0 0 12px hsl(var(--hue) 90% 55% / 0.4);
+  transition: background 0.15s ease;
 }
 
 .slider::-webkit-slider-thumb{
@@ -116,4 +168,13 @@ textarea{
   background:hsl(var(--hue) 90% 55%);
   box-shadow:0 0 15px hsl(var(--hue) 90% 55%);
   cursor:pointer;
+}
+
+.slider:active::-webkit-slider-thumb{
+  transform:scale(1.15);
+}
+
+/* responsive */
+@media (min-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr);}
 }
