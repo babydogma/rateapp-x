@@ -29,11 +29,6 @@ function formatDateSimple(datestr){
   return `${dd}.${mm}.${yy}`;
 }
 
-function getGlowColor(rating){
-  const hue = 10 + (rating * 4);
-  return `hsl(${hue}, 80%, 55%)`;
-}
-
 function getQueryParam(name){
   const url = new URL(location.href);
   return url.searchParams.get(name);
@@ -63,7 +58,6 @@ function buildCardElement(card){
 
   const el = document.createElement("div");
   el.className = "card";
-  el.style.boxShadow = `0 35px 60px -25px ${getGlowColor(card.rating || 0)}`;
 
   const createdAtRaw = card.created_at;
   const categoryVal = card.category || "Разное";
@@ -77,14 +71,14 @@ function buildCardElement(card){
     <select class="category-select"></select>
     <div class="created">${formatDateSimple(createdAtRaw)}</div>
   `;
+
   const img = el.querySelector("img");
 
-img.addEventListener("click", () => {
-  if(!img.src) return;
-
-  modalImg.src = img.src;
-  imageModal.classList.add("active");
-});
+  img.addEventListener("click", () => {
+    if(!img.src) return;
+    modalImg.src = img.src;
+    imageModal.classList.add("active");
+  });
 
   /* категории */
   const sel = el.querySelector(".category-select");
@@ -134,25 +128,18 @@ img.addEventListener("click", () => {
 
   let previousRating = Number(slider.value) || 0;
 
-  // initial progress
   slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
 
-  /* 1) во время перетаскивания */
   slider.addEventListener("input", () => {
 
     const newRating = Number(slider.value) || 0;
 
     ratingEl.textContent = newRating + "/10";
-
     slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
-
-    el.style.boxShadow =
-      `0 35px 60px -25px ${getGlowColor(newRating)}`;
 
     updateStatsFromDOM();
   });
 
-  /* 2) при отпускании — сохраняем */
   slider.addEventListener("change", async () => {
 
     const newRating = Number(slider.value) || 0;
@@ -161,8 +148,6 @@ img.addEventListener("click", () => {
       slider.value = previousRating;
       ratingEl.textContent = previousRating + "/10";
       slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      el.style.boxShadow =
-        `0 35px 60px -25px ${getGlowColor(previousRating)}`;
       updateStatsFromDOM();
       return;
     }
@@ -176,8 +161,6 @@ img.addEventListener("click", () => {
       slider.value = previousRating;
       ratingEl.textContent = previousRating + "/10";
       slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      el.style.boxShadow =
-        `0 35px 60px -25px ${getGlowColor(previousRating)}`;
       updateStatsFromDOM();
       alert("Ошибка обновления рейтинга");
       return;
