@@ -92,30 +92,11 @@ body::after{
   padding:14px;
   position:relative;
   overflow:hidden;
-  transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+  transition:transform .25s ease, opacity .25s ease;
   z-index:10;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.02),
-    0 16px 40px rgba(0,0,0,0.6);
-}
 
-/* внешний мягкий золотой glow */
-.card::before{
-  content:"";
-  position:absolute;
-  left:-20px; right:-20px; top:-20px; bottom:-20px;
-  border-radius:24px;
-  pointer-events:none;
-  background:
-    radial-gradient(ellipse at top center, rgba(212,175,55,0.12), transparent 25%),
-    linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
-  box-shadow:
-  0 0 90px rgba(212,175,55,0.20),
-  0 0 45px rgba(212,175,55,0.12);
-  filter:blur(0.8px);
-  opacity:1;
-  mix-blend-mode: screen;
-  z-index:-1;
+  /* только глубина, без золотого свечения */
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
 }
 
 /* содержимое карточки */
