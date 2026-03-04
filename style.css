@@ -88,6 +88,7 @@ body::after{
    ============================ */
 .card{
   --borderColor: #d4af37;
+  --angle: 0deg;
 
   position: relative;
   border-radius: 18px;
@@ -97,37 +98,18 @@ body::after{
   background:
     linear-gradient(#141415, #0f0f10) padding-box,
     conic-gradient(
-      from 0deg,
+      from var(--angle),
       transparent 0deg,
       var(--borderColor) 40deg,
       transparent 80deg
     ) border-box;
 
-  animation: rotateBorder 4s linear infinite;
+  animation: spin 4s linear infinite;
 }
 
-@keyframes rotateBorder {
-  from {
-    background:
-      linear-gradient(#141415, #0f0f10) padding-box,
-      conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        var(--borderColor) 40deg,
-        transparent 80deg
-      ) border-box;
-  }
-
-  to {
-    background:
-      linear-gradient(#141415, #0f0f10) padding-box,
-      conic-gradient(
-        from 360deg,
-        transparent 0deg,
-        var(--borderColor) 40deg,
-        transparent 80deg
-      ) border-box;
-  }
+@keyframes spin {
+  from { --angle: 0deg; }
+  to { --angle: 360deg; }
 }
 
 /* содержимое карточки */
