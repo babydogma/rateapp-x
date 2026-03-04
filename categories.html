@@ -16,27 +16,33 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
   <div class="header">Категории</div>
-  <div class="stats" id="catsStats">Загрузка...</div>
+  <div class="stats" id="catsStats"></div>
   <div class="divider"></div>
 
+  <!-- СПИСОК КАТЕГОРИЙ -->
   <div id="categoriesGrid" class="categories-grid"></div>
-  <div class="category-block category-block--add" id="addCategoryBtn">
-  <div class="cat-emoji">＋</div>
-  <div class="cat-title">Новая категория</div>
-</div>
 
-  <!-- нижняя панель (тот же блок для консистентности) -->
+  <!-- ОТДЕЛЬНАЯ КНОПКА СОЗДАНИЯ -->
+  <div class="category-block category-block--add" id="addCategoryBtn">
+    <div class="cat-emoji">＋</div>
+    <div class="cat-title">Новая категория</div>
+  </div>
+
+  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
   <nav class="bottom-nav" role="navigation" aria-label="Навигация">
     <button class="nav-emoji" data-page="home" title="Главная">🏠</button>
-
     <button id="addBtnCats" class="add-btn" title="Добавить фото"></button>
-
     <button class="nav-emoji active" data-page="categories" title="Категории">📂</button>
   </nav>
 
 <script>
-/* --- CATEGORIES list (copy of script.js) --- */
+
+/* =========================
+   CATEGORIES
+========================= */
+
 const DEFAULT_CATEGORIES = [
   { id: "Фильм", emoji: "🎬" },
   { id: "Сериалы", emoji: "📺" },
@@ -54,36 +60,83 @@ function saveCategories(cats){
   localStorage.setItem("categories", JSON.stringify(cats));
 }
 
+/* =========================
+   SUPABASE
+========================= */
+
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* =========================
+   DOM
+========================= */
+
 const categoriesGrid = document.getElementById("categoriesGrid");
 const catsStats = document.getElementById("catsStats");
+const addCategoryBtn = document.getElementById("addCategoryBtn");
+
+/* =========================
+   RENDER
+========================= */
 
 function createCategoryBlock(cat){
   const el = document.createElement("a");
   el.className = "category-block";
   el.href = "/index.html?category=" + encodeURIComponent(cat.id);
-  el.innerHTML = `<div class="cat-emoji">${cat.emoji}</div><div class="cat-title">${cat.id}</div>`;
+
+  el.innerHTML = `
+    <div class="cat-emoji">${cat.emoji}</div>
+    <div class="cat-title">${cat.id}</div>
+  `;
+
   return el;
 }
 
 function renderCategoryBlocks(){
   categoriesGrid.innerHTML = "";
-  getCategories().forEach(c=>{
+  const cats = getCategories();
+
+  cats.forEach(c=>{
     categoriesGrid.appendChild(createCategoryBlock(c));
   });
-  catsStats.textContent = ""; // not used here
+
+  catsStats.textContent = `Категорий: ${cats.length}`;
 }
 
+/* =========================
+   ADD CATEGORY
+========================= */
+
+addCategoryBtn.addEventListener("click", () => {
+
+  const name = prompt("Введите название категории:");
+  if(!name || !name.trim()) return;
+
+  const cats = getCategories();
+
+  if(cats.some(c => c.id === name.trim())){
+    alert("Такая категория уже существует");
+    return;
+  }
+
+  cats.push({
+    id: name.trim(),
+    emoji: "📁"
+  });
+
+  saveCategories(cats);
+  renderCategoryBlocks();
+});
+
+/* =========================
+   NAVIGATION
+========================= */
+
 document.getElementById("addBtnCats").addEventListener("click", ()=> {
-  // делегируем открытие file input на index.html - открываем сам input, если есть
-  // просто перенаправим на главную и откроем диалог (index.js откроет input, если в ссылке ?openUpload=1)
   location.href = "/index.html?openUpload=1";
 });
 
-/* nav emoji кнопки */
 document.querySelectorAll('.nav-emoji').forEach(btn=>{
   btn.onclick = () => {
     const page = btn.dataset.page;
@@ -92,7 +145,12 @@ document.querySelectorAll('.nav-emoji').forEach(btn=>{
   };
 });
 
+/* =========================
+   INIT
+========================= */
+
 renderCategoryBlocks();
+
 </script>
 </body>
 </html>
