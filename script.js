@@ -1,7 +1,27 @@
-/* main script (index.html) — содержит также CATEGORIES и логику */
+/* =========================================================
+   RATEAPP X — STRUCTURED SCRIPT
+========================================================= */
+
+/* =========================
+   1. CONFIG
+========================= */
+
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
+const SUPABASE_KEY = "YOUR_PUBLIC_KEY"; // оставь свой
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* =========================
+   2. STATE
+========================= */
+
+const state = {
+  cards: [],
+  loading: false
+};
+
+/* =========================
+   3. CONSTANTS
+========================= */
 
 const CATEGORIES = [
   { id: "Фильм", emoji: "🎬" },
@@ -11,256 +31,33 @@ const CATEGORIES = [
   { id: "Разное", emoji: "🔖" }
 ];
 
-const grid = document.getElementById("grid");
-const stats = document.getElementById("stats");
-const photoInput = document.getElementById("photoInput");
-const addBtn = document.getElementById("addBtn");
-const imageModal = document.getElementById("imageModal");
-const modalImg = document.getElementById("modalImg");
+/* =========================
+   4. DOM
+========================= */
 
-/* утиль */
+const DOM = {
+  grid: document.getElementById("grid"),
+  stats: document.getElementById("stats"),
+  photoInput: document.getElementById("photoInput"),
+  addBtn: document.getElementById("addBtn"),
+  imageModal: document.getElementById("imageModal"),
+  modalImg: document.getElementById("modalImg")
+};
+
+/* =========================
+   5. UTILS
+========================= */
+
 function formatDateSimple(datestr){
   if(!datestr) return "";
   const d = new Date(datestr);
   if(isNaN(d)) return "";
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yy = d.getFullYear();
-  return `${dd}.${mm}.${yy}`;
+  return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`;
 }
 
-/* НОВАЯ ФУНКЦИЯ ЦВЕТА */
 function getHue(rating){
-  return (rating / 10) * 150; // 0 = красный, 10 = изумруд
+  return (rating / 10) * 150;
 }
-
-function getQueryParam(name){
-  const url = new URL(location.href);
-  return url.searchParams.get(name);
-}
-
-function updateStatsFromDOM(){
-  const cards = Array.from(grid.querySelectorAll(".card"));
-  const count = cards.length;
-
-  if(count === 0){
-    stats.textContent = "Пока нет карточек";
-    return;
-  }
-
-  let sum = 0;
-  cards.forEach(c => {
-    const ratingText = c.querySelector(".rating")?.textContent || "0/10";
-    const num = Number(ratingText.split("/")[0]) || 0;
-    sum += num;
-  });
-
-  stats.textContent = `Средняя оценка: ${(sum/count).toFixed(1)} • Карточек: ${count}`;
-}
-
-/* строим карточку */
-function buildCardElement(card){
-
-  const el = document.createElement("div");
-  el.className = "card";
-
-  const createdAtRaw = card.created_at;
-  const categoryVal = card.category || "Разное";
-
-  /* УСТАНАВЛИВАЕМ НАЧАЛЬНЫЙ ЦВЕТ РАМКИ */
-  const initialHue = getHue(card.rating || 0);
-  el.style.setProperty('--hue', initialHue);
-
-  el.innerHTML = `
-    <img src="${card.image_url || ""}">
-    <div class="delete-btn">✕</div>
-    <textarea placeholder="Описание">${card.text || ""}</textarea>
-    <div class="rating">${card.rating || 0}/10</div>
-    <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
-    <select class="category-select"></select>
-    <div class="created">${formatDateSimple(createdAtRaw)}</div>
-  `;
-
-  const img = el.querySelector("img");
-
-  img.addEventListener("click", () => {
-    if(!img.src) return;
-    modalImg.src = img.src;
-    imageModal.classList.add("active");
-  });
-
-  /* категории */
-  const sel = el.querySelector(".category-select");
-  CATEGORIES.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.id;
-    if(c.id === categoryVal) opt.selected = true;
-    sel.appendChild(opt);
-  });
-
-  /* удаление */
-  el.querySelector(".delete-btn").onclick = async () => {
-    if(!createdAtRaw) return;
-
-    const { error } = await supabaseClient
-      .from("cards")
-      .delete()
-      .eq("created_at", createdAtRaw);
-
-    if(error){
-      alert("Ошибка удаления");
-      return;
-    }
-
-    el.classList.add("fade-out");
-    setTimeout(()=> {
-      el.remove();
-      updateStatsFromDOM();
-    }, 260);
-  };
-
-  /* textarea */
-  el.querySelector("textarea").oninput = debounce(async (e)=> {
-    if(!createdAtRaw) return;
-
-    await supabaseClient
-      .from("cards")
-      .update({ text: e.target.value })
-      .eq("created_at", createdAtRaw);
-  }, 700);
-
-  /* ===== SLIDER LOGIC ===== */
-
-  const slider = el.querySelector(".slider");
-  const ratingEl = el.querySelector(".rating");
-
-  let previousRating = Number(slider.value) || 0;
-
-  slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
-  slider.style.setProperty('--hue', initialHue);
-
-  slider.addEventListener("input", () => {
-
-    const newRating = Number(slider.value) || 0;
-    const newHue = getHue(newRating);
-
-    ratingEl.textContent = newRating + "/10";
-
-    slider.style.setProperty('--progress', (slider.value / 10) * 100 + '%');
-    slider.style.setProperty('--hue', newHue);
-    el.style.setProperty('--hue', newHue);
-
-    updateStatsFromDOM();
-  });
-
-  slider.addEventListener("change", async () => {
-
-    const newRating = Number(slider.value) || 0;
-    const newHue = getHue(newRating);
-
-    if(!createdAtRaw){
-      slider.value = previousRating;
-      ratingEl.textContent = previousRating + "/10";
-      slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      slider.style.setProperty('--hue', getHue(previousRating));
-      el.style.setProperty('--hue', getHue(previousRating));
-      updateStatsFromDOM();
-      return;
-    }
-
-    const { error } = await supabaseClient
-      .from("cards")
-      .update({ rating: newRating })
-      .eq("created_at", createdAtRaw);
-
-    if(error){
-      slider.value = previousRating;
-      ratingEl.textContent = previousRating + "/10";
-      slider.style.setProperty('--progress', (previousRating / 10) * 100 + '%');
-      slider.style.setProperty('--hue', getHue(previousRating));
-      el.style.setProperty('--hue', getHue(previousRating));
-      updateStatsFromDOM();
-      alert("Ошибка обновления рейтинга");
-      return;
-    }
-
-    previousRating = newRating;
-  });
-
-  sel.addEventListener("change", async () => {
-    if(!createdAtRaw) return;
-
-    const { error } = await supabaseClient
-      .from("cards")
-      .update({ category: sel.value })
-      .eq("created_at", createdAtRaw);
-
-    if(error){
-      alert("Ошибка обновления категории");
-    }
-  });
-
-  return el;
-}
-
-/* загрузка карточек */
-async function loadCards(){
-
-  let query = supabaseClient
-    .from("cards")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  const { data, error } = await query;
-
-  if(error){
-    stats.textContent = "Ошибка загрузки";
-    return;
-  }
-
-  grid.innerHTML = "";
-
-  data.forEach(card=>{
-    grid.appendChild(buildCardElement(card));
-  });
-
-  updateStatsFromDOM();
-}
-
-/* загрузка фото */
-photoInput.addEventListener("change", async (e) => {
-
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const fileName = Date.now() + "-" + file.name;
-
-  await supabaseClient
-    .storage
-    .from("photos")
-    .upload(fileName, file);
-
-  const { data } =
-    supabaseClient.storage.from("photos").getPublicUrl(fileName);
-
-  const { data: inserted } = await supabaseClient
-    .from("cards")
-    .insert([{
-      image_url: data.publicUrl,
-      text: "",
-      rating: 0,
-      category: "Разное"
-    }])
-    .select()
-    .limit(1);
-
-  grid.prepend(buildCardElement(inserted[0]));
-  updateStatsFromDOM();
-  photoInput.value = "";
-});
-
-addBtn.addEventListener("click", ()=> photoInput.click());
 
 function debounce(fn, ms){
   let t;
@@ -270,13 +67,247 @@ function debounce(fn, ms){
   };
 }
 
+/* =========================
+   6. API LAYER
+========================= */
+
+const API = {
+
+  async fetchCards(){
+    const { data, error } = await supabaseClient
+      .from("cards")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if(error) throw error;
+    return data;
+  },
+
+  async updateCard(idField, idValue, payload){
+    const { error } = await supabaseClient
+      .from("cards")
+      .update(payload)
+      .eq(idField, idValue);
+
+    if(error) throw error;
+  },
+
+  async deleteCard(createdAt){
+    const { error } = await supabaseClient
+      .from("cards")
+      .delete()
+      .eq("created_at", createdAt);
+
+    if(error) throw error;
+  },
+
+  async uploadPhoto(file){
+    const fileName = Date.now() + "-" + file.name;
+
+    await supabaseClient.storage
+      .from("photos")
+      .upload(fileName, file);
+
+    const { data } =
+      supabaseClient.storage.from("photos").getPublicUrl(fileName);
+
+    return data.publicUrl;
+  },
+
+  async insertCard(payload){
+    const { data } = await supabaseClient
+      .from("cards")
+      .insert([payload])
+      .select()
+      .limit(1);
+
+    return data[0];
+  }
+
+};
+
+/* =========================
+   7. UI LAYER
+========================= */
+
+function renderStats(){
+  if(state.cards.length === 0){
+    DOM.stats.textContent = "Пока нет карточек";
+    return;
+  }
+
+  const sum = state.cards.reduce((acc,c)=> acc + (c.rating || 0), 0);
+  const avg = (sum / state.cards.length).toFixed(1);
+
+  DOM.stats.textContent = `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
+}
+
+function buildCardElement(card){
+
+  const el = document.createElement("div");
+  el.className = "card";
+
+  el.style.setProperty('--hue', getHue(card.rating || 0));
+
+  el.innerHTML = `
+    <img class="card__image" src="${card.image_url || ""}">
+    <button class="card__delete">✕</button>
+    <textarea class="card__textarea" placeholder="Описание">${card.text || ""}</textarea>
+    <div class="rating">${card.rating || 0}/10</div>
+    <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
+    <select class="category-select"></select>
+    <div class="created">${formatDateSimple(card.created_at)}</div>
+  `;
+
+  setupCardEvents(el, card);
+
+  return el;
+}
+
+function renderCards(){
+  DOM.grid.innerHTML = "";
+  state.cards.forEach(card=>{
+    DOM.grid.appendChild(buildCardElement(card));
+  });
+}
+
+/* =========================
+   8. CARD EVENTS
+========================= */
+
+function setupCardEvents(el, card){
+
+  const img = el.querySelector(".card__image");
+  const delBtn = el.querySelector(".card__delete");
+  const textarea = el.querySelector(".card__textarea");
+  const slider = el.querySelector(".slider");
+  const ratingEl = el.querySelector(".rating");
+  const select = el.querySelector(".category-select");
+
+  /* modal */
+  img.addEventListener("click", ()=>{
+    if(!img.src) return;
+    DOM.modalImg.src = img.src;
+    DOM.imageModal.classList.add("active");
+  });
+
+  /* categories */
+  CATEGORIES.forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.id;
+    if(c.id === card.category) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  /* delete */
+  delBtn.addEventListener("click", async ()=>{
+    try{
+      await API.deleteCard(card.created_at);
+      state.cards = state.cards.filter(c=>c.created_at !== card.created_at);
+      renderCards();
+      renderStats();
+    } catch{
+      alert("Ошибка удаления");
+    }
+  });
+
+  /* textarea */
+  textarea.addEventListener("input", debounce(async (e)=>{
+    try{
+      await API.updateCard("created_at", card.created_at, { text: e.target.value });
+      card.text = e.target.value;
+    } catch{}
+  }, 600));
+
+  /* slider */
+  slider.addEventListener("input", ()=>{
+    const newRating = Number(slider.value);
+    ratingEl.textContent = newRating + "/10";
+    slider.style.setProperty('--progress', (newRating/10)*100 + '%');
+    el.style.setProperty('--hue', getHue(newRating));
+  });
+
+  slider.addEventListener("change", async ()=>{
+    const newRating = Number(slider.value);
+    try{
+      await API.updateCard("created_at", card.created_at, { rating: newRating });
+      card.rating = newRating;
+      renderStats();
+    } catch{
+      alert("Ошибка обновления рейтинга");
+    }
+  });
+
+  /* category */
+  select.addEventListener("change", async ()=>{
+    try{
+      await API.updateCard("created_at", card.created_at, { category: select.value });
+      card.category = select.value;
+    } catch{
+      alert("Ошибка обновления категории");
+    }
+  });
+
+}
+
+/* =========================
+   9. INIT
+========================= */
+
+async function init(){
+
+  try{
+    state.loading = true;
+    const cards = await API.fetchCards();
+    state.cards = cards;
+    renderCards();
+    renderStats();
+  } catch{
+    DOM.stats.textContent = "Ошибка загрузки";
+  } finally{
+    state.loading = false;
+  }
+
+}
+
+DOM.photoInput.addEventListener("change", async (e)=>{
+
+  const file = e.target.files[0];
+  if(!file) return;
+
+  try{
+    const publicUrl = await API.uploadPhoto(file);
+
+    const newCard = await API.insertCard({
+      image_url: publicUrl,
+      text: "",
+      rating: 0,
+      category: "Разное"
+    });
+
+    state.cards.unshift(newCard);
+    renderCards();
+    renderStats();
+
+  } catch{
+    alert("Ошибка загрузки фото");
+  }
+
+  DOM.photoInput.value = "";
+});
+
+DOM.addBtn.addEventListener("click", ()=>{
+  DOM.photoInput.click();
+});
+
+DOM.imageModal.addEventListener("click", ()=>{
+  DOM.imageModal.classList.remove("active");
+  DOM.modalImg.src = "";
+});
+
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
 }
 
-imageModal.addEventListener("click", () => {
-  imageModal.classList.remove("active");
-  modalImg.src = "";
-});
-
-loadCards();
+init();
