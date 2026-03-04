@@ -86,11 +86,16 @@ body::after{
 /* ============================
    Карточки — фон, внутренняя обводка, золотой glow
    ============================ */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .card{
   --borderColor: #d4af37;
   --angle: 0deg;
-  will-change: transform;
-  transform: translateZ(0);
+
   position: relative;
   border-radius: 18px;
   padding: 14px;
