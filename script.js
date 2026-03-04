@@ -339,4 +339,33 @@ document.querySelectorAll(".nav-emoji").forEach(btn => {
   });
 });
 
+/* =========================
+   FOR CATEGORIES
+========================= */
+
+const addCategoryBtn = document.getElementById("addCategoryBtn");
+
+if(addCategoryBtn){
+  addCategoryBtn.addEventListener("click", () => {
+
+    const name = prompt("Введите название категории:");
+    if(!name || !name.trim()) return;
+
+    const cats = getCategories();
+
+    if(cats.some(c => c.id === name.trim())){
+      alert("Такая категория уже существует");
+      return;
+    }
+
+    cats.push({
+      id: name.trim(),
+      emoji: "📁"
+    });
+
+    saveCategories(cats);
+    alert("Категория добавлена");
+  });
+}
+
 init();
