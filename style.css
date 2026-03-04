@@ -12,15 +12,9 @@
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
-/* фон и тонкий зернистый шум */
 html{
   height:100%;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(212,175,55,0.06), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(184,134,11,0.03), transparent 50%),
-    linear-gradient(160deg,var(--bg-dark-1), var(--bg-dark-2) 60%, #0c0c0d);
-  background-repeat:no-repeat;
-  background-attachment:fixed;
+  background:#000;
 }
 
 /* body + легкий глиттер */
@@ -34,19 +28,9 @@ body{
   overscroll-behavior-y: none;
   position:relative;
 }
+
 body::after{
-  content:"";
-  pointer-events:none;
-  position:fixed;
-  left:0;top:0;right:0;bottom:0;
-  background-image:
-    radial-gradient(rgba(255,215,150,0.03) 0.5px, transparent 0.5px),
-    radial-gradient(rgba(255,215,150,0.01) 0.5px, transparent 0.5px);
-  background-size: 6px 6px, 18px 18px;
-  mix-blend-mode: screen;
-  opacity:0.06;
-  transform:translateZ(0);
-  z-index:1;
+  display:none;
 }
 
 /* заголовки и базовые блоки */
