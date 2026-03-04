@@ -89,7 +89,8 @@ body::after{
 .card{
   --borderColor: #d4af37;
   --angle: 0deg;
-
+  will-change: transform;
+  transform: translateZ(0);
   position: relative;
   border-radius: 18px;
   padding: 14px;
