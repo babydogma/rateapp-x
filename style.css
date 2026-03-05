@@ -178,6 +178,11 @@ body {
   --hue: 0;
 
   position: relative;
+
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+
   padding: 14px;
   border-radius: var(--radius-md);
   border: 2px solid transparent;
@@ -199,12 +204,27 @@ body {
   transform: translateY(-4px);
 }
 
+/* ===== IMAGE LEFT ===== */
+
 .card__image {
-  width: 100%;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
+
+/* ===== RIGHT SIDE CONTENT ===== */
+
+.card__textarea,
+.category-select,
+.rating,
+.created,
+.slider {
+  flex: 1;
+}
+
+/* ===== TEXT AREA ===== */
 
 .card__textarea,
 .category-select {
@@ -222,17 +242,23 @@ body {
   font-size: 14px;
 }
 
+/* ===== RATING ===== */
+
 .rating {
   margin-top: var(--space-sm);
   font-weight: 600;
   color: var(--color-gold);
 }
 
+/* ===== DATE ===== */
+
 .created {
   margin-top: var(--space-sm);
   font-size: 13px;
   color: var(--color-text-secondary);
 }
+
+/* ===== DELETE BUTTON ===== */
 
 .card__delete {
   position: absolute;
