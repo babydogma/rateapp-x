@@ -104,7 +104,7 @@ function debounce(fn, ms){
 
 function getCategoryFromUrl(){
   const params = new URLSearchParams(window.location.search);
-  return params.get("category");
+  return params.get("category") || localStorage.getItem("selectedCategory");
 }
 
 /* безопасный ключ карточки */
