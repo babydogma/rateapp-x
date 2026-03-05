@@ -98,6 +98,32 @@ body {
   color: var(--color-gold);
 }
 
+.brand-main{
+  color: var(--color-gold);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.brand-x{
+  margin-left: 6px;
+
+  font-weight: 900;
+
+  background: linear-gradient(
+      135deg,
+      #d4af37,
+      #ffe08a,
+      #b8962e
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow:
+      0 0 8px rgba(212,175,55,0.6),
+      0 0 20px rgba(212,175,55,0.4);
+}
+
 .stats {
   text-align: center;
   font-size: 15px;
