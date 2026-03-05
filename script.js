@@ -494,7 +494,7 @@ async function init(){
 
     if(categoryFromUrl){
 
-      state.cards=cards.filter(c=>c.category===categoryFromUrl);
+      state.cards = cards.filter(c => (c.category || "Разное") === categoryFromUrl);
 
       if(DOM.stats){
         DOM.stats.textContent=`Категория: ${categoryFromUrl}`;
