@@ -232,7 +232,7 @@ function buildCardElement(card){
 
   el.innerHTML = `
 
-<img class="card__image" src="${card.img || card.image}">
+<img class="card__image" src="${card.image_url || ''}">
 
 <div class="card__content">
 
