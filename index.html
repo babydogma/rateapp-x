@@ -18,36 +18,33 @@
 
 <body>
 
-  <!-- =========================
-       IMAGE MODAL
-  ========================== -->
-  <div id="imageModal" class="image-modal">
-    <img id="modalImg" alt="Preview">
-  </div>
+<div id="imageModal" class="image-modal">
+<img id="modalImg" alt="Preview">
+</div>
 
-  <!-- =========================
-       APP WRAPPER
-  ========================== -->
-  <main class="app">
+<main class="app">
 
-    <!-- Header -->
-    <header class="header">
-      RateApp X
-    </header>
+<div class="header">
+  
+<div class="logo-row">
+<img src="/icons/icon-192.png" class="app-icon">
 
-    <div class="divider"></div>
+<div>
+<div class="logo">RateApp <span>X</span></div>
+<div class="tagline">Rate anything. Instantly.</div>
+</div>
 
-    <!-- Stats -->
-    <section class="stats" id="stats">
-      Загрузка...
-    </section>
+</div>
 
-    <div class="divider"></div>
+<div class="stats">
+⭐ 4.8 average • 2 cards
+</div>
 
-    <!-- =========================
-         RATING FILTERS
-    ========================== -->
-    <section class="rating-filters">
+</div>
+
+<div class="divider"></div>
+
+<section class="rating-filters">
 
 <button id="filterGood" class="rating-filter" data-filter="good">
 🤩
@@ -63,45 +60,40 @@
 
 </section>
 
-    <!-- Cards Grid -->
-    <section class="layout-grid" id="grid"></section>
+<section class="layout-grid" id="grid"></section>
 
-  </main>
+</main>
 
-  <!-- Hidden File Input -->
-  <input id="photoInput" type="file" accept="image/*" hidden>
+<input id="photoInput" type="file" accept="image/*" hidden>
 
-  <!-- =========================
-       Bottom Navigation
-  ========================== -->
-  <nav class="bottom-nav" role="navigation" aria-label="Навигация">
+<nav class="bottom-nav" role="navigation" aria-label="Навигация">
 
-    <button 
-      class="nav-emoji" 
-      data-page="home" 
-      title="Главная"
-      aria-label="Главная"
-    >
-      🏠
-    </button>
+<button 
+class="nav-emoji" 
+data-page="home" 
+title="Главная"
+aria-label="Главная"
+>
+🏠
+</button>
 
-    <button 
-      id="addBtn" 
-      class="add-btn" 
-      aria-label="Добавить фото"
-    ></button>
+<button 
+id="addBtn" 
+class="add-btn" 
+aria-label="Добавить фото"
+></button>
 
-    <button 
-      class="nav-emoji" 
-      data-page="categories" 
-      title="Категории"
-      aria-label="Категории"
-    >
-      📂
-    </button>
+<button 
+class="nav-emoji" 
+data-page="categories" 
+title="Категории"
+aria-label="Категории"
+>
+📂
+</button>
 
-  </nav>
+</nav>
 
-  <script src="/script.js"></script>
+<script src="/script.js"></script>
 </body>
 </html>
