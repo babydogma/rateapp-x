@@ -105,6 +105,20 @@ body {
   color: var(--color-text-secondary);
 }
 
+/* ===== APP LOGO ===== */
+
+.app-title {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.app-title img{
+  width:320px;
+  max-width:90%;
+  display:block;
+}
+
 /* =========================================================
    5. DIVIDER
    ========================================================= */
