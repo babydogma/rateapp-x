@@ -442,6 +442,39 @@ body {
   to { --angle: 360deg; }
 }
 
+.logo-shine {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-shine::after{
+  content: "";
+  position: absolute;
+  top:0;
+  left:-150%;
+  width:150%;
+  height:100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255,215,120,0.0) 30%,
+    rgba(255,235,160,0.6) 50%,
+    rgba(255,215,120,0.0) 70%,
+    transparent 100%
+  );
+
+  animation: shineMove 6s infinite;
+}
+
+@keyframes shineMove{
+  0%{
+    left:-150%;
+  }
+  100%{
+    left:150%;
+  }
+}
 /* ===== DELETE BUTTON (categories) ===== */
 
 .category-delete {
