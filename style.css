@@ -177,7 +177,8 @@ body {
   --angle: 0deg;
   --hue: 0;
 
-  position: relative;
+  position:relative;
+  overflow:hidden;
 
   display: flex;
   gap: 14px;
@@ -274,6 +275,18 @@ body {
   z-index: var(--z-fab);
 }
 
+.card::before{
+content:"";
+position:absolute;
+inset:0;
+border-radius:inherit;
+background:linear-gradient(
+to bottom,
+rgba(255,255,255,0.08),
+rgba(255,255,255,0) 40%
+);
+pointer-events:none;
+}
 /* =========================================================
    7. SLIDER
    ========================================================= */
