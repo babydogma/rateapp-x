@@ -18,33 +18,51 @@
 
 <body>
 
-<div id="imageModal" class="image-modal">
-<img id="modalImg" alt="Preview">
+  <!-- =========================
+       IMAGE MODAL
+  ========================== -->
+  <div id="imageModal" class="image-modal">
+    <img id="modalImg" alt="Preview">
+  </div>
+
+  <!-- =========================
+       APP WRAPPER
+  ========================== -->
+  <main class="app">
+
+    <!-- Header -->
+    <header class="header">
+  <span class="brand-main">RateApp</span>
+  <span class="brand-x">X</span>
+</header>
+
+    <div class="header">
+  <div class="logo-row">
+    <img src="/icon-192.png" class="app-icon">
+    <div>
+      <div class="logo">RateApp <span>X</span></div>
+      <div class="tagline">Rate anything. Instantly.</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    ⭐ 4.8 average • 2 cards
+  </div>
 </div>
 
-<main class="app">
+    <div class="divider"></div>
 
-<div class="header">
-  
-<div class="logo-row">
-<img src="/icons/icon-192.png" class="app-icon">
+    <!-- Stats -->
+    <section class="stats" id="stats">
+      Загрузка...
+    </section>
 
-<div>
-<div class="logo">RateApp <span>X</span></div>
-<div class="tagline">Rate anything. Instantly.</div>
-</div>
+    <div class="divider"></div>
 
-</div>
-
-<div class="stats">
-⭐ 4.8 average • 2 cards
-</div>
-
-</div>
-
-<div class="divider"></div>
-
-<section class="rating-filters">
+    <!-- =========================
+         RATING FILTERS
+    ========================== -->
+    <section class="rating-filters">
 
 <button id="filterGood" class="rating-filter" data-filter="good">
 🤩
@@ -60,40 +78,45 @@
 
 </section>
 
-<section class="layout-grid" id="grid"></section>
+    <!-- Cards Grid -->
+    <section class="layout-grid" id="grid"></section>
 
-</main>
+  </main>
 
-<input id="photoInput" type="file" accept="image/*" hidden>
+  <!-- Hidden File Input -->
+  <input id="photoInput" type="file" accept="image/*" hidden>
 
-<nav class="bottom-nav" role="navigation" aria-label="Навигация">
+  <!-- =========================
+       Bottom Navigation
+  ========================== -->
+  <nav class="bottom-nav" role="navigation" aria-label="Навигация">
 
-<button 
-class="nav-emoji" 
-data-page="home" 
-title="Главная"
-aria-label="Главная"
->
-🏠
-</button>
+    <button 
+      class="nav-emoji" 
+      data-page="home" 
+      title="Главная"
+      aria-label="Главная"
+    >
+      🏠
+    </button>
 
-<button 
-id="addBtn" 
-class="add-btn" 
-aria-label="Добавить фото"
-></button>
+    <button 
+      id="addBtn" 
+      class="add-btn" 
+      aria-label="Добавить фото"
+    ></button>
 
-<button 
-class="nav-emoji" 
-data-page="categories" 
-title="Категории"
-aria-label="Категории"
->
-📂
-</button>
+    <button 
+      class="nav-emoji" 
+      data-page="categories" 
+      title="Категории"
+      aria-label="Категории"
+    >
+      📂
+    </button>
 
-</nav>
+  </nav>
 
-<script src="/script.js"></script>
+  <script src="/script.js"></script>
 </body>
 </html>
