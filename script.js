@@ -211,7 +211,7 @@ function buildCardElement(card){
     <button class="card__delete">✕</button>
     <textarea class="card__textarea" placeholder="Описание">${card.text || ""}</textarea>
     <div class="rating">${card.rating || 0}/10</div>
-    <input type="range" min="0" max="10" value="${card.rating || 0}" class="slider">
+    <input type="range" min="0" max="10" step="0.5" value="${card.rating || 0}" class="slider">
     <select class="category-select"></select>
     <div class="created">${formatDateSimple(card.created_at)}</div>
   `;
