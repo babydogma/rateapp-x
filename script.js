@@ -275,7 +275,7 @@ function setupCardEvents(el, card){
 
   slider.addEventListener("input", ()=>{
     const newRating = Number(slider.value);
-    ratingEl.textContent = newRating.toFixed(1) + "/10";
+    ratingEl.textContent = (newRating % 1 === 0 ? newRating.toFixed(0) : newRating.toFixed(1)) + "/10";
     el.style.setProperty('--hue', getHue(newRating));
   });
 
