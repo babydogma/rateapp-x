@@ -17,7 +17,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const state = {
   cards: [],
   loading: false,
-  activeCategory: null
+  activeCategory: null,
+  ratingFilter: null
 };
 
 /* =========================
@@ -93,7 +94,10 @@ const DOM = {
   photoInput: document.getElementById("photoInput"),
   addBtn: document.getElementById("addBtn"),
   imageModal: document.getElementById("imageModal"),
-  modalImg: document.getElementById("modalImg")
+  modalImg: document.getElementById("modalImg"),
+  filterGood: document.getElementById("filterGood"),
+  filterMid: document.getElementById("filterMid"),
+  filterBad: document.getElementById("filterBad")
 };
 
 /* =========================
@@ -188,6 +192,7 @@ const API = {
 ========================= */
 
 function renderStats(){
+
   if(state.cards.length === 0){
     DOM.stats.textContent = "Пока нет карточек";
     return;
@@ -198,6 +203,25 @@ function renderStats(){
 
   DOM.stats.textContent =
     `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
+}
+
+function getFilteredCards(){
+
+  if(!state.ratingFilter) return state.cards;
+
+  if(state.ratingFilter === "good"){
+    return state.cards.filter(c => c.rating >= 7);
+  }
+
+  if(state.ratingFilter === "mid"){
+    return state.cards.filter(c => c.rating >= 4 && c.rating < 7);
+  }
+
+  if(state.ratingFilter === "bad"){
+    return state.cards.filter(c => c.rating < 4);
+  }
+
+  return state.cards;
 }
 
 function buildCardElement(card){
@@ -221,8 +245,12 @@ function buildCardElement(card){
 }
 
 function renderCards(){
+
   DOM.grid.innerHTML = "";
-  state.cards.forEach(card=>{
+
+  const cards = getFilteredCards();
+
+  cards.forEach(card=>{
     DOM.grid.appendChild(buildCardElement(card));
   });
 }
@@ -240,7 +268,6 @@ function setupCardEvents(el, card){
   const ratingEl = el.querySelector(".rating");
   const select = el.querySelector(".category-select");
 
-  // ===== ОТКРЫТИЕ МОДАЛКИ =====
   img.addEventListener("click", () => {
     if (!card.image_url) return;
     DOM.modalImg.src = card.image_url;
@@ -301,6 +328,34 @@ function setupCardEvents(el, card){
 }
 
 /* =========================
+   FILTER BUTTONS
+========================= */
+
+function setupFilters(){
+
+  if(DOM.filterGood){
+    DOM.filterGood.onclick = () => {
+      state.ratingFilter = state.ratingFilter === "good" ? null : "good";
+      renderCards();
+    };
+  }
+
+  if(DOM.filterMid){
+    DOM.filterMid.onclick = () => {
+      state.ratingFilter = state.ratingFilter === "mid" ? null : "mid";
+      renderCards();
+    };
+  }
+
+  if(DOM.filterBad){
+    DOM.filterBad.onclick = () => {
+      state.ratingFilter = state.ratingFilter === "bad" ? null : "bad";
+      renderCards();
+    };
+  }
+}
+
+/* =========================
    NAVIGATION
 ========================= */
 
@@ -349,8 +404,6 @@ if (DOM.photoInput) {
   });
 }
 
-/* ===== ЗАКРЫТИЕ МОДАЛКИ ===== */
-
 if (DOM.imageModal) {
   DOM.imageModal.addEventListener("click", () => {
     DOM.imageModal.classList.remove("active");
@@ -382,6 +435,7 @@ async function init(){
 
     renderCards();
     renderStats();
+    setupFilters();
 
   } catch{
     if(DOM.stats){
