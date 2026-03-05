@@ -68,7 +68,7 @@ body {
 
 .layout-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--space-md);
   padding: 20px;
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
