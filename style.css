@@ -465,6 +465,47 @@ body {
    12. RATING FILTERS
    ========================================================= */
 
+.rating-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+  padding: 0 20px;
+}
+
+.rating-filter {
+  flex: 1;
+
+  height: 42px;
+
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gold-border);
+
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-secondary),
+    var(--color-bg-primary)
+  );
+
+  font-size: 20px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rating-filter:active {
+  transform: scale(0.96);
+  border-color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+}
+
 /* контейнер фильтров */
 .rating-filters{
     display:flex;
@@ -493,8 +534,4 @@ body {
 /* активный фильтр */
 .rating-filter.active{
     border:1px solid #d4af37;
-}
-
-.rating-filter:active{
-    transform:scale(0.95);
 }
