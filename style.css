@@ -533,5 +533,12 @@ body {
 
 /* активный фильтр */
 .rating-filter.active{
+
     border:1px solid #d4af37;
+
+    box-shadow:
+        0 0 0 1px rgba(212,175,55,0.6),
+        0 0 10px rgba(212,175,55,0.35);
+
+    transform: translateY(-1px);
 }
