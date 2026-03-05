@@ -1,5 +1,5 @@
 /* =========================================================
-   RATEAPP X — STRUCTURED SCRIPT (SAFE IMPROVED VERSION)
+   RATEAPP X — STRUCTURED SCRIPT
 ========================================================= */
 
 /* =========================
@@ -22,28 +22,7 @@ const state = {
 };
 
 /* =========================
-   3. CACHE
-========================= */
-
-const CACHE_KEY = "rateapp_cards_cache";
-
-function saveCardsCache(cards){
-  try{
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cards));
-  }catch{}
-}
-
-function loadCardsCache(){
-  try{
-    const cached = localStorage.getItem(CACHE_KEY);
-    return cached ? JSON.parse(cached) : null;
-  }catch{
-    return null;
-  }
-}
-
-/* =========================
-   4. CATEGORIES
+   3. CATEGORIES
 ========================= */
 
 const DEFAULT_CATEGORIES = [
@@ -63,8 +42,50 @@ function saveCategories(cats){
   localStorage.setItem("categories", JSON.stringify(cats));
 }
 
+/* ===== УДАЛЕНИЕ КАТЕГОРИИ ===== */
+
+async function deleteCategory(categoryId){
+
+  if(categoryId === "Разное"){
+    alert('Категорию "Разное" удалить нельзя');
+    return;
+  }
+
+  const confirmDelete = confirm(
+    `Удалить категорию "${categoryId}"?\nКарточки будут перемещены в "Разное".`
+  );
+
+  if(!confirmDelete) return;
+
+  try{
+
+    let categories = getCategories();
+    let misc = categories.find(c => c.id === "Разное");
+
+    if(!misc){
+      misc = { id: "Разное", emoji: "🔖" };
+      categories.push(misc);
+      saveCategories(categories);
+    }
+
+    await supabaseClient
+      .from("cards")
+      .update({ category: "Разное" })
+      .eq("category", categoryId);
+
+    categories = categories.filter(c => c.id !== categoryId);
+    saveCategories(categories);
+
+    alert("Категория удалена");
+    window.location.reload();
+
+  } catch {
+    alert("Ошибка удаления категории");
+  }
+}
+
 /* =========================
-   5. DOM
+   4. DOM
 ========================= */
 
 const DOM = {
@@ -80,7 +101,7 @@ const DOM = {
 };
 
 /* =========================
-   6. UTILS
+   5. UTILS
 ========================= */
 
 function formatDateSimple(datestr){
@@ -96,87 +117,66 @@ function getHue(rating){
 
 function debounce(fn, ms){
   let t;
-  return (...a)=>{
+  return (...a) => {
     clearTimeout(t);
-    t=setTimeout(()=>fn(...a),ms);
+    t = setTimeout(()=> fn(...a), ms);
   };
 }
 
 function getCategoryFromUrl(){
   const params = new URLSearchParams(window.location.search);
-  return params.get("category") || localStorage.getItem("selectedCategory");
-}
-
-/* безопасный ключ карточки */
-
-function getCardKey(card){
-  return card.id ?? card.created_at;
-}
-
-function getCardField(card){
-  return card.id ? "id" : "created_at";
+  return params.get("category");
 }
 
 /* =========================
-   7. API
+   6. API
 ========================= */
 
 const API = {
 
   async fetchCards(){
-
     const { data, error } = await supabaseClient
       .from("cards")
       .select("*")
-      .order("created_at",{ascending:false});
+      .order("created_at", { ascending: false });
 
     if(error) throw error;
     return data;
   },
 
-  async updateCard(card, payload){
-
-    const field = getCardField(card);
-    const key = getCardKey(card);
-
+  async updateCard(idField, idValue, payload){
     const { error } = await supabaseClient
       .from("cards")
       .update(payload)
-      .eq(field,key);
+      .eq(idField, idValue);
 
     if(error) throw error;
   },
 
-  async deleteCard(card){
-
-    const field = getCardField(card);
-    const key = getCardKey(card);
-
+  async deleteCard(createdAt){
     const { error } = await supabaseClient
       .from("cards")
       .delete()
-      .eq(field,key);
+      .eq("created_at", createdAt);
 
     if(error) throw error;
   },
 
   async uploadPhoto(file){
-
-    const fileName = Date.now()+"-"+file.name;
+    const fileName = Date.now() + "-" + file.name;
 
     await supabaseClient.storage
       .from("photos")
-      .upload(fileName,file);
+      .upload(fileName, file);
 
-    const {data} =
+    const { data } =
       supabaseClient.storage.from("photos").getPublicUrl(fileName);
 
     return data.publicUrl;
   },
 
   async insertCard(payload){
-
-    const {data} = await supabaseClient
+    const { data } = await supabaseClient
       .from("cards")
       .insert([payload])
       .select()
@@ -188,20 +188,20 @@ const API = {
 };
 
 /* =========================
-   8. UI
+   7. UI
 ========================= */
 
 function renderStats(){
 
-  if(state.cards.length===0){
-    DOM.stats.textContent="Пока нет карточек";
+  if(state.cards.length === 0){
+    DOM.stats.textContent = "Пока нет карточек";
     return;
   }
 
-  const sum=state.cards.reduce((a,c)=>a+(c.rating||0),0);
-  const avg=(sum/state.cards.length).toFixed(1);
+  const sum = state.cards.reduce((acc,c)=> acc + (c.rating || 0), 0);
+  const avg = (sum / state.cards.length).toFixed(1);
 
-  DOM.stats.textContent=
+  DOM.stats.textContent =
     `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
 }
 
@@ -209,16 +209,16 @@ function getFilteredCards(){
 
   if(!state.ratingFilter) return state.cards;
 
-  if(state.ratingFilter==="good"){
-    return state.cards.filter(c=>c.rating>=7);
+  if(state.ratingFilter === "good"){
+    return state.cards.filter(c => c.rating >= 7);
   }
 
-  if(state.ratingFilter==="mid"){
-    return state.cards.filter(c=>c.rating>=4&&c.rating<7);
+  if(state.ratingFilter === "mid"){
+    return state.cards.filter(c => c.rating >= 4 && c.rating < 7);
   }
 
-  if(state.ratingFilter==="bad"){
-    return state.cards.filter(c=>c.rating<4);
+  if(state.ratingFilter === "bad"){
+    return state.cards.filter(c => c.rating < 4);
   }
 
   return state.cards;
@@ -226,29 +226,29 @@ function getFilteredCards(){
 
 function buildCardElement(card){
 
-  const el=document.createElement("div");
-  el.className="card";
-  el.style.setProperty('--hue',getHue(card.rating||0));
+  const el = document.createElement("div");
+  el.className = "card";
+  el.style.setProperty('--hue', getHue(card.rating || 0));
 
-  el.innerHTML=`
-  <img class="card__image" loading="lazy" src="${card.image_url||""}">
-  <button class="card__delete">✕</button>
-  <textarea class="card__textarea" placeholder="Описание">${card.text||""}</textarea>
-  <div class="rating">${card.rating||0}/10</div>
-  <input type="range" min="0" max="10" step="0.5" value="${card.rating||0}" class="slider">
-  <select class="category-select"></select>
-  <div class="created">${formatDateSimple(card.created_at)}</div>
+  el.innerHTML = `
+    <img class="card__image" src="${card.image_url || ""}">
+    <button class="card__delete">✕</button>
+    <textarea class="card__textarea" placeholder="Описание">${card.text || ""}</textarea>
+    <div class="rating">${card.rating || 0}/10</div>
+    <input type="range" min="0" max="10" step="0.5" value="${card.rating || 0}" class="slider">
+    <select class="category-select"></select>
+    <div class="created">${formatDateSimple(card.created_at)}</div>
   `;
 
-  setupCardEvents(el,card);
+  setupCardEvents(el, card);
   return el;
 }
 
 function renderCards(){
 
-  DOM.grid.innerHTML="";
+  DOM.grid.innerHTML = "";
 
-  const cards=getFilteredCards();
+  const cards = getFilteredCards();
 
   cards.forEach(card=>{
     DOM.grid.appendChild(buildCardElement(card));
@@ -256,216 +256,158 @@ function renderCards(){
 }
 
 /* =========================
-   9. CARD EVENTS
+   8. CARD EVENTS
 ========================= */
 
-function setupCardEvents(el,card){
+function setupCardEvents(el, card){
 
-  const img=el.querySelector(".card__image");
-  const delBtn=el.querySelector(".card__delete");
-  const textarea=el.querySelector(".card__textarea");
-  const slider=el.querySelector(".slider");
-  const ratingEl=el.querySelector(".rating");
-  const select=el.querySelector(".category-select");
+  const img = el.querySelector(".card__image");
+  const delBtn = el.querySelector(".card__delete");
+  const textarea = el.querySelector(".card__textarea");
+  const slider = el.querySelector(".slider");
+  const ratingEl = el.querySelector(".rating");
+  const select = el.querySelector(".category-select");
 
-  img.addEventListener("click",()=>{
-    if(!card.image_url)return;
-    DOM.modalImg.src=card.image_url;
+  img.addEventListener("click", () => {
+    if (!card.image_url) return;
+    DOM.modalImg.src = card.image_url;
     DOM.imageModal.classList.add("active");
   });
 
   getCategories().forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=c.id;
-    opt.textContent=c.id;
-    if(c.id===card.category)opt.selected=true;
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.id;
+    if(c.id === card.category) opt.selected = true;
     select.appendChild(opt);
   });
 
-  delBtn.addEventListener("click",async()=>{
-
+  delBtn.addEventListener("click", async ()=>{
     try{
-
-      await API.deleteCard(card);
-
-      state.cards=
-        state.cards.filter(c=>getCardKey(c)!==getCardKey(card));
-
-      saveCardsCache(state.cards);
-
+      await API.deleteCard(card.created_at);
+      state.cards = state.cards.filter(c=>c.created_at !== card.created_at);
       renderCards();
       renderStats();
-
-    }catch{
+    } catch{
       alert("Ошибка удаления");
     }
-
   });
 
-  textarea.addEventListener("input",
-    debounce(async(e)=>{
-
-      try{
-
-        await API.updateCard(card,{text:e.target.value});
-
-        card.text=e.target.value;
-        saveCardsCache(state.cards);
-
-      }catch{}
-
-  },600));
-
-  slider.addEventListener("input",()=>{
-
-    const newRating=Number(slider.value);
-
-    ratingEl.textContent=
-      (newRating%1===0?newRating.toFixed(0):newRating.toFixed(1))+"/10";
-
-    el.style.setProperty('--hue',getHue(newRating));
-  });
-
-  slider.addEventListener("change",async()=>{
-
-    const newRating=Number(slider.value);
-
+  textarea.addEventListener("input", debounce(async (e)=>{
     try{
+      await API.updateCard("created_at", card.created_at, { text: e.target.value });
+      card.text = e.target.value;
+    } catch{}
+  }, 600));
 
-      await API.updateCard(card,{rating:newRating});
+  slider.addEventListener("input", ()=>{
+    const newRating = Number(slider.value);
+    ratingEl.textContent = (newRating % 1 === 0 ? newRating.toFixed(0) : newRating.toFixed(1)) + "/10";
+    el.style.setProperty('--hue', getHue(newRating));
+  });
 
-      card.rating=newRating;
-
-      saveCardsCache(state.cards);
-
+  slider.addEventListener("change", async ()=>{
+    const newRating = Number(slider.value);
+    try{
+      await API.updateCard("created_at", card.created_at, { rating: newRating });
+      card.rating = newRating;
       renderStats();
-
-    }catch{
-
+    } catch{
       alert("Ошибка обновления рейтинга");
-
     }
-
   });
 
-  select.addEventListener("change",async()=>{
-
+  select.addEventListener("change", async ()=>{
     try{
-
-      await API.updateCard(card,{category:select.value});
-
-      card.category=select.value;
-      saveCardsCache(state.cards);
-
-    }catch{
-
+      await API.updateCard("created_at", card.created_at, { category: select.value });
+      card.category = select.value;
+    } catch{
       alert("Ошибка обновления категории");
-
     }
-
   });
-
 }
 
 /* =========================
-   FILTERS
+   FILTER BUTTONS
 ========================= */
 
 function setupFilters(){
 
   if(DOM.filterGood){
-    DOM.filterGood.onclick=()=>{
-      state.ratingFilter=state.ratingFilter==="good"?null:"good";
+    DOM.filterGood.onclick = () => {
+      state.ratingFilter = state.ratingFilter === "good" ? null : "good";
       renderCards();
     };
   }
 
   if(DOM.filterMid){
-    DOM.filterMid.onclick=()=>{
-      state.ratingFilter=state.ratingFilter==="mid"?null:"mid";
+    DOM.filterMid.onclick = () => {
+      state.ratingFilter = state.ratingFilter === "mid" ? null : "mid";
       renderCards();
     };
   }
 
   if(DOM.filterBad){
-    DOM.filterBad.onclick=()=>{
-      state.ratingFilter=state.ratingFilter==="bad"?null:"bad";
+    DOM.filterBad.onclick = () => {
+      state.ratingFilter = state.ratingFilter === "bad" ? null : "bad";
       renderCards();
     };
   }
-
 }
 
 /* =========================
-   PHOTO UPLOAD
+   NAVIGATION
 ========================= */
 
-if(DOM.addBtn&&DOM.photoInput){
+document.querySelectorAll(".nav-emoji").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const page = btn.dataset.page;
+    if(page === "home") window.location.href = "/index.html";
+    if(page === "categories") window.location.href = "/categories.html";
+  });
+});
 
-  DOM.addBtn.addEventListener("click",()=>{
+if (DOM.addBtn && DOM.photoInput) {
+  DOM.addBtn.addEventListener("click", () => {
     DOM.photoInput.click();
   });
-
 }
 
-if(DOM.photoInput){
+if (DOM.photoInput) {
+  DOM.photoInput.addEventListener("change", async (e) => {
 
-  DOM.photoInput.addEventListener("change",async(e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const file=e.target.files[0];
-    if(!file)return;
+    try {
 
-    if(!file.type.startsWith("image/")){
-      alert("Можно загружать только изображения");
-      return;
-    }
+      const imageUrl = await API.uploadPhoto(file);
 
-    if(file.size>8*1024*1024){
-      alert("Файл слишком большой (макс 8MB)");
-      return;
-    }
-
-    try{
-
-      const imageUrl=await API.uploadPhoto(file);
-
-      const newCard=await API.insertCard({
-        image_url:imageUrl,
-        text:"",
-        rating:0,
-        category:"Разное"
+      const newCard = await API.insertCard({
+        image_url: imageUrl,
+        text: "",
+        rating: 0,
+        category: "Разное"
       });
 
       state.cards.unshift(newCard);
-
-      saveCardsCache(state.cards);
-
       renderCards();
       renderStats();
 
-      DOM.photoInput.value="";
+      DOM.photoInput.value = "";
 
-    }catch(err){
-
+    } catch (err) {
       alert("Ошибка добавления карточки");
       console.error(err);
-
     }
 
   });
-
 }
 
-/* =========================
-   MODAL
-========================= */
-
-if(DOM.imageModal){
-
-  DOM.imageModal.addEventListener("click",()=>{
+if (DOM.imageModal) {
+  DOM.imageModal.addEventListener("click", () => {
     DOM.imageModal.classList.remove("active");
   });
-
 }
 
 /* =========================
@@ -475,55 +417,33 @@ if(DOM.imageModal){
 async function init(){
 
   try{
+    state.loading = true;
 
-    state.loading=true;
+    const cards = await API.fetchCards();
+    const categoryFromUrl = getCategoryFromUrl();
 
-    const cached=loadCardsCache();
-
-    if(cached){
-      state.cards=cached;
-      renderCards();
-      renderStats();
-    }
-
-    const cards=await API.fetchCards();
-
-    const categoryFromUrl=getCategoryFromUrl();
-
-    state.activeCategory=categoryFromUrl;
+    state.activeCategory = categoryFromUrl;
 
     if(categoryFromUrl){
-
-      state.cards = cards.filter(c => (c.category || "Разное") === categoryFromUrl);
-
+      state.cards = cards.filter(c => c.category === categoryFromUrl);
       if(DOM.stats){
-        DOM.stats.textContent=`Категория: ${categoryFromUrl}`;
+        DOM.stats.textContent = `Категория: ${categoryFromUrl}`;
       }
-
-    }else{
-
-      state.cards=cards;
-
+    } else {
+      state.cards = cards;
     }
-
-    saveCardsCache(cards);
 
     renderCards();
     renderStats();
     setupFilters();
 
-  }catch{
-
+  } catch{
     if(DOM.stats){
-      DOM.stats.textContent="Ошибка загрузки";
+      DOM.stats.textContent = "Ошибка загрузки";
     }
-
-  }finally{
-
-    state.loading=false;
-
+  } finally{
+    state.loading = false;
   }
-
 }
 
 init();
