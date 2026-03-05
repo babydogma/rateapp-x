@@ -442,37 +442,31 @@ body {
   to { --angle: 360deg; }
 }
 
-.logo-shine {
-  position: relative;
-  display: inline-block;
-}
-
-.logo-shine::after{
-  content: "";
-  position: absolute;
-  top:0;
-  left:-150%;
-  width:150%;
-  height:100%;
+.logo-text{
+  font-size:48px;
+  font-weight:600;
+  text-align:center;
 
   background: linear-gradient(
-    120deg,
-    transparent 0%,
-    rgba(255,215,120,0.0) 30%,
-    rgba(255,235,160,0.6) 50%,
-    rgba(255,215,120,0.0) 70%,
-    transparent 100%
+    90deg,
+    #c9a96a,
+    #fff3c4,
+    #c9a96a
   );
 
-  animation: shineMove 6s infinite;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  background-size:200% auto;
+  animation: goldMove 6s linear infinite;
 }
 
-@keyframes shineMove{
+@keyframes goldMove{
   0%{
-    left:-150%;
+    background-position:-200% center;
   }
   100%{
-    left:150%;
+    background-position:200% center;
   }
 }
 /* ===== DELETE BUTTON (categories) ===== */
