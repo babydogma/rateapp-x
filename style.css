@@ -1,5 +1,5 @@
 /* =========================================================
-   RATEAPP X — STRUCTURED CSS 
+   RATEAPP X — STRUCTURED CSS
    ========================================================= */
 
 /* =========================================================
@@ -89,43 +89,20 @@ body {
    4. HEADER / TEXT
    ========================================================= */
 
-.header{
-  text-align:center;
-  padding:20px;
+.header {
+  padding: var(--space-lg) 20px 10px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-gold);
 }
 
-.logo-row{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-}
-
-.app-icon{
-  width:36px;
-  height:36px;
-  border-radius:10px;
-}
-
-.logo{
-  font-size:30px;
-  font-weight:700;
-  color:#d4af37;
-}
-
-.logo span{
-  color:#ffd700;
-}
-
-.tagline{
-  font-size:13px;
-  opacity:0.7;
-}
-
-.stats{
-  margin-top:10px;
-  font-size:15px;
-  opacity:0.8;
+.stats {
+  text-align: center;
+  font-size: 15px;
+  margin-bottom: 20px;
+  color: var(--color-text-secondary);
 }
 
 /* =========================================================
