@@ -278,20 +278,55 @@ box-shadow:
   color: var(--color-text-secondary);
 }
 
-/* ===== DELETE BUTTON ===== */
+/* SWIPE CONTAINER */
 
-.card__delete {
-  position: absolute;
-  top: -5px;
-  right: -3px;
-  padding: 6px;
-  border: none;
-  background: none;
-  color: var(--color-gold);
-  font-size: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: var(--z-fab);
+.swipe-wrapper{
+position:relative;
+overflow:hidden;
+margin-bottom:22px;
+}
+
+/* DELETE BACKGROUND */
+
+.delete-bg{
+position:absolute;
+right:0;
+top:0;
+bottom:0;
+width:120px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+background:linear-gradient(180deg,#ff4d4d,#d80000);
+color:white;
+
+font-size:28px;
+
+border-radius:26px;
+
+opacity:0.95;
+}
+
+/* CARD */
+
+.card{
+position:relative;
+z-index:2;
+
+transition:transform 0.25s ease;
+touch-action:pan-y;
+}
+
+/* DELETE ANIMATION */
+
+.card.removing{
+
+transform:translateX(-120%);
+opacity:0;
+
+transition:transform 0.35s ease, opacity 0.35s ease;
 }
 
 .card::before{
