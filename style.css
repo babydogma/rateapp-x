@@ -373,6 +373,9 @@ box-shadow:
 0 2px 8px rgba(0,0,0,0.35);
 
 z-index:50;
+
+overflow:visible;
+   
 }
 
 .nav-emoji {
@@ -387,8 +390,14 @@ z-index:50;
 }
 
 .add-btn{
-width:64px;
-height:64px;
+
+position:absolute;
+left:50%;
+top:-22px;
+transform:translateX(-50%);
+
+width:68px;
+height:68px;
 
 border-radius:50%;
 
@@ -396,27 +405,38 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-font-size:34px;
-font-weight:600;
+font-size:36px;
+font-weight:700;
 
-color:var(--color-gold);
+color:#0b0b0b;
 
-background:rgba(255,255,255,0.05);
-border:1px solid rgba(255,215,120,0.25);
+background:radial-gradient(
+circle at 30% 30%,
+#fff6cc,
+#e0b84f 60%,
+#b98a2c
+);
 
-backdrop-filter:blur(10px);
+border:2px solid rgba(255,215,120,0.5);
 
 box-shadow:
-0 6px 20px rgba(0,0,0,0.6),
-0 0 20px rgba(255,200,80,0.15);
+0 8px 25px rgba(0,0,0,0.7),
+0 0 20px rgba(255,215,120,0.7),
+0 0 45px rgba(255,200,80,0.45);
+
+backdrop-filter:blur(8px);
+
+z-index:60;
 
 transition:all .25s ease;
 }
 
 .add-btn:active{
-transform:scale(.92);
+transform:translateX(-50%) scale(.9);
+
 box-shadow:
-0 4px 12px rgba(0,0,0,0.8);
+0 4px 15px rgba(0,0,0,0.8),
+0 0 12px rgba(255,215,120,0.6);
 }
 
 /* =========================================================
