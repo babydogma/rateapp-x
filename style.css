@@ -387,8 +387,8 @@ z-index:50;
 }
 
 .add-button{
-width:58px;
-height:58px;
+width:64px;
+height:64px;
 
 display:flex;
 align-items:center;
@@ -396,25 +396,25 @@ justify-content:center;
 
 border-radius:50%;
 
-font-size:28px;
+font-size:30px;
 font-weight:600;
 
-color:#000;
+color:#2b1d00;
 
 background:linear-gradient(
 180deg,
 #ffe7a3 0%,
-#f2c86f 45%,
-#c89b3c 100%
+#f3c76b 50%,
+#c9962f 100%
 );
 
 box-shadow:
-0 8px 20px rgba(0,0,0,0.45),
-0 0 18px rgba(255,200,80,0.45);
+0 10px 25px rgba(0,0,0,0.6),
+0 0 25px rgba(255,200,80,0.35);
 
-transform:translateY(-18px);
+border:1px solid rgba(255,220,140,0.4);
 
-border:1px solid rgba(255,220,120,0.4);
+transform:translateY(-22px);
 }
 
 .add-btn::after {
