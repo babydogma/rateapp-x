@@ -176,6 +176,7 @@ body {
 .card {
   --angle: 0deg;
   --hue: 0;
+  --glow-strength: calc(var(--rating) / 10);
 
   position:relative;
   overflow:hidden;
@@ -189,16 +190,16 @@ body {
   border: 2px solid transparent;
 
   background:
-    linear-gradient(var(--color-bg-secondary), var(--color-bg-primary)) padding-box,
-    conic-gradient(
-      from var(--angle),
-      hsl(var(--hue), 90%, 55%),
-      transparent 30%,
-      transparent 70%,
-      hsl(var(--hue), 90%, 55%)
-    ) border-box;
+linear-gradient(var(--color-bg-secondary), var(--color-bg-primary)) padding-box,
+linear-gradient(
+90deg,
+transparent 0%,
+hsl(var(--hue),90%,60%) 50%,
+transparent 100%
+) border-box;
 
-  animation: rotateBorder 4s linear infinite;
+  animation: borderPulse 3.5s ease-in-out infinite;
+
   transition: box-shadow 0.3s ease;
 }
 
@@ -567,6 +568,28 @@ pointer-events:none;
 
 .category-delete:active {
   transform: scale(0.85);
+}
+
+@keyframes borderPulse{
+
+0%{
+box-shadow:
+0 0 calc(6px * var(--glow-strength))
+hsl(var(--hue),90%,60%,0.15);
+}
+
+50%{
+box-shadow:
+0 0 calc(30px * var(--glow-strength))
+hsl(var(--hue),90%,60%,0.45);
+}
+
+100%{
+box-shadow:
+0 0 calc(6px * var(--glow-strength))
+hsl(var(--hue),90%,60%,0.15);
+}
+
 }
 
 /* =========================================================
