@@ -211,8 +211,15 @@ body {
   width: 120px;
   height: 120px;
   object-fit: cover;
+
   border-radius: var(--radius-sm);
   flex-shrink: 0;
+
+  border: 1.5px solid rgba(212,175,55,0.6);
+
+  box-shadow:
+    0 0 8px rgba(212,175,55,0.35),
+    inset 0 0 6px rgba(212,175,55,0.15);
 }
 
 /* ===== RIGHT SIDE CONTENT ===== */
