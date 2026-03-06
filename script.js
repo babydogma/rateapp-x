@@ -112,7 +112,13 @@ function formatDateSimple(datestr){
 }
 
 function getHue(rating){
-  return (rating / 10) * 150;
+
+  if(rating >= 9) return 45;   // золото
+  if(rating >= 7) return 35;   // янтарь
+  if(rating >= 5) return 25;   // оранж
+  if(rating >= 3) return 15;   // тёмный оранж
+  return 5;                    // красный
+
 }
 
 function debounce(fn, ms){
