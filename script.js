@@ -337,8 +337,6 @@ el.addEventListener("touchend", async ()=>{
   }
 });
 
-
-const delBtn = el.querySelector(".card__delete");
   const textarea = el.querySelector(".card__textarea");
   const slider = el.querySelector(".slider");
   const ratingEl = el.querySelector(".rating");
