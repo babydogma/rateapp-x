@@ -235,7 +235,8 @@ function buildCardElement(card){
   const el = document.createElement("div");
   el.className = "card";
   el.style.setProperty('--hue', getHue(card.rating || 0));
-
+  el.style.setProperty('--rating', card.rating || 0);
+   
   el.innerHTML = `
 
 <img class="card__image" src="${card.image_url || ''}">
