@@ -174,12 +174,14 @@ body {
 }
 
 .card {
-  --angle: 0deg;
-  --hue: 0;
-  --glow-strength: calc(var(--rating) / 10);
 
-  position:relative;
-  overflow:hidden;
+--angle:0deg;
+--hue:0;
+--rating:0;
+--glow-strength: calc(var(--rating) / 10);
+
+position:relative;
+overflow:hidden;
 
   display: flex;
   gap: 14px;
