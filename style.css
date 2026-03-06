@@ -675,3 +675,59 @@ hsl(var(--hue),90%,60%,0.15);
 
     transform: translateY(-1px);
 }
+
+/* =========================================================
+   13. UI STRUCTURE IMPROVEMENTS
+   ========================================================= */
+
+/* секция фильтров */
+.filters-section{
+  margin-bottom: 12px;
+}
+
+/* разделитель между фильтрами и карточками */
+
+.cards-divider{
+  height:1px;
+  margin:14px 30px 6px;
+
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(212,175,55,0.35),
+    transparent
+  );
+
+  opacity:0.6;
+}
+
+/* контейнер карточек */
+
+.cards-section{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* усиливаем отступы карточек */
+
+.card{
+  margin-top:4px;
+}
+
+/* лёгкая тень отделения карточек */
+
+.card::after{
+
+content:"";
+position:absolute;
+inset:-2px;
+border-radius:inherit;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,0.6);
+
+opacity:0.25;
+pointer-events:none;
+
+}
