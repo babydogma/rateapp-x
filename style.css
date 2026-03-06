@@ -211,11 +211,10 @@ body {
   width: 120px;
   height: 120px;
   object-fit: cover;
-
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 
-  border: 1px solid rgba(212,175,55,0.25);
+  background: #000;   
    
 }
 
