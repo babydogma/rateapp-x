@@ -422,7 +422,7 @@ border:1px solid rgba(255,220,150,0.5);
 z-index:5;
 }
 
-.add-btn::after {
+.add-button::after {
   content: "+";
   font-size: 30px;
   font-weight: 700;
@@ -430,7 +430,8 @@ z-index:5;
 }
 
 .add-button:active{
-transform:scale(0.92);
+transform:translateX(-50%) scale(0.92);
+}
 box-shadow:
 0 3px 10px rgba(255,180,0,0.25);
 }
