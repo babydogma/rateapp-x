@@ -1,5 +1,5 @@
 /* =========================================================
-   RATEAPP X — STRUCTURED SCRIPT
+   RATEAPP X — SCRIPT (SWIPE DELETE STABLE VERSION)
 ========================================================= */
 
 /* =========================
@@ -38,52 +38,6 @@ function getCategories(){
   return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
 }
 
-function saveCategories(cats){
-  localStorage.setItem("categories", JSON.stringify(cats));
-}
-
-/* ===== УДАЛЕНИЕ КАТЕГОРИИ ===== */
-
-async function deleteCategory(categoryId){
-
-  if(categoryId === "Разное"){
-    alert('Категорию "Разное" удалить нельзя');
-    return;
-  }
-
-  const confirmDelete = confirm(
-    `Удалить категорию "${categoryId}"?\nКарточки будут перемещены в "Разное".`
-  );
-
-  if(!confirmDelete) return;
-
-  try{
-
-    let categories = getCategories();
-    let misc = categories.find(c => c.id === "Разное");
-
-    if(!misc){
-      misc = { id: "Разное", emoji: "🔖" };
-      categories.push(misc);
-      saveCategories(categories);
-    }
-
-    await supabaseClient
-      .from("cards")
-      .update({ category: "Разное" })
-      .eq("category", categoryId);
-
-    categories = categories.filter(c => c.id !== categoryId);
-    saveCategories(categories);
-
-    alert("Категория удалена");
-    window.location.reload();
-
-  } catch {
-    alert("Ошибка удаления категории");
-  }
-}
-
 /* =========================
    4. DOM
 ========================= */
@@ -112,21 +66,19 @@ function formatDateSimple(datestr){
 }
 
 function getHue(rating){
-
-  if(rating >= 9) return 45;   // золото
-  if(rating >= 7) return 35;   // янтарь
-  if(rating >= 5) return 25;   // оранж
-  if(rating >= 3) return 15;   // тёмный оранж
-  return 5;                    // красный
-
+  if(rating >= 9) return 45;
+  if(rating >= 7) return 35;
+  if(rating >= 5) return 25;
+  if(rating >= 3) return 15;
+  return 5;
 }
 
 function debounce(fn, ms){
   let t;
-  return (...a) => {
+  return (...a)=>{
     clearTimeout(t);
-    t = setTimeout(()=> fn(...a), ms);
-  };
+    t=setTimeout(()=>fn(...a),ms);
+  }
 }
 
 function getCategoryFromUrl(){
@@ -140,56 +92,58 @@ function getCategoryFromUrl(){
 
 const API = {
 
-  async fetchCards(){
-    const { data, error } = await supabaseClient
-      .from("cards")
-      .select("*")
-      .order("created_at", { ascending: false });
+async fetchCards(){
+  const { data, error } = await supabaseClient
+  .from("cards")
+  .select("*")
+  .order("created_at",{ascending:false});
 
-    if(error) throw error;
-    return data;
-  },
+  if(error) throw error;
+  return data;
+},
 
-  async updateCard(idField, idValue, payload){
-    const { error } = await supabaseClient
-      .from("cards")
-      .update(payload)
-      .eq(idField, idValue);
+async updateCard(idField,idValue,payload){
+  const { error } = await supabaseClient
+  .from("cards")
+  .update(payload)
+  .eq(idField,idValue);
 
-    if(error) throw error;
-  },
+  if(error) throw error;
+},
 
-  async deleteCard(createdAt){
-    const { error } = await supabaseClient
-      .from("cards")
-      .delete()
-      .eq("created_at", createdAt);
+async deleteCard(createdAt){
+  const { error } = await supabaseClient
+  .from("cards")
+  .delete()
+  .eq("created_at",createdAt);
 
-    if(error) throw error;
-  },
+  if(error) throw error;
+},
 
-  async uploadPhoto(file){
-    const fileName = Date.now() + "-" + file.name;
+async uploadPhoto(file){
 
-    await supabaseClient.storage
-      .from("photos")
-      .upload(fileName, file);
+  const fileName = Date.now()+"-"+file.name;
 
-    const { data } =
-      supabaseClient.storage.from("photos").getPublicUrl(fileName);
+  await supabaseClient.storage
+  .from("photos")
+  .upload(fileName,file);
 
-    return data.publicUrl;
-  },
+  const { data } =
+  supabaseClient.storage.from("photos").getPublicUrl(fileName);
 
-  async insertCard(payload){
-    const { data } = await supabaseClient
-      .from("cards")
-      .insert([payload])
-      .select()
-      .limit(1);
+  return data.publicUrl;
+},
 
-    return data[0];
-  }
+async insertCard(payload){
+
+  const { data } = await supabaseClient
+  .from("cards")
+  .insert([payload])
+  .select()
+  .limit(1);
+
+  return data[0];
+}
 
 };
 
@@ -199,53 +153,65 @@ const API = {
 
 function renderStats(){
 
-  if(state.cards.length === 0){
-    DOM.stats.textContent = "Пока нет карточек";
-    return;
-  }
+if(state.cards.length===0){
+DOM.stats.textContent="Пока нет карточек";
+return;
+}
 
-  const sum = state.cards.reduce((acc,c)=> acc + (c.rating || 0), 0);
-  const avg = (sum / state.cards.length).toFixed(1);
+const sum = state.cards.reduce((acc,c)=>acc+(c.rating||0),0);
+const avg = (sum/state.cards.length).toFixed(1);
 
-  DOM.stats.textContent =
-    `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
+DOM.stats.textContent =
+`Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
 }
 
 function getFilteredCards(){
 
-  if(!state.ratingFilter) return state.cards;
+if(!state.ratingFilter) return state.cards;
 
-  if(state.ratingFilter === "good"){
-    return state.cards.filter(c => c.rating >= 7);
-  }
-
-  if(state.ratingFilter === "mid"){
-    return state.cards.filter(c => c.rating >= 4 && c.rating < 7);
-  }
-
-  if(state.ratingFilter === "bad"){
-    return state.cards.filter(c => c.rating < 4);
-  }
-
-  return state.cards;
+if(state.ratingFilter==="good"){
+return state.cards.filter(c=>c.rating>=7);
 }
+
+if(state.ratingFilter==="mid"){
+return state.cards.filter(c=>c.rating>=4 && c.rating<7);
+}
+
+if(state.ratingFilter==="bad"){
+return state.cards.filter(c=>c.rating<4);
+}
+
+return state.cards;
+}
+
+/* =========================
+   CARD BUILD
+========================= */
 
 function buildCardElement(card){
 
-  const el = document.createElement("div");
-  el.className = "card";
-  el.style.setProperty('--hue', getHue(card.rating || 0));
-  el.style.setProperty('--rating', card.rating || 0);
-   
-  el.innerHTML = `
+const wrapper = document.createElement("div");
+wrapper.className="swipe-wrapper";
 
-<img class="card__image" src="${card.image_url || ''}">
+const deleteBg = document.createElement("div");
+deleteBg.className="delete-bg";
+deleteBg.textContent="🗑";
+
+const el = document.createElement("div");
+el.className="card";
+
+el.style.setProperty('--hue', getHue(card.rating||0));
+el.style.setProperty('--rating', card.rating||0);
+
+el.innerHTML=`
+
+<img class="card__image" src="${card.image_url||''}">
 
 <div class="card__content">
 
-<textarea class="card__textarea" placeholder="Описание...">${card.text || ""}</textarea>
+<textarea class="card__textarea" placeholder="Описание...">${card.text||""}</textarea>
 
-<div class="rating">${card.rating || 0}/10</div>
+<div class="rating">${card.rating||0}/10</div>
 
 <input
 type="range"
@@ -253,7 +219,7 @@ class="slider"
 min="0"
 max="10"
 step="0.5"
-value="${card.rating || 0}"
+value="${card.rating||0}"
 >
 
 <select class="category-select"></select>
@@ -261,244 +227,336 @@ value="${card.rating || 0}"
 <div class="created">${formatDateSimple(card.created_at)}</div>
 
 </div>
-
 `;
-   
-  setupCardEvents(el, card);
-  return el;
+
+wrapper.appendChild(deleteBg);
+wrapper.appendChild(el);
+
+setupCardEvents(wrapper,el,card);
+
+return wrapper;
 }
+
+/* =========================
+   RENDER
+========================= */
 
 function renderCards(){
 
-  DOM.grid.innerHTML = "";
+DOM.grid.innerHTML="";
 
-  const cards = getFilteredCards();
+const cards = getFilteredCards();
 
-  cards.forEach(card=>{
-    DOM.grid.appendChild(buildCardElement(card));
-  });
+cards.forEach(card=>{
+DOM.grid.appendChild(buildCardElement(card));
+});
+
 }
 
 /* =========================
-   8. CARD EVENTS
+   CARD EVENTS
 ========================= */
 
-function setupCardEvents(el, card){
+function setupCardEvents(wrapper,el,card){
 
-  const img = el.querySelector(".card__image");
-  const delBtn = el.querySelector(".card__delete");
-  const textarea = el.querySelector(".card__textarea");
-  const slider = el.querySelector(".slider");
-  const ratingEl = el.querySelector(".rating");
-  const select = el.querySelector(".category-select");
-   
-  /* IOS STYLE SWIPE DELETE */
+const img = el.querySelector(".card__image");
+const textarea = el.querySelector(".card__textarea");
+const slider = el.querySelector(".slider");
+const ratingEl = el.querySelector(".rating");
+const select = el.querySelector(".category-select");
 
-let startX = 0;
-let currentX = 0;
-let moved = false;
+/* IMAGE MODAL */
 
-el.addEventListener("touchstart", (e)=>{
-  startX = e.touches[0].clientX;
-  moved = false;
+img.addEventListener("click",()=>{
+if(!card.image_url) return;
+DOM.modalImg.src = card.image_url;
+DOM.imageModal.classList.add("active");
 });
 
-el.addEventListener("touchmove", (e)=>{
+/* CATEGORY SELECT */
 
-  currentX = e.touches[0].clientX;
-  let diff = currentX - startX;
+getCategories().forEach(c=>{
 
-  if(Math.abs(diff) > 8){
-    moved = true;
-  }
+const opt = document.createElement("option");
+opt.value=c.id;
+opt.textContent=c.id;
 
-  if(diff < 0){
+if(c.id===card.category) opt.selected=true;
 
-    /* резиновое замедление */
-    const resistance = diff * 0.35;
-
-    el.style.transform = `translateX(${resistance}px)`;
-  }
+select.appendChild(opt);
 
 });
 
-el.addEventListener("touchend", async ()=>{
+/* TEXT SAVE */
 
-  if(!moved){
-    el.style.transform = "";
-    return;
-  }
+textarea.addEventListener("input",
+debounce(async(e)=>{
 
-  const diff = currentX - startX;
+try{
 
-  /* порог удаления */
+await API.updateCard("created_at",card.created_at,
+{ text:e.target.value });
 
-  if(diff < -160){
+card.text=e.target.value;
 
-    el.classList.add("removing");
+}catch{}
 
-    setTimeout(async ()=>{
+},600)
+);
 
-      try{
+/* SLIDER */
 
-        await API.deleteCard(card.created_at);
+slider.addEventListener("input",()=>{
 
-        state.cards = state.cards.filter(
-          c => c.created_at !== card.created_at
-        );
+const newRating = Number(slider.value);
 
-        renderCards();
-        renderStats();
+ratingEl.textContent =
+(newRating%1===0?
+newRating.toFixed(0):
+newRating.toFixed(1))
++"/10";
 
-      }catch{
-
-        el.classList.remove("removing");
-        el.style.transform = "";
-
-      }
-
-    },300);
-
-  }else{
-
-    /* возврат карточки */
-
-    el.style.transform = "";
-
-  }
+el.style.setProperty('--hue', getHue(newRating));
+el.style.setProperty('--rating', newRating);
 
 });
 
-  img.addEventListener("click", () => {
-    if (!card.image_url) return;
-    DOM.modalImg.src = card.image_url;
-    DOM.imageModal.classList.add("active");
-  });
+slider.addEventListener("change", async()=>{
 
-  getCategories().forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.id;
-    if(c.id === card.category) opt.selected = true;
-    select.appendChild(opt);
-  });
+const newRating = Number(slider.value);
 
-  textarea.addEventListener("input", debounce(async (e)=>{
-    try{
-      await API.updateCard("created_at", card.created_at, { text: e.target.value });
-      card.text = e.target.value;
-    } catch{}
-  }, 600));
+try{
 
-  slider.addEventListener("input", ()=>{
-    const newRating = Number(slider.value);
-    ratingEl.textContent = (newRating % 1 === 0 ? newRating.toFixed(0) : newRating.toFixed(1)) + "/10";
-    el.style.setProperty('--hue', getHue(newRating));
-    el.style.setProperty('--rating', newRating);
-  });
-    
-  slider.addEventListener("change", async ()=>{
-    const newRating = Number(slider.value);
-    try{
-      await API.updateCard("created_at", card.created_at, { rating: newRating });
-      card.rating = newRating;
-      renderStats();
-    } catch{
-      alert("Ошибка обновления рейтинга");
-    }
-  });
+await API.updateCard(
+"created_at",
+card.created_at,
+{ rating:newRating }
+);
 
-  select.addEventListener("change", async ()=>{
-    try{
-      await API.updateCard("created_at", card.created_at, { category: select.value });
-      card.category = select.value;
-    } catch{
-      alert("Ошибка обновления категории");
-    }
-  });
+card.rating=newRating;
+renderStats();
+
+}catch{
+alert("Ошибка обновления рейтинга");
+}
+
+});
+
+/* CATEGORY CHANGE */
+
+select.addEventListener("change", async()=>{
+
+try{
+
+await API.updateCard(
+"created_at",
+card.created_at,
+{ category:select.value }
+);
+
+card.category=select.value;
+
+}catch{
+alert("Ошибка обновления категории");
+}
+
+});
+
+/* =========================
+   SWIPE DELETE
+========================= */
+
+let startX=0;
+let currentX=0;
+let moved=false;
+
+wrapper.addEventListener("touchstart",(e)=>{
+
+if(
+e.target.closest("textarea")||
+e.target.closest("input")||
+e.target.closest("select")
+){
+return;
+}
+
+startX=e.touches[0].clientX;
+currentX=startX;
+moved=false;
+
+});
+
+wrapper.addEventListener("touchmove",(e)=>{
+
+currentX=e.touches[0].clientX;
+
+let diff=currentX-startX;
+
+if(Math.abs(diff)>8){
+moved=true;
+}
+
+if(diff<0){
+
+const resistance = diff*0.35;
+
+el.style.transform=`translateX(${resistance}px)`;
+
+}
+
+});
+
+wrapper.addEventListener("touchend", async()=>{
+
+if(!moved){
+el.style.transform="";
+return;
+}
+
+const diff=currentX-startX;
+
+if(diff<-160){
+
+el.classList.add("removing");
+
+setTimeout(async()=>{
+
+try{
+
+await API.deleteCard(card.created_at);
+
+state.cards = state.cards.filter(
+c=>c.created_at!==card.created_at
+);
+
+renderCards();
+renderStats();
+
+}catch{
+
+el.classList.remove("removing");
+el.style.transform="";
+
+}
+
+},300);
+
+}else{
+
+el.style.transform="";
+
+}
+
+});
+
 }
 
 /* =========================
-   FILTER BUTTONS
+   FILTERS
 ========================= */
 
 function setupFilters(){
 
-  if(DOM.filterGood){
-    DOM.filterGood.onclick = () => {
-      state.ratingFilter = state.ratingFilter === "good" ? null : "good";
-      renderCards();
-    };
-  }
+if(DOM.filterGood){
+DOM.filterGood.onclick=()=>{
+state.ratingFilter=state.ratingFilter==="good"?null:"good";
+renderCards();
+};
+}
 
-  if(DOM.filterMid){
-    DOM.filterMid.onclick = () => {
-      state.ratingFilter = state.ratingFilter === "mid" ? null : "mid";
-      renderCards();
-    };
-  }
+if(DOM.filterMid){
+DOM.filterMid.onclick=()=>{
+state.ratingFilter=state.ratingFilter==="mid"?null:"mid";
+renderCards();
+};
+}
 
-  if(DOM.filterBad){
-    DOM.filterBad.onclick = () => {
-      state.ratingFilter = state.ratingFilter === "bad" ? null : "bad";
-      renderCards();
-    };
-  }
+if(DOM.filterBad){
+DOM.filterBad.onclick=()=>{
+state.ratingFilter=state.ratingFilter==="bad"?null:"bad";
+renderCards();
+};
+}
+
 }
 
 /* =========================
-   NAVIGATION
+   NAV
 ========================= */
 
-document.querySelectorAll(".nav-emoji").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const page = btn.dataset.page;
-    if(page === "home") window.location.href = "/index.html";
-    if(page === "categories") window.location.href = "/categories.html";
-  });
+document.querySelectorAll(".nav-emoji").forEach(btn=>{
+
+btn.addEventListener("click",()=>{
+
+const page=btn.dataset.page;
+
+if(page==="home") window.location.href="/index.html";
+if(page==="categories") window.location.href="/categories.html";
+
 });
 
-if (DOM.addBtn && DOM.photoInput) {
-  DOM.addBtn.addEventListener("click", () => {
-    DOM.photoInput.click();
-  });
+});
+
+/* =========================
+   ADD CARD
+========================= */
+
+if(DOM.addBtn && DOM.photoInput){
+
+DOM.addBtn.addEventListener("click",()=>{
+DOM.photoInput.click();
+});
+
 }
 
-if (DOM.photoInput) {
-  DOM.photoInput.addEventListener("change", async (e) => {
+if(DOM.photoInput){
 
-    const file = e.target.files[0];
-    if (!file) return;
+DOM.photoInput.addEventListener("change", async(e)=>{
 
-    try {
+const file=e.target.files[0];
+if(!file) return;
 
-      const imageUrl = await API.uploadPhoto(file);
+try{
 
-      const newCard = await API.insertCard({
-        image_url: imageUrl,
-        text: "",
-        rating: 0,
-        category: "Разное"
-      });
+const imageUrl = await API.uploadPhoto(file);
 
-      state.cards.unshift(newCard);
-      renderCards();
-      renderStats();
+const newCard = await API.insertCard({
 
-      DOM.photoInput.value = "";
+image_url:imageUrl,
+text:"",
+rating:0,
+category:"Разное"
 
-    } catch (err) {
-      alert("Ошибка добавления карточки");
-      console.error(err);
-    }
+});
 
-  });
+state.cards.unshift(newCard);
+
+renderCards();
+renderStats();
+
+DOM.photoInput.value="";
+
+}catch(err){
+
+alert("Ошибка добавления карточки");
+console.error(err);
+
 }
 
-if (DOM.imageModal) {
-  DOM.imageModal.addEventListener("click", () => {
-    DOM.imageModal.classList.remove("active");
-  });
+});
+
+}
+
+/* =========================
+   MODAL CLOSE
+========================= */
+
+if(DOM.imageModal){
+
+DOM.imageModal.addEventListener("click",()=>{
+DOM.imageModal.classList.remove("active");
+});
+
 }
 
 /* =========================
@@ -507,34 +565,45 @@ if (DOM.imageModal) {
 
 async function init(){
 
-  try{
-    state.loading = true;
+try{
 
-    const cards = await API.fetchCards();
-    const categoryFromUrl = getCategoryFromUrl();
+state.loading=true;
 
-    state.activeCategory = categoryFromUrl;
+const cards = await API.fetchCards();
+const categoryFromUrl = getCategoryFromUrl();
 
-    if(categoryFromUrl){
-      state.cards = cards.filter(c => c.category === categoryFromUrl);
-      if(DOM.stats){
-        DOM.stats.textContent = `Категория: ${categoryFromUrl}`;
-      }
-    } else {
-      state.cards = cards;
-    }
+state.activeCategory=categoryFromUrl;
 
-    renderCards();
-    renderStats();
-    setupFilters();
+if(categoryFromUrl){
 
-  } catch{
-    if(DOM.stats){
-      DOM.stats.textContent = "Ошибка загрузки";
-    }
-  } finally{
-    state.loading = false;
-  }
+state.cards = cards.filter(c=>c.category===categoryFromUrl);
+
+if(DOM.stats){
+DOM.stats.textContent=`Категория: ${categoryFromUrl}`;
+}
+
+}else{
+
+state.cards = cards;
+
+}
+
+renderCards();
+renderStats();
+setupFilters();
+
+}catch{
+
+if(DOM.stats){
+DOM.stats.textContent="Ошибка загрузки";
+}
+
+}finally{
+
+state.loading=false;
+
+}
+
 }
 
 init();
