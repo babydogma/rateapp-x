@@ -298,17 +298,6 @@ function setupCardEvents(el, card){
     select.appendChild(opt);
   });
 
-  delBtn.addEventListener("click", async ()=>{
-    try{
-      await API.deleteCard(card.created_at);
-      state.cards = state.cards.filter(c=>c.created_at !== card.created_at);
-      renderCards();
-      renderStats();
-    } catch{
-      alert("Ошибка удаления");
-    }
-  });
-
   textarea.addEventListener("input", debounce(async (e)=>{
     try{
       await API.updateCard("created_at", card.created_at, { text: e.target.value });
