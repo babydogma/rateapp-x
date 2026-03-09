@@ -32,11 +32,6 @@
   --z-nav: 50;
   --z-fab: 60;
   --z-modal: 100;
-
-  /* NEW: Добавлены токены для улучшений (свечение, частицы) */
-  --glow-gold: rgba(212,175,55,0.35);
-  --particle-size: 2px;
-  --animation-duration: 4s;
 }
 
 /* =========================================================
@@ -65,46 +60,6 @@ body {
 
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
-
-  /* NEW: Subtle градиентный фон с редкими золотыми частицами для премиум-эффекта */
-  background: linear-gradient(to bottom, var(--color-bg-primary), rgba(0,0,0,0.95));
-  position: relative;
-  overflow: hidden;
-}
-
-body::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: -1;
-}
-
-body::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 20% 30%, var(--glow-gold) var(--particle-size), transparent var(--particle-size)),
-    radial-gradient(circle at 80% 50%, var(--glow-gold) var(--particle-size), transparent var(--particle-size)),
-    radial-gradient(circle at 40% 80%, var(--glow-gold) var(--particle-size), transparent var(--particle-size));
-  opacity: 0.15;
-  animation: particles 20s linear infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-@keyframes particles {
-  0% { transform: translateY(0); opacity: 0.15; }
-  100% { transform: translateY(-50px); opacity: 0; }
 }
 
 /* =========================================================
@@ -141,9 +96,6 @@ body::after {
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--color-gold);
-
-  /* NEW: Усилено для 3D-свечения и анимации градиента на логотипе */
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 0 10px var(--glow-gold);
 }
 
 .stats {
@@ -151,29 +103,6 @@ body::after {
   font-size: 15px;
   margin-bottom: 20px;
   color: var(--color-text-secondary);
-
-  /* NEW: Пульсирующее свечение и иконки для статистики */
-  text-shadow: 0 0 5px var(--glow-gold);
-  animation: pulse-glow 2s ease-in-out infinite;
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-}
-
-.stats::before {
-  content: "⭐"; /* Иконка для средней оценки */
-  font-size: 14px;
-}
-
-.stats::after {
-  content: "🃏"; /* Иконка для количества карточек */
-  font-size: 14px;
-  margin-left: 8px;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { text-shadow: 0 0 5px var(--glow-gold); }
-  50% { text-shadow: 0 0 10px var(--glow-gold); }
 }
 
 /* ===== APP LOGO ===== */
@@ -182,19 +111,6 @@ body::after {
   display:flex;
   justify-content:center;
   align-items:center;
-
-  /* NEW: Анимация градиента для "живого золота" */
-  background: linear-gradient(135deg, #ffd700, #d4af37, #b8860b);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine-logo 3s linear infinite;
-}
-
-@keyframes shine-logo {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 .app-title img{
@@ -248,292 +164,129 @@ body::after {
 }
 
 /* =========================================================
-   6. CARD
+   6. CARD COMPONENT
    ========================================================= */
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 
 .card {
-  position: relative;
-  background: var(--color-bg-secondary);
+
+--angle:0deg;
+--hue:0;
+--rating:0;
+--glow-strength: calc(var(--rating) / 10);
+
+position:relative;
+overflow:hidden;
+
+  display: flex;
+  gap: 14px;
+  align-items: center;
+
+  padding: 14px;
   border-radius: var(--radius-md);
-  padding: var(--space-sm);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  border: 2px solid transparent;
 
-  /* NEW: Усилено для карточек — градиентный текст рейтинга, пульсирующий orb, overlay на фото */
-  --hue: 45; /* По умолчанию золото */
-  --glow-strength: 1;
+  background:
+linear-gradient(var(--color-bg-secondary), var(--color-bg-primary)) padding-box,
+linear-gradient(
+90deg,
+transparent 0%,
+hsl(var(--hue),90%,60%) 50%,
+transparent 100%
+) border-box;
+
+  animation: borderPulse 3.5s ease-in-out infinite;
+
+  transition: box-shadow 0.3s ease;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212,175,55,0.2);
+.card:hover{
+box-shadow:
+0 10px 40px rgba(0,0,0,0.7),
+0 0 25px hsl(var(--hue),90%,60%,0.35);
 }
+
+.card:active {
+  transform: translateY(-4px);
+
+}
+
+/* ===== IMAGE LEFT ===== */
 
 .card__image {
-  width: 100%;
-  height: auto;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+
   border-radius: var(--radius-sm);
-  margin-bottom: var(--space-xs);
+  flex-shrink: 0;
 
-  /* NEW: Overlay с лёгким блюром и золотой рамкой для фото */
-  position: relative;
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow:
+    inset 0 4px 10px rgba(0,0,0,0.8),
+    inset 0 -2px 6px rgba(255,255,255,0.08),
+    0 8px 20px rgba(0,0,0,0.45);
 }
 
-.card__image::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
-  border-radius: var(--radius-sm);
-  box-shadow: inset 0 0 10px var(--glow-gold);
-  pointer-events: none;
-}
+/* ===== RIGHT SIDE CONTENT ===== */
 
-.card__textarea-wrapper {
-  position: relative;
-}
-
-.card__delete {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: transparent;
-  border: none;
-  color: var(--color-gold);
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.card__textarea {
-  width: 100%;
-  min-height: 60px;
-  background: transparent;
-  border: none;
-  color: var(--color-text-primary);
-  font-size: 16px;
-  resize: none;
-}
-
-.rating {
-  font-size: 18px;
-  font-weight: bold;
-  color: hsl(var(--hue), 80%, 60%);
-
-  /* NEW: Градиентный текст для рейтинга */
-  background: linear-gradient(to right, hsl(var(--hue), 80%, 60%), var(--color-gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+.card__textarea,
+.category-select,
+.rating,
+.created,
 .slider {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  background: var(--color-gold-soft);
-  border-radius: 2px;
+  flex: 1;
 }
 
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--color-gold);
-  border-radius: 50%;
-  cursor: pointer;
+/* ===== TEXT AREA ===== */
 
-  /* NEW: Пульсирующий orb для слайдера */
-  box-shadow: 0 0 10px var(--glow-gold);
-  animation: orb-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes orb-pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 10px var(--glow-gold); }
-  50% { transform: scale(1.1); box-shadow: 0 0 15px var(--glow-gold); }
-}
-
+.card__textarea,
 .category-select {
   width: 100%;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-gold-border);
-  color: var(--color-text-primary);
+  margin-top: var(--space-sm);
+  padding: 10px;
   border-radius: var(--radius-sm);
-  padding: var(--space-xs);
+  border: 1px solid var(--color-gold-border);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-secondary),
+    var(--color-bg-primary)
+  );
+  color: var(--color-text-primary);
+  font-size: 14px;
 }
+
+/* ===== RATING ===== */
+
+.rating {
+  margin-top: var(--space-sm);
+  font-weight: 600;
+  color: var(--color-gold);
+}
+
+/* ===== DATE ===== */
 
 .created {
-  font-size: 12px;
+  margin-top: var(--space-sm);
+  font-size: 13px;
   color: var(--color-text-secondary);
-  text-align: right;
-  margin-top: var(--space-xs);
 }
 
-/* NEW: Микроанимация при изменении слайдера (вздрагивание карточки) */
-.card.changing {
-  animation: shake 0.3s ease;
+/* SWIPE CONTAINER */
+
+.swipe-wrapper{
+position:relative;
+overflow:hidden;
+margin-bottom:22px;
 }
 
-@keyframes shake {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-/* =========================================================
-   7. IMAGE MODAL
-   ========================================================= */
-
-.image-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--z-modal);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.image-modal.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.image-modal img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: var(--radius-md);
-}
-
-/* =========================================================
-   8. BOTTOM NAVIGATION
-   ========================================================= */
-
-.bottom-nav {
-  position: fixed;
-  bottom: env(safe-area-inset-bottom);
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  height: 60px;
-  background: var(--color-bg-primary);
-  border-top: 1px solid var(--color-gold-border);
-  z-index: var(--z-nav);
-
-  /* NEW: Blur-фон и золотое свечение для навбара */
-  backdrop-filter: blur(10px);
-  box-shadow: 0 -2px 10px var(--glow-gold);
-}
-
-.nav-emoji {
-  font-size: 24px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  /* NEW: Золотой градиент и hover-эффект с rotation */
-  background: linear-gradient(to bottom, var(--color-gold), #b8860b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.nav-emoji:hover {
-  transform: rotate(5deg) scale(1.1);
-}
-
-.add-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--color-gold);
-  color: #000;
-  font-size: 24px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(212,175,55,0.5);
-
-  /* NEW: Свечение и искры (частицы) для кнопки + */
-  animation: fab-glow 2s ease-in-out infinite;
-}
-
-@keyframes fab-glow {
-  0%, 100% { box-shadow: 0 2px 10px rgba(212,175,55,0.5); }
-  50% { box-shadow: 0 2px 15px rgba(212,175,55,0.8); }
-}
-
-.add-btn::after {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  width: 70px;
-  height: 70px;
-  background: radial-gradient(circle, var(--glow-gold) 10%, transparent 50%);
-  opacity: 0.3;
-  animation: sparks 3s linear infinite;
-}
-
-@keyframes sparks {
-  0% { transform: scale(1); opacity: 0.3; }
-  100% { transform: scale(1.2); opacity: 0; }
-}
-
-/* =========================================================
-   9. CATEGORIES
-   ========================================================= */
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.category-block {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.category-block:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212,175,55,0.2);
-}
-
-.cat-emoji {
-  font-size: 32px;
-  margin-bottom: var(--space-xs);
-}
-
-.cat-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.category-block--add {
-  border: 1px dashed var(--color-gold-border);
-  color: var(--color-gold-soft);
-}
-
-/* =========================================================
-   10. SWIPE DELETE (если реализовано)
-   ========================================================= */
-
-/* Свайп-удаление */
-.swipe-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-}
+/* DELETE BACKGROUND */
 
 .delete-bg {
   position: absolute;
@@ -541,8 +294,8 @@ body::after {
   right: auto;
   left: 0;
   width: 100%;
-  background: linear-gradient(90deg, #ff4d4d, #d80000);
-  color: white;
+  background: linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.25));  /* золотистый градиент вместо красного */
+  color: var(--color-gold);  /* золотой текст/иконка */
   font-size: 18px;
   font-weight: 600;
   display: flex;
@@ -554,25 +307,259 @@ body::after {
   pointer-events: none;
 }
 
-.card-content {
-  position: relative;
-  z-index: 2;
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  touch-action: pan-y;
-  will-change: transform;
+/* CARD */
+
+.card{
+position:relative;
+z-index:2;
+
+transition:transform 0.25s ease;
+touch-action:pan-y;
 }
 
-.card.removing .card-content {
-  transform: translateX(-120%);
+/* DELETE ANIMATION */
+
+.card.removing{
+
+transform:translateX(-120%);
+opacity:0;
+
+transition:transform 0.35s ease, opacity 0.35s ease;
+}
+
+.card::before{
+content:"";
+position:absolute;
+inset:0;
+border-radius:inherit;
+
+background:
+radial-gradient(
+circle at 85% 50%,
+hsl(var(--hue),90%,60%,0.25),
+transparent 60%
+),
+
+linear-gradient(
+to bottom,
+rgba(255,255,255,0.08),
+rgba(255,255,255,0) 40%
+);
+
+pointer-events:none;
+}
+/* =========================================================
+   7. SLIDER
+   ========================================================= */
+
+.slider {
+  width: 100%;
+  margin-top: var(--space-sm);
+  appearance: none;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    var(--color-gold) var(--progress, 0%),
+    #2a2a2a var(--progress, 0%)
+  );
+  box-shadow: 0 0 12px rgba(212,175,55,0.4);
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, var(--color-gold));
+  box-shadow:
+    0 0 12px rgba(212,175,55,0.8),
+    0 0 25px rgba(212,175,55,0.6);
+}
+
+/* =========================================================
+   8. BOTTOM NAVIGATION
+   ========================================================= */
+
+.bottom-nav{
+position:fixed;
+left:16px;
+right:16px;
+bottom:16px;
+
+height:64px;
+padding:10px 18px;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+border-radius:22px;
+
+background:rgba(20,20,20,0.65);
+backdrop-filter:blur(14px);
+
+border:1px solid rgba(255,255,255,0.08);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,0.45),
+0 2px 8px rgba(0,0,0,0.35);
+
+z-index:50;
+
+overflow:visible;
+   
+}
+
+.nav-emoji {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: none;
+  border: none;
+}
+
+.add-btn{
+
+position:absolute;
+left:50%;
+top:-22px;
+transform:translateX(-50%);
+
+width:68px;
+height:68px;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:36px;
+font-weight:700;
+
+color:#0b0b0b;
+
+background:radial-gradient(
+circle at 30% 30%,
+#fff6cc,
+#e0b84f 60%,
+#b98a2c
+);
+
+border:2px solid rgba(255,215,120,0.5);
+
+box-shadow:
+0 8px 25px rgba(0,0,0,0.7),
+0 0 20px rgba(255,215,120,0.7),
+0 0 45px rgba(255,200,80,0.45);
+
+backdrop-filter:blur(8px);
+
+z-index:60;
+
+transition:all .25s ease;
+}
+
+.add-btn:active{
+transform:translateX(-50%) scale(.9);
+
+box-shadow:
+0 4px 15px rgba(0,0,0,0.8),
+0 0 12px rgba(255,215,120,0.6);
+}
+
+/* =========================================================
+   9. MODAL
+   ========================================================= */
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   opacity: 0;
-  transition: transform 0.4s ease-out, opacity 0.3s ease-out;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: var(--z-modal);
 }
 
-/* Показываем фон при свайпе */
-.swipe-wrapper.swiping .delete-bg {
+.image-modal.active {
   opacity: 1;
+  pointer-events: auto;
+}
+
+.image-modal img {
+  max-width: 90%;
+  max-height: 85%;
+  border-radius: var(--radius-lg);
+}
+
+/* =========================================================
+   10. CATEGORIES COMPONENT
+========================================================= */
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding: 0 18px;
+}
+
+.category-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-secondary),
+    var(--color-bg-primary)
+  );
+  border: 1px solid var(--color-gold-border);
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+
+.category-block:active {
+  transform: scale(0.98);
+  border-color: var(--color-gold);
+}
+
+/* ===== КНОПКА СОЗДАНИЯ ===== */
+
+.category-block--add {
+  margin: 28px 18px 120px 18px;
+  border: 2px dashed rgba(212,175,55,0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(212,175,55,0.05),
+    rgba(0,0,0,0.2)
+  );
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.category-block--add:active {
+  transform: scale(0.97);
+  opacity: 1;
+}
+
+.cat-emoji {
+  font-size: 22px;
+}
+
+.cat-title {
+  font-size: 16px;
 }
 
 /* =========================================================
@@ -580,136 +567,41 @@ body::after {
    ========================================================= */
 
 @keyframes shine {
-  to {
-    transform: translateX(-100%);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
 }
 
-@keyframes logoShine {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
+@keyframes rotateBorder {
+  to { --angle: 360deg; }
 }
 
-/* =========================================================
-   12. RATING FILTERS
-   ========================================================= */
-
-.rating-filters {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px 0 20px 0;
-  padding: 0 20px;
-
-  /* NEW: Градиент от тёмного к золотому для фильтров */
-}
-
-.rating-filter {
-  flex: 1;
-
-  height: 48px; /* NEW: Чуть больше для тактильности */
-
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-gold-border);
+.logo-text{
+  font-size:48px;
+  font-weight:600;
+  text-align:center;
 
   background: linear-gradient(
-    180deg,
-    var(--color-bg-secondary),
-    var(--color-bg-primary)
-  );
-
-  font-size: 20px;
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: 
-    transform 0.15s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-
-  /* NEW: Radial-gradient свечение и scale при active */
-  background: linear-gradient(to bottom, var(--color-bg-secondary), rgba(212,175,55,0.1));
-}
-
-.rating-filter:active {
-  transform: scale(0.96);
-  border-color: var(--color-gold);
-  box-shadow: 0 0 10px rgba(212,175,55,0.4);
-}
-
-.rating-filter.active {
-  border: 1px solid #d4af37;
-
-  box-shadow:
-      0 0 0 1px rgba(212,175,55,0.6),
-      0 0 10px rgba(212,175,55,0.35);
-
-  transform: translateY(-1px);
-}
-
-/* =========================================================
-   13. UI STRUCTURE IMPROVEMENTS
-   ========================================================= */
-
-/* секция фильтров */
-.filters-section{
-  margin-bottom: 12px;
-}
-
-/* разделитель между фильтрами и карточками */
-
-.cards-divider{
-  height:1px;
-  margin:14px 30px 6px;
-
-  background:linear-gradient(
     90deg,
-    transparent,
-    rgba(212,175,55,0.35),
-    transparent
+    #c9a96a,
+    #fff3c4,
+    #c9a96a
   );
 
-  opacity:0.6;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  background-size:200% auto;
+  animation: goldMove 6s linear infinite;
 }
 
-/* контейнер карточек */
-
-.cards-section{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+@keyframes goldMove{
+  0%{
+    background-position:-200% center;
+  }
+  100%{
+    background-position:200% center;
+  }
 }
-
-/* усиливаем отступы карточек */
-
-.card{
-  margin-top:4px;
-}
-
-/* лёгкая тень отделения карточек */
-
-.card::after{
-
-content:"";
-position:absolute;
-inset:-2px;
-border-radius:inherit;
-
-box-shadow:
-0 10px 30px rgba(0,0,0,0.6);
-
-opacity:0.25;
-pointer-events:none;
-
-}
-
 /* ===== DELETE BUTTON (categories) ===== */
 
 .category-delete {
@@ -782,4 +674,142 @@ to{
 opacity:1;
 transform: translateY(0);
 }
+}
+
+/* =========================================================
+   12. RATING FILTERS
+   ========================================================= */
+
+.rating-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+  padding: 0 20px;
+}
+
+.rating-filter {
+  flex: 1;
+
+  height: 42px;
+
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gold-border);
+
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-secondary),
+    var(--color-bg-primary)
+  );
+
+  font-size: 20px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rating-filter:active {
+  transform: scale(0.96);
+  border-color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+}
+
+/* контейнер фильтров */
+.rating-filters{
+    display:flex;
+    gap:12px;
+    margin:18px 0 10px;
+}
+
+/* сами блоки */
+.rating-filter{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+
+    background:#111;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.08);
+
+    cursor:pointer;
+    transition:all 0.2s ease;
+}
+
+/* активный фильтр */
+.rating-filter.active{
+
+    border:1px solid #d4af37;
+
+    box-shadow:
+        0 0 0 1px rgba(212,175,55,0.6),
+        0 0 10px rgba(212,175,55,0.35);
+
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   13. UI STRUCTURE IMPROVEMENTS
+   ========================================================= */
+
+/* секция фильтров */
+.filters-section{
+  margin-bottom: 12px;
+}
+
+/* разделитель между фильтрами и карточками */
+
+.cards-divider{
+  height:1px;
+  margin:14px 30px 6px;
+
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(212,175,55,0.35),
+    transparent
+  );
+
+  opacity:0.6;
+}
+
+/* контейнер карточек */
+
+.cards-section{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* усиливаем отступы карточек */
+
+.card{
+  margin-top:4px;
+}
+
+/* лёгкая тень отделения карточек */
+
+.card::after{
+
+content:"";
+position:absolute;
+inset:-2px;
+border-radius:inherit;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,0.6);
+
+opacity:0.25;
+pointer-events:none;
+
 }
