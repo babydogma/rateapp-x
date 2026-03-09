@@ -562,6 +562,35 @@ box-shadow:
   font-size: 16px;
 }
 
+/* ===== КНОПКА РЕДАКТИРОВАНИЯ ===== */
+.category-edit {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;  /* Прозрачный фон — убирает квадрат */
+  color: rgba(212,175,55,0.6);  /* Базовый золотой оттенок */
+  font-size: 16px;
+  cursor: pointer;
+  transition: 
+    transform 0.15s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.category-edit:hover {
+  color: var(--color-gold);  /* Золотой на hover */
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);  /* Лёгкое свечение */
+}
+
+.category-edit:active {
+  transform: scale(0.85);
+  color: var(--color-gold);
+}
+
 /* =========================================================
    11. ANIMATIONS
    ========================================================= */
