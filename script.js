@@ -233,40 +233,30 @@ function getFilteredCards(){
 function buildCardElement(card){
 
   const el = document.createElement("div");
-  el.className = "card";
-  el.style.setProperty('--hue', getHue(card.rating || 0));
-  el.style.setProperty('--rating', card.rating || 0);
-   
+  el.className = "swipe-wrapper";  // Обертка для свайпа
+
   el.innerHTML = `
+    <div class="delete-bg">
+      <span class="delete-icon">🗑️</span>
+    </div>
+    <div class="card" style="--hue: ${getHue(card.rating || 0)}; --rating: ${card.rating || 0};">
+      <img class="card__image" src="${card.image_url || ''}">
 
-<img class="card__image" src="${card.image_url || ''}">
+      <div class="card__content">
+        <button class="card__delete">×</button>
+        <textarea class="card__textarea" placeholder="Описание...">${card.text || ""}</textarea>
+        <div class="rating">${card.rating || 0}/10</div>
+        <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
+        <select class="category-select"></select>
+        <div class="created">${formatDateSimple(card.created)}</div>
+      </div>
+    </div>
+  `;
 
-<div class="card__content">
+  const cardEl = el.querySelector('.card');  // Ссылка на .card внутри
+  setupCardEvents(cardEl, card);  // Передаем cardEl вместо el
+  enableSwipeDelete(el, card);    // Новая функция для свайпа
 
-<button class="card__delete">×</button>
-
-<textarea class="card__textarea" placeholder="Описание...">${card.text || ""}</textarea>
-
-<div class="rating">${card.rating || 0}/10</div>
-
-<input
-type="range"
-class="slider"
-min="0"
-max="10"
-step="0.5"
-value="${card.rating || 0}"
->
-
-<select class="category-select"></select>
-
-<div class="created">${formatDateSimple(card.created)}</div>
-
-</div>
-
-`;
-   
-  setupCardEvents(el, card);
   return el;
 }
 
@@ -474,3 +464,65 @@ async function init(){
 }
 
 init();
+
+/* =========================
+   SWIPE DELETE
+========================= */
+
+function enableSwipeDelete(wrapperEl, card) {
+  const cardEl = wrapperEl.querySelector('.card');
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  const threshold = 50;  // Порог для удаления (px)
+
+  // Игнорируем свайп, если touch на интерактивных элементах
+  function shouldIgnoreTouch(target) {
+    return target.closest('textarea, input, select, button');
+  }
+
+  wrapperEl.addEventListener('touchstart', (e) => {
+    if (shouldIgnoreTouch(e.target)) return;
+    startX = e.touches[0].clientX;
+    isDragging = true;
+    cardEl.style.transition = 'none';  // Отключаем transition для плавного drag
+  });
+
+  wrapperEl.addEventListener('touchmove', (e) => {
+    if (!isDragging || shouldIgnoreTouch(e.target)) return;
+    currentX = e.touches[0].clientX - startX;
+    if (currentX < 0) {  // Только влево
+      cardEl.style.transform = `translateX(${currentX}px)`;
+    }
+  });
+
+  wrapperEl.addEventListener('touchend', async () => {
+    if (!isDragging) return;
+    isDragging = false;
+    cardEl.style.transition = 'transform 0.25s ease';  // Включаем обратно
+
+    if (currentX < -threshold) {
+      // Подтверждение (опционально: убери confirm для instant-delete)
+      if (confirm('Удалить карточку?')) {
+        try {
+          await API.deleteCard(card.created_at);
+          cardEl.classList.add('removing');
+          setTimeout(() => {
+            state.cards = state.cards.filter(c => c.created_at !== card.created_at);
+            renderCards();
+            renderStats();
+          }, 350);  // Ждем анимацию
+        } catch {
+          alert('Ошибка удаления');
+        }
+      } else {
+        // Откат свайпа
+        cardEl.style.transform = 'translateX(0)';
+      }
+    } else {
+      // Откат свайпа
+      cardEl.style.transform = 'translateX(0)';
+    }
+    currentX = 0;
+  });
+}
