@@ -316,12 +316,13 @@ function setupCardEvents(el, card){
     try{
       await API.updateCard("created_at", card.created_at, { rating: newRating });
       card.rating = newRating;
-      renderStats();
-    } catch{
-      alert("Ошибка обновления рейтинга");
-    }
-  });
-
+      el.classList.add('changing');  // ← Добавь здесь
+    setTimeout(() => el.classList.remove('changing'), 300);  // ← И здесь
+    renderStats();
+  } catch{
+    alert("Ошибка обновления рейтинга");
+  }
+});
   select.addEventListener("change", async ()=>{
     try{
       await API.updateCard("created_at", card.created_at, { category: select.value });
