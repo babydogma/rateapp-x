@@ -292,29 +292,48 @@ function setupCardEvents(el, card){
   const ratingEl = el.querySelector(".rating");
   const select = el.querySelector(".category-select");
    
-   /* SWIPE DELETE */
+  /* IOS STYLE SWIPE DELETE */
 
 let startX = 0;
 let currentX = 0;
+let moved = false;
 
 el.addEventListener("touchstart", (e)=>{
   startX = e.touches[0].clientX;
+  moved = false;
 });
 
 el.addEventListener("touchmove", (e)=>{
+
   currentX = e.touches[0].clientX;
-  const diff = currentX - startX;
+  let diff = currentX - startX;
+
+  if(Math.abs(diff) > 8){
+    moved = true;
+  }
 
   if(diff < 0){
-    el.style.transform = `translateX(${diff}px)`;
+
+    /* резиновое замедление */
+    const resistance = diff * 0.35;
+
+    el.style.transform = `translateX(${resistance}px)`;
   }
+
 });
 
 el.addEventListener("touchend", async ()=>{
 
+  if(!moved){
+    el.style.transform = "";
+    return;
+  }
+
   const diff = currentX - startX;
 
-  if(diff < -120){
+  /* порог удаления */
+
+  if(diff < -160){
 
     el.classList.add("removing");
 
@@ -335,13 +354,14 @@ el.addEventListener("touchend", async ()=>{
 
         el.classList.remove("removing");
         el.style.transform = "";
-        alert("Ошибка удаления");
 
       }
 
     },300);
 
-  } else {
+  }else{
+
+    /* возврат карточки */
 
     el.style.transform = "";
 
