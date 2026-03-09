@@ -236,21 +236,30 @@ function buildCardElement(card){
   el.className = "swipe-wrapper";  // Обертка для свайпа
 
   el.innerHTML = `
-    <div class="delete-bg">
-      <span class="delete-icon">🗑️</span>
-    </div>
-    <div class="card" style="--hue: ${getHue(card.rating || 0)}; --rating: ${card.rating || 0};">
-      <img class="card__image" src="${card.image_url || ''}">
+  <div class="swipe-wrapper">
+    <div class="delete-bg">Удалить</div>
+    <div class="card-content">
+      <img class="card__image" src="${card.image_url || ''}" alt="">
 
-      <div class="card__content">
-        <textarea class="card__textarea" placeholder="Описание...">${card.text || ""}</textarea>
-        <div class="rating">${card.rating || 0}/10</div>
-        <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
-        <select class="category-select"></select>
-        <div class="created">${formatDateSimple(card.created)}</div>
-      </div>
+      <div class="card__title" data-placeholder="Добавить название">${card.text || ""}</div>
+
+      <div class="rating">${card.rating || 0}/10</div>
+
+      <input
+        type="range"
+        class="slider"
+        min="0"
+        max="10"
+        step="0.5"
+        value="${card.rating || 0}"
+      >
+
+      <select class="category-select"></select>
+
+      <div class="created">${formatDateSimple(card.created_at || card.created)}</div>
     </div>
-  `;
+  </div>
+`;
 
   const cardEl = el.querySelector('.card');  // Ссылка на .card внутри
   setupCardEvents(cardEl, card);  // Передаем cardEl вместо el
@@ -269,6 +278,27 @@ function renderCards(){
     DOM.grid.appendChild(buildCardElement(card));
   });
 }
+
+const titleEl = el.querySelector('.card__title');
+titleEl.addEventListener('click', () => {
+  if (titleEl.querySelector('input')) return;
+
+  const currentText = titleEl.textContent.trim() === 'Добавить название' ? '' : titleEl.textContent;
+  titleEl.innerHTML = `<input type="text" value="${currentText}" placeholder="Введите название">`;
+  const input = titleEl.querySelector('input');
+  input.focus();
+
+  input.addEventListener('blur', async () => {
+    const newTitle = input.value.trim();
+    try {
+      await API.updateCard("created_at", card.created_at, { text: newTitle });
+      card.text = newTitle;
+      titleEl.textContent = newTitle || 'Добавить название';
+    } catch {
+      alert("Ошибка сохранения названия");
+    }
+  });
+});
 
 /* =========================
    8. CARD EVENTS
