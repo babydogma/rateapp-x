@@ -489,7 +489,7 @@ init();
 ========================= */
 
 function enableSwipeDelete(wrapperEl, card) {
-  const cardEl = wrapperEl.querySelector('.card');
+  const cardEl = wrapperEl.querySelector('.card-content');
   let startX = 0;
   let currentX = 0;
   let isDragging = false;
