@@ -348,6 +348,37 @@ rgba(255,255,255,0) 40%
 
 pointer-events:none;
 }
+
+.card__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 10px;
+  cursor: pointer;
+  min-height: 24px;
+}
+
+.card__title:empty::before {
+  content: attr(data-placeholder);
+  color: #c6b27a;
+  opacity: 0.7;
+}
+
+.card__title:hover {
+  text-shadow: 0 0 5px rgba(212,175,55,0.35);
+}
+
+.card__title input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--color-gold);
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+}
+
 /* =========================================================
    7. SLIDER
    ========================================================= */
