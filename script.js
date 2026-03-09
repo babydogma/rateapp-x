@@ -243,7 +243,6 @@ function buildCardElement(card){
       <img class="card__image" src="${card.image_url || ''}">
 
       <div class="card__content">
-        <button class="card__delete">×</button>
         <textarea class="card__textarea" placeholder="Описание...">${card.text || ""}</textarea>
         <div class="rating">${card.rating || 0}/10</div>
         <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
