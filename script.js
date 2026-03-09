@@ -330,8 +330,9 @@ function setupCardEvents(el, card){
     const newRating = Number(slider.value);
     ratingEl.textContent = (newRating % 1 === 0 ? newRating.toFixed(0) : newRating.toFixed(1)) + "/10";
     el.style.setProperty('--hue', getHue(newRating));
-  });
     el.style.setProperty('--rating', newRating);
+  });
+    
   slider.addEventListener("change", async ()=>{
     const newRating = Number(slider.value);
     try{
