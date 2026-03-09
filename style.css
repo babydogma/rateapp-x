@@ -288,25 +288,23 @@ margin-bottom:22px;
 
 /* DELETE BACKGROUND */
 
-.delete-bg{
-position:absolute;
-right:0;
-top:0;
-bottom:0;
-width:120px;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-background:linear-gradient(180deg,#ff4d4d,#d80000);
-color:white;
-
-font-size:28px;
-
-border-radius:26px;
-
-opacity:0.95;
+.delete-bg {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.25));  /* золотистый градиент вместо красного */
+  color: var(--color-gold);  /* золотой текст/иконка */
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 24px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
 }
 
 /* CARD */
