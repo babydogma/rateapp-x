@@ -22,7 +22,7 @@ const state = {
 };
 
 /* =========================
-   CATEGORIES
+   3. CATEGORIES
 ========================= */
 
 const DEFAULT_CATEGORIES = [
@@ -42,25 +42,7 @@ function saveCategories(cats){
   localStorage.setItem("categories", JSON.stringify(cats));
 }
 
-/* =========================
-   SUPABASE
-========================= */
-
-const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* =========================
-   DOM
-========================= */
-
-const categoriesGrid = document.getElementById("categoriesGrid");
-const catsStats = document.getElementById("catsStats");
-const addCategoryBtn = document.getElementById("addCategoryBtn");
-
-/* =========================
-   DELETE CATEGORY
-========================= */
+/* ===== УДАЛЕНИЕ КАТЕГОРИИ ===== */
 
 async function deleteCategory(categoryId){
 
@@ -77,130 +59,30 @@ async function deleteCategory(categoryId){
 
   try{
 
+    let categories = getCategories();
+    let misc = categories.find(c => c.id === "Разное");
+
+    if(!misc){
+      misc = { id: "Разное", emoji: "🔖" };
+      categories.push(misc);
+      saveCategories(categories);
+    }
+
     await supabaseClient
       .from("cards")
       .update({ category: "Разное" })
       .eq("category", categoryId);
 
-    let cats = getCategories();
-    cats = cats.filter(c => c.id !== categoryId);
-    saveCategories(cats);
+    categories = categories.filter(c => c.id !== categoryId);
+    saveCategories(categories);
 
-    renderCategoryBlocks();
+    alert("Категория удалена");
+    window.location.reload();
 
-  } catch{
+  } catch {
     alert("Ошибка удаления категории");
   }
 }
-
-/* ===== НОВАЯ ФУНКЦИЯ: РЕДАКТИРОВАНИЕ ЭМОДЗИ ===== */  // ← Добавлено здесь
-function editCategoryEmoji(categoryId){
-  const newEmoji = prompt(`Введите новый эмодзи для категории "${categoryId}" (или оставьте пустым для 📁):`) || "📁";
-  
-  let cats = getCategories();
-  const cat = cats.find(c => c.id === categoryId);
-  if(cat){
-    cat.emoji = newEmoji.trim();
-    saveCategories(cats);
-    renderCategoryBlocks();
-  } else {
-    alert("Категория не найдена");
-  }
-}
-
-/* =========================
-   RENDER
-========================= */
-
-function createCategoryBlock(cat){
-
-  const el = document.createElement("div");
-  el.className = "category-block";
-
-  el.innerHTML = `
-    <div class="cat-emoji">${cat.emoji}</div>
-    <div class="cat-title">${cat.id}</div>
-    <button class="category-edit">✏️</button>  // ← Добавлена кнопка редактирования
-    <button class="category-delete">✕</button>
-  `;
-
-  el.addEventListener("click", (e)=>{
-    if(e.target.classList.contains("category-delete") || e.target.classList.contains("category-edit")) return;  // ← Учтена новая кнопка
-    window.location.href = "/index.html?category=" + encodeURIComponent(cat.id);
-  });
-
-  el.querySelector(".category-delete").addEventListener("click", (e)=>{
-    e.stopPropagation();
-    deleteCategory(cat.id);
-  });
-
-  el.querySelector(".category-edit").addEventListener("click", (e)=>{  // ← Добавлен обработчик
-    e.stopPropagation();
-    editCategoryEmoji(cat.id);
-  });
-
-  return el;
-}
-
-function renderCategoryBlocks(){
-  categoriesGrid.innerHTML = "";
-  const cats = getCategories();
-
-  cats.forEach(c=>{
-    categoriesGrid.appendChild(createCategoryBlock(c));
-  });
-
-  catsStats.textContent = `Категорий: ${cats.length}`;
-}
-
-/* =========================
-   ADD CATEGORY
-========================= */
-
-addCategoryBtn.addEventListener("click", () => {
-
-  const name = prompt("Введите название категории:");
-  if(!name || !name.trim()) return;
-
-  const cats = getCategories();
-
-  if(cats.some(c => c.id === name.trim())){
-    alert("Такая категория уже существует");
-    return;
-  }
-
-  const emoji = prompt("Введите эмодзи для категории (или оставьте пустым для 📁):") || "📁";  // ← Добавлен prompt для эмодзи
-
-  cats.push({
-    id: name.trim(),
-    emoji: emoji.trim()
-  });
-
-  saveCategories(cats);
-  renderCategoryBlocks();
-});
-
-/* =========================
-   NAVIGATION
-========================= */
-
-document.getElementById("addBtnCats").addEventListener("click", ()=> {
-  location.href = "/index.html?openUpload=1";
-});
-
-document.querySelectorAll('.nav-emoji').forEach(btn=>{
-  btn.onclick = () => {
-    const page = btn.dataset.page;
-    if(page === 'home') location.href = '/index.html';
-    if(page === 'categories') location.href = '/categories.html';
-  };
-});
-
-/* =========================
-   INIT
-========================= */
-
-renderCategoryBlocks();
 
 /* =========================
    4. DOM
