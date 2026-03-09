@@ -234,63 +234,6 @@ function buildCardElement(card){
 
   const el = document.createElement("div");
   el.className = "card";
-   /* SWIPE DELETE */
-
-let startX = 0;
-let currentX = 0;
-
-el.addEventListener("touchstart", (e) => {
-  startX = e.touches[0].clientX;
-});
-
-el.addEventListener("touchmove", (e) => {
-  currentX = e.touches[0].clientX;
-  const diff = currentX - startX;
-
-  if (diff < 0) {
-    el.style.transform = `translateX(${diff}px)`;
-  }
-});
-
-el.addEventListener("touchend", async () => {
-
-  const diff = currentX - startX;
-
-  if (diff < -120) {
-
-    el.style.transform = "translateX(-100%)";
-    el.style.opacity = "0";
-
-    setTimeout(async () => {
-
-      try {
-
-        await API.deleteCard(card.created_at);
-
-        state.cards = state.cards.filter(
-          c => c.created_at !== card.created_at
-        );
-
-        renderCards();
-
-      } catch {
-
-        el.style.transform = "";
-        el.style.opacity = "";
-
-        alert("Ошибка удаления");
-
-      }
-
-    }, 200);
-
-  } else {
-
-    el.style.transform = "";
-
-  }
-
-});
   el.style.setProperty('--hue', getHue(card.rating || 0));
   el.style.setProperty('--rating', card.rating || 0);
    
@@ -345,6 +288,7 @@ function renderCards(){
 function setupCardEvents(el, card){
 
   const img = el.querySelector(".card__image");
+  const delBtn = el.querySelector(".card__delete");
   const textarea = el.querySelector(".card__textarea");
   const slider = el.querySelector(".slider");
   const ratingEl = el.querySelector(".rating");
@@ -386,9 +330,8 @@ function setupCardEvents(el, card){
     const newRating = Number(slider.value);
     ratingEl.textContent = (newRating % 1 === 0 ? newRating.toFixed(0) : newRating.toFixed(1)) + "/10";
     el.style.setProperty('--hue', getHue(newRating));
-    el.style.setProperty('--rating', newRating);
   });
-    
+    el.style.setProperty('--rating', newRating);
   slider.addEventListener("change", async ()=>{
     const newRating = Number(slider.value);
     try{
