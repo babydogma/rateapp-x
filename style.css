@@ -280,34 +280,31 @@ box-shadow:
 
 /* SWIPE CONTAINER */
 
-.swipe-wrapper{
-position:relative;
-overflow:hidden;
-margin-bottom:22px;
+.swipe-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
 }
 
 /* DELETE BACKGROUND */
 
-.delete-bg{
-position:absolute;
-right:0;
-top:0;
-bottom:0;
-width:120px;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-background:linear-gradient(180deg,#ff4d4d,#d80000);
-color:white;
-
-font-size:28px;
-
-border-radius:26px;
-
-opacity:0.95;
-}
+.delete-bg {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #ff4d4d, #d80000);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 24px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
 
 /* CARD */
 
@@ -319,14 +316,23 @@ transition:transform 0.25s ease;
 touch-action:pan-y;
 }
 
+   
+.card-content {
+  position: relative;
+  z-index: 2;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  touch-action: pan-y;
+  will-change: transform;
+}
+   
 /* DELETE ANIMATION */
 
-.card.removing{
-
-transform:translateX(-120%);
-opacity:0;
-
-transition:transform 0.35s ease, opacity 0.35s ease;
+.card.removing .card-content {
+  transform: translateX(-120%);
+  opacity: 0;
+  transition: transform 0.4s ease-out, opacity 0.3s ease-out;
 }
 
 .card::before{
@@ -349,6 +355,10 @@ rgba(255,255,255,0) 40%
 );
 
 pointer-events:none;
+}
+
+.swipe-wrapper.swiping .delete-bg {
+  opacity: 1;
 }
 /* =========================================================
    7. SLIDER
