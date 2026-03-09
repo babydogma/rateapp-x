@@ -108,6 +108,21 @@ async function deleteCategory(categoryId){
   }
 }
 
+/* ===== РЕДАКТИРОВАНИЕ ЭМОДЗИ ===== */
+function editCategoryEmoji(categoryId){
+  const newEmoji = prompt(`Введите новый эмодзи для категории "${categoryId}" (или оставьте пустым для 📁):`) || "📁";
+  
+  let cats = getCategories();
+  const cat = cats.find(c => c.id === categoryId);
+  if(cat){
+    cat.emoji = newEmoji.trim();
+    saveCategories(cats);
+    renderCategoryBlocks();
+  } else {
+    alert("Категория не найдена");
+  }
+}
+
 /* =========================
    RENDER
 ========================= */
@@ -120,17 +135,23 @@ function createCategoryBlock(cat){
   el.innerHTML = `
     <div class="cat-emoji">${cat.emoji}</div>
     <div class="cat-title">${cat.id}</div>
+    <button class="category-edit">✏️</button>
     <button class="category-delete">✕</button>
   `;
 
   el.addEventListener("click", (e)=>{
-    if(e.target.classList.contains("category-delete")) return;
+    if(e.target.classList.contains("category-delete") || e.target.classList.contains("category-edit")) return;
     window.location.href = "/index.html?category=" + encodeURIComponent(cat.id);
   });
 
   el.querySelector(".category-delete").addEventListener("click", (e)=>{
     e.stopPropagation();
     deleteCategory(cat.id);
+  });
+
+  el.querySelector(".category-edit").addEventListener("click", (e)=>{
+    e.stopPropagation();
+    editCategoryEmoji(cat.id);
   });
 
   return el;
@@ -163,9 +184,11 @@ addCategoryBtn.addEventListener("click", () => {
     return;
   }
 
+  const emoji = prompt("Введите эмодзи для категории (или оставьте пустым для 📁):") || "📁";
+
   cats.push({
     id: name.trim(),
-    emoji: "📁"
+    emoji: emoji.trim()
   });
 
   saveCategories(cats);
