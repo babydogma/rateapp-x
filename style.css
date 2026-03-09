@@ -32,6 +32,11 @@
   --z-nav: 50;
   --z-fab: 60;
   --z-modal: 100;
+
+  /* NEW: Добавлены токены для улучшений (свечение, частицы) */
+  --glow-gold: rgba(212,175,55,0.35);
+  --particle-size: 2px;
+  --animation-duration: 4s;
 }
 
 /* =========================================================
@@ -60,6 +65,46 @@ body {
 
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
+
+  /* NEW: Subtle градиентный фон с редкими золотыми частицами для премиум-эффекта */
+  background: linear-gradient(to bottom, var(--color-bg-primary), rgba(0,0,0,0.95));
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--glow-gold) var(--particle-size), transparent var(--particle-size)),
+    radial-gradient(circle at 80% 50%, var(--glow-gold) var(--particle-size), transparent var(--particle-size)),
+    radial-gradient(circle at 40% 80%, var(--glow-gold) var(--particle-size), transparent var(--particle-size));
+  opacity: 0.15;
+  animation: particles 20s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes particles {
+  0% { transform: translateY(0); opacity: 0.15; }
+  100% { transform: translateY(-50px); opacity: 0; }
 }
 
 /* =========================================================
@@ -96,6 +141,9 @@ body {
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--color-gold);
+
+  /* NEW: Усилено для 3D-свечения и анимации градиента на логотипе */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 0 10px var(--glow-gold);
 }
 
 .stats {
@@ -103,6 +151,29 @@ body {
   font-size: 15px;
   margin-bottom: 20px;
   color: var(--color-text-secondary);
+
+  /* NEW: Пульсирующее свечение и иконки для статистики */
+  text-shadow: 0 0 5px var(--glow-gold);
+  animation: pulse-glow 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.stats::before {
+  content: "⭐"; /* Иконка для средней оценки */
+  font-size: 14px;
+}
+
+.stats::after {
+  content: "🃏"; /* Иконка для количества карточек */
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { text-shadow: 0 0 5px var(--glow-gold); }
+  50% { text-shadow: 0 0 10px var(--glow-gold); }
 }
 
 /* ===== APP LOGO ===== */
@@ -111,6 +182,19 @@ body {
   display:flex;
   justify-content:center;
   align-items:center;
+
+  /* NEW: Анимация градиента для "живого золота" */
+  background: linear-gradient(135deg, #ffd700, #d4af37, #b8860b);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine-logo 3s linear infinite;
+}
+
+@keyframes shine-logo {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .app-title img{
@@ -175,6 +259,8 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+
+  /* NEW: Усилено для карточек — градиентный текст рейтинга, пульсирующий orb, overlay на фото */
   --hue: 45; /* По умолчанию золото */
   --glow-strength: 1;
 }
@@ -189,6 +275,19 @@ body {
   height: auto;
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-xs);
+
+  /* NEW: Overlay с лёгким блюром и золотой рамкой для фото */
+  position: relative;
+}
+
+.card__image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 10px var(--glow-gold);
+  pointer-events: none;
 }
 
 .card__textarea-wrapper {
@@ -220,6 +319,11 @@ body {
   font-size: 18px;
   font-weight: bold;
   color: hsl(var(--hue), 80%, 60%);
+
+  /* NEW: Градиентный текст для рейтинга */
+  background: linear-gradient(to right, hsl(var(--hue), 80%, 60%), var(--color-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .slider {
@@ -239,6 +343,15 @@ body {
   background: var(--color-gold);
   border-radius: 50%;
   cursor: pointer;
+
+  /* NEW: Пульсирующий orb для слайдера */
+  box-shadow: 0 0 10px var(--glow-gold);
+  animation: orb-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 10px var(--glow-gold); }
+  50% { transform: scale(1.1); box-shadow: 0 0 15px var(--glow-gold); }
 }
 
 .category-select {
@@ -255,6 +368,16 @@ body {
   color: var(--color-text-secondary);
   text-align: right;
   margin-top: var(--space-xs);
+}
+
+/* NEW: Микроанимация при изменении слайдера (вздрагивание карточки) */
+.card.changing {
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 /* =========================================================
@@ -301,6 +424,10 @@ body {
   background: var(--color-bg-primary);
   border-top: 1px solid var(--color-gold-border);
   z-index: var(--z-nav);
+
+  /* NEW: Blur-фон и золотое свечение для навбара */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -2px 10px var(--glow-gold);
 }
 
 .nav-emoji {
@@ -309,6 +436,15 @@ body {
   border: none;
   cursor: pointer;
   transition: transform 0.2s ease;
+
+  /* NEW: Золотой градиент и hover-эффект с rotation */
+  background: linear-gradient(to bottom, var(--color-gold), #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-emoji:hover {
+  transform: rotate(5deg) scale(1.1);
 }
 
 .add-btn {
@@ -322,6 +458,31 @@ body {
   border: none;
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(212,175,55,0.5);
+
+  /* NEW: Свечение и искры (частицы) для кнопки + */
+  animation: fab-glow 2s ease-in-out infinite;
+}
+
+@keyframes fab-glow {
+  0%, 100% { box-shadow: 0 2px 10px rgba(212,175,55,0.5); }
+  50% { box-shadow: 0 2px 15px rgba(212,175,55,0.8); }
+}
+
+.add-btn::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, var(--glow-gold) 10%, transparent 50%);
+  opacity: 0.3;
+  animation: sparks 3s linear infinite;
+}
+
+@keyframes sparks {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(1.2); opacity: 0; }
 }
 
 /* =========================================================
@@ -363,73 +524,59 @@ body {
   color: var(--color-gold-soft);
 }
 
-.category-delete {
-  margin-left: auto;
-  width: 30px;
-  height: 30px;
+/* =========================================================
+   10. SWIPE DELETE (если реализовано)
+   ========================================================= */
 
+/* Свайп-удаление */
+.swipe-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.delete-bg {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #ff4d4d, #d80000);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-  border: none;
-  background: rgba(212,175,55,0.08);
-
-  color: rgba(212,175,55,0.6);
-  font-size: 16px;
-  cursor: pointer;
-
-  transition: 
-    transform 0.15s ease,
-    background 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+  justify-content: flex-end;
+  padding-right: 24px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
 }
 
-.category-delete:hover {
-  background: rgba(212,175,55,0.18);
-  color: var(--color-gold);
-  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+.card-content {
+  position: relative;
+  z-index: 2;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  touch-action: pan-y;
+  will-change: transform;
 }
 
-.category-delete:active {
-  transform: scale(0.85);
+.card.removing .card-content {
+  transform: translateX(-120%);
+  opacity: 0;
+  transition: transform 0.4s ease-out, opacity 0.3s ease-out;
 }
 
-/* ===== НОВЫЕ СТИЛИ: ДЛЯ КНОПКИ РЕДАКТИРОВАНИЯ ===== */  // ← Добавлено здесь
-.category-edit {
-  margin-left: auto;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: rgba(212,175,55,0.08);
-  color: rgba(212,175,55,0.6);
-  font-size: 16px;
-  cursor: pointer;
-  transition: 
-    transform 0.15s ease,
-    background 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.category-edit:hover {
-  background: rgba(212,175,55,0.18);
-  color: var(--color-gold);
-  box-shadow: 0 0 10px rgba(212,175,55,0.4);
-}
-
-.category-edit:active {
-  transform: scale(0.85);
+/* Показываем фон при свайпе */
+.swipe-wrapper.swiping .delete-bg {
+  opacity: 1;
 }
 
 /* =========================================================
-   10. ANIMATIONS
+   11. ANIMATIONS
    ========================================================= */
 
 @keyframes shine {
@@ -447,44 +594,6 @@ body {
   }
 }
 
-@keyframes borderPulse{
-
-0%{
-box-shadow:
-0 0 calc(6px * var(--glow-strength))
-hsl(var(--hue),90%,60%,0.15);
-}
-
-50%{
-box-shadow:
-0 0 calc(30px * var(--glow-strength))
-hsl(var(--hue),90%,60%,0.45);
-}
-
-100%{
-box-shadow:
-0 0 calc(6px * var(--glow-strength))
-hsl(var(--hue),90%,60%,0.15);
-}
-
-}
-
-.card{
-animation: cardAppear 0.5s ease;
-}
-
-@keyframes cardAppear{
-from{
-opacity:0;
-transform: translateY(20px);
-}
-
-to{
-opacity:1;
-transform: translateY(0);
-}
-}
-
 /* =========================================================
    12. RATING FILTERS
    ========================================================= */
@@ -495,12 +604,14 @@ transform: translateY(0);
   gap: 10px;
   margin: 10px 0 20px 0;
   padding: 0 20px;
+
+  /* NEW: Градиент от тёмного к золотому для фильтров */
 }
 
 .rating-filter {
   flex: 1;
 
-  height: 42px;
+  height: 48px; /* NEW: Чуть больше для тактильности */
 
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-gold-border);
@@ -522,6 +633,9 @@ transform: translateY(0);
     transform 0.15s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease;
+
+  /* NEW: Radial-gradient свечение и scale при active */
+  background: linear-gradient(to bottom, var(--color-bg-secondary), rgba(212,175,55,0.1));
 }
 
 .rating-filter:active {
@@ -530,41 +644,14 @@ transform: translateY(0);
   box-shadow: 0 0 10px rgba(212,175,55,0.4);
 }
 
-/* контейнер фильтров */
-.rating-filters{
-    display:flex;
-    gap:12px;
-    margin:18px 0 10px;
-}
+.rating-filter.active {
+  border: 1px solid #d4af37;
 
-/* сами блоки */
-.rating-filter{
-    width:42px;
-    height:42px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  box-shadow:
+      0 0 0 1px rgba(212,175,55,0.6),
+      0 0 10px rgba(212,175,55,0.35);
 
-    font-size:22px;
-
-    background:#111;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.08);
-
-    cursor:pointer;
-    transition:all 0.2s ease;
-}
-
-/* активный фильтр */
-.rating-filter.active{
-
-    border:1px solid #d4af37;
-
-    box-shadow:
-        0 0 0 1px rgba(212,175,55,0.6),
-        0 0 10px rgba(212,175,55,0.35);
-
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 /* =========================================================
@@ -621,3 +708,78 @@ box-shadow:
 opacity:0.25;
 pointer-events:none;
 
+}
+
+/* ===== DELETE BUTTON (categories) ===== */
+
+.category-delete {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  border: none;
+  background: rgba(212,175,55,0.08);
+
+  color: rgba(212,175,55,0.6);
+  font-size: 16px;
+  cursor: pointer;
+
+  transition: 
+    transform 0.15s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.category-delete:hover {
+  background: rgba(212,175,55,0.18);
+  color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+}
+
+.category-delete:active {
+  transform: scale(0.85);
+}
+
+@keyframes borderPulse{
+
+0%{
+box-shadow:
+0 0 calc(6px * var(--glow-strength))
+hsl(var(--hue),90%,60%,0.15);
+}
+
+50%{
+box-shadow:
+0 0 calc(30px * var(--glow-strength))
+hsl(var(--hue),90%,60%,0.45);
+}
+
+100%{
+box-shadow:
+0 0 calc(6px * var(--glow-strength))
+hsl(var(--hue),90%,60%,0.15);
+}
+
+}
+
+.card{
+animation: cardAppear 0.5s ease;
+}
+
+@keyframes cardAppear{
+from{
+opacity:0;
+transform: translateY(20px);
+}
+
+to{
+opacity:1;
+transform: translateY(0);
+}
+}
