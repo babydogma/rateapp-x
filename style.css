@@ -234,6 +234,23 @@ box-shadow:
     0 8px 20px rgba(0,0,0,0.45);
 }
 
+.card-content {
+  display: flex;
+  gap: var(--space-sm);  /* Отступ между фото и текстом */
+  align-items: flex-start;  /* Выравнивание по верхнему краю */
+}
+
+.card__image {
+  width: 120px;  /* Фиксированная ширина фото для бокового вида */
+  height: auto;
+  flex-shrink: 0;  /* Фото не сжимается */
+  border-radius: var(--radius-sm);
+}
+
+.card__title, .rating, .slider, .category-select, .created {
+  flex: 1;  /* Текст занимает остальное пространство справа */
+}
+
 /* ===== RIGHT SIDE CONTENT ===== */
 
 .card__textarea,
