@@ -243,8 +243,6 @@ function buildCardElement(card){
 
 <div class="card__content">
 
-<button class="card__delete">×</button>
-
 <textarea class="card__textarea" placeholder="Описание...">${card.text || ""}</textarea>
 
 <div class="rating">${card.rating || 0}/10</div>
@@ -260,7 +258,7 @@ value="${card.rating || 0}"
 
 <select class="category-select"></select>
 
-<div class="created">${formatDateSimple(card.created)}</div>
+<div class="created">${formatDateSimple(card.created_at)}</div>
 
 </div>
 
@@ -293,6 +291,63 @@ function setupCardEvents(el, card){
   const slider = el.querySelector(".slider");
   const ratingEl = el.querySelector(".rating");
   const select = el.querySelector(".category-select");
+   
+   /* SWIPE DELETE */
+
+let startX = 0;
+let currentX = 0;
+
+el.addEventListener("touchstart", (e)=>{
+  startX = e.touches[0].clientX;
+});
+
+el.addEventListener("touchmove", (e)=>{
+  currentX = e.touches[0].clientX;
+  const diff = currentX - startX;
+
+  if(diff < 0){
+    el.style.transform = `translateX(${diff}px)`;
+  }
+});
+
+el.addEventListener("touchend", async ()=>{
+
+  const diff = currentX - startX;
+
+  if(diff < -120){
+
+    el.classList.add("removing");
+
+    setTimeout(async ()=>{
+
+      try{
+
+        await API.deleteCard(card.created_at);
+
+        state.cards = state.cards.filter(
+          c => c.created_at !== card.created_at
+        );
+
+        renderCards();
+        renderStats();
+
+      }catch{
+
+        el.classList.remove("removing");
+        el.style.transform = "";
+        alert("Ошибка удаления");
+
+      }
+
+    },300);
+
+  } else {
+
+    el.style.transform = "";
+
+  }
+
+});
 
   img.addEventListener("click", () => {
     if (!card.image_url) return;
@@ -306,17 +361,6 @@ function setupCardEvents(el, card){
     opt.textContent = c.id;
     if(c.id === card.category) opt.selected = true;
     select.appendChild(opt);
-  });
-
-  delBtn.addEventListener("click", async ()=>{
-    try{
-      await API.deleteCard(card.created_at);
-      state.cards = state.cards.filter(c=>c.created_at !== card.created_at);
-      renderCards();
-      renderStats();
-    } catch{
-      alert("Ошибка удаления");
-    }
   });
 
   textarea.addEventListener("input", debounce(async (e)=>{
