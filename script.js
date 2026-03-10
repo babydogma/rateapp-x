@@ -200,7 +200,6 @@ function buildCardElement(card){
     </div>
   </div>
 `;
-<img class="card__image" src="${card.image_url || ''}" alt="" onerror="this.src='https://via.placeholder.com/140x140/111/fff?text=Фото';">
 
   el.style.setProperty('--hue', getHue(card.rating));
   el.style.setProperty('--glow-strength', Math.min(card.rating / 10 * 2, 2));
