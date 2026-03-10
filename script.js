@@ -186,30 +186,21 @@ function buildCardElement(card){
   el.className = "card";
 
   el.innerHTML = `
-    <div class="swipe-wrapper">
-      <div class="delete-bg">Удалить</div>
-      <div class="card-content">
-        <img class="card__image" src="${card.image_url || ''}" alt="">
+  <div class="swipe-wrapper">
+    <div class="delete-bg">Удалить</div>
+    <div class="card-content">
+      <img class="card__image" src="${card.image_url || ''}" alt="">
 
+      <div class="card-right-column">
         <div class="card__title" data-placeholder="Добавить название">${card.text || ""}</div>
-
         <div class="rating">${card.rating || 0}/10</div>
-
-        <input
-          type="range"
-          class="slider"
-          min="0"
-          max="10"
-          step="0.5"
-          value="${card.rating || 0}"
-        >
-
+        <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
         <select class="category-select"></select>
-
         <div class="created">${formatDateSimple(card.created_at || card.created)}</div>
       </div>
     </div>
-  `;
+  </div>
+`;
 
   el.style.setProperty('--hue', getHue(card.rating));
   el.style.setProperty('--glow-strength', Math.min(card.rating / 10 * 2, 2));
