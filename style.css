@@ -236,19 +236,78 @@ box-shadow:
 
 .card-content {
   display: flex;
-  gap: var(--space-sm);  /* Отступ между фото и текстом */
-  align-items: flex-start;  /* Выравнивание по верхнему краю */
+  flex-direction: row;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .card__image {
-  width: 120px;  /* Фиксированная ширина фото для бокового вида */
+  width: 140px;
   height: auto;
-  flex-shrink: 0;  /* Фото не сжимается */
-  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
 }
 
-.card__title, .rating, .slider, .category-select, .created {
-  flex: 1;  /* Текст занимает остальное пространство справа */
+.card-right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-gold);
+  cursor: pointer;
+  min-height: 24px;
+}
+
+.card__title:empty::before {
+  content: attr(data-placeholder);
+  color: #c6b27a;
+  opacity: 0.7;
+}
+
+.card__title:hover {
+  text-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+
+.card__title input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--color-gold);
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+  border-bottom: 1px solid rgba(212,175,55,0.3);
+}
+
+.rating {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--color-gold);
+}
+
+.slider {
+  width: 100%;
+}
+
+.category-select {
+  width: 100%;
+  padding: 8px;
+  background: #161618;
+  border: 1px solid var(--color-gold-border);
+  color: white;
+  border-radius: 8px;
+}
+
+.created {
+  font-size: 13px;
+  color: #c6b27a;
+  text-align: right;
 }
 
 /* ===== RIGHT SIDE CONTENT ===== */
