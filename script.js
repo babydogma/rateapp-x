@@ -189,8 +189,7 @@ function buildCardElement(card){
   <div class="swipe-wrapper">
     <div class="delete-bg">Удалить</div>
     <div class="card-content">
-      <img class="card__image" src="${card.image_url || ''}" alt="">
-
+      <img class="card__image" src="${card.image_url || ''}" alt="" onerror="this.src='https://via.placeholder.com/140x140/111/fff?text=Фото+не+загружено';">
       <div class="card-right-column">
         <div class="card__title" data-placeholder="Добавить название">${card.text || ""}</div>
         <div class="rating">${card.rating || 0}/10</div>
