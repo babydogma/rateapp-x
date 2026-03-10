@@ -123,13 +123,13 @@ const API = {
   async deleteCard(created_at){
     await supabaseClient.from("cards").delete().eq("created_at", created_at);
   },
-
+   
   async uploadPhoto(file){
-    const fileName = `${Date.now()}_${file.name}`;
-    await supabaseClient.storage.from("photos").upload(fileName, file);
-    const { publicURL } = supabaseClient.storage.from("photos").getPublicUrl(fileName);
-    return publicURL;
-  }
+  const fileName = `${Date.now()}_${file.name}`;
+  await supabaseClient.storage.from("photos").upload(fileName, file);
+  const { data } = supabaseClient.storage.from("photos").getPublicUrl(fileName);
+  return data.publicUrl;  // Точный фикс для v2
+}
 
 };
 
