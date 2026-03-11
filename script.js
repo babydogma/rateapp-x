@@ -196,7 +196,7 @@ function buildCardElement(card){
         <div class="rating">${card.rating || 0}/10</div>
         <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
         <select class="category-select"></select>
-        <div class="created">${formatDateSimple(card.created_at || card.created)}</div>
+        <div class="created">${formatDateDDMMYY(card.created_at || card.created)}</div>
       </div>
     </div>
   </div>
@@ -490,4 +490,13 @@ function enableSwipeDelete(wrapperEl, card) {
     }
     currentX = 0;
   });
+}
+
+function formatDateDDMMYY(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = String(date.getFullYear()).slice(-2); // последние 2 цифры года
+  return `${day}.${month}.${year}`;
 }
