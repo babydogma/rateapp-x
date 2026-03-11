@@ -229,13 +229,11 @@ box-shadow:
     0 8px 20px rgba(0,0,0,0.45);
 }
 
-.card-content {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  align-items: flex-start;
-  position: relative;
-  padding: 12px;
+.card-content{
+display:flex;
+align-items:center;
+gap:14px;
+padding:14px;
 }
 
 .card__image {
