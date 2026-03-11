@@ -183,15 +183,10 @@ body {
 position:relative;
 overflow:hidden;
 
-  display: flex;
-  gap: 14px;
-  align-items: center;
+border-radius: var(--radius-md);
+border: 2px solid transparent;
 
-  padding: 14px;
-  border-radius: var(--radius-md);
-  border: 2px solid transparent;
-
-  background:
+background:
 linear-gradient(var(--color-bg-secondary), var(--color-bg-primary)) padding-box,
 linear-gradient(
 90deg,
@@ -200,9 +195,9 @@ hsl(var(--hue),90%,60%) 50%,
 transparent 100%
 ) border-box;
 
-  animation: borderPulse 3.5s ease-in-out infinite;
+animation: borderPulse 3.5s ease-in-out infinite;
 
-  transition: box-shadow 0.3s ease;
+transition: box-shadow 0.3s ease;
 }
 
 .card:hover{
