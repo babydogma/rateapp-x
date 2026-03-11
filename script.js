@@ -540,3 +540,12 @@ function formatDateDDMMYY(dateStr) {
   const year = String(date.getFullYear()).slice(-2); // последние 2 цифры года
   return `${day}.${month}.${year}`;
 }
+
+document.getElementById("descriptionModal")
+.addEventListener("click",(e)=>{
+
+if(e.target.id === "descriptionModal"){
+e.target.classList.remove("active");
+}
+
+});
