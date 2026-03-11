@@ -193,6 +193,7 @@ function buildCardElement(card){
 
       <div class="card-right-column">
         <div class="card__title" data-placeholder="Добавить название">${card.text || ""}</div>
+        <button class="card-more-btn">Подробнее</button>
         <div class="rating">${card.rating || 0}/10</div>
         <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
         <select class="category-select"></select>
