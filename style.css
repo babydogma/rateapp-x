@@ -455,6 +455,24 @@ pointer-events:none;
   border-bottom: 1px solid rgba(212,175,55,0.2);
 }
 
+.card-more-btn{
+margin-top:4px;
+align-self:flex-start;
+
+background:none;
+border:none;
+
+color:#cfa94a;
+font-size:13px;
+
+cursor:pointer;
+opacity:.85;
+}
+
+.card-more-btn:hover{
+opacity:1;
+}
+
 /* =========================================================
    7. SLIDER
    ========================================================= */
