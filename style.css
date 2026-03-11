@@ -248,7 +248,7 @@ box-shadow:
   object-fit: cover;
   border-radius: 12px;
   flex-shrink: 0;
-  background: #111; /* тёмный фон, если фото не загрузилось */
+  background: #111;
 }
 
 .card-right-column {
