@@ -239,6 +239,7 @@ box-shadow:
   flex-direction: row;
   gap: 16px;
   align-items: flex-start;
+  position: relative;
   padding: 12px;
 }
 
@@ -310,6 +311,8 @@ box-shadow:
   font-size: 13px;
   color: #c6b27a;
   text-align: right;
+  margin-top: 4px; /* небольшой отступ от слайдера */
+  align-self: flex-end; /* прижимает дату к правому краю */
 }
 
 /* ===== RIGHT SIDE CONTENT ===== */
