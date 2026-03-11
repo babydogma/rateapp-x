@@ -233,6 +233,45 @@ function buildCardElement(card){
   return el;
 }
 
+const moreBtn = el.querySelector(".card-more-btn");
+
+if(moreBtn){
+
+moreBtn.addEventListener("click", ()=>{
+
+const modal = document.getElementById("descriptionModal");
+const input = document.getElementById("descriptionInput");
+const save = document.getElementById("saveDescription");
+
+input.value = card.description || "";
+
+modal.classList.add("active");
+
+save.onclick = async ()=>{
+
+const text = input.value.trim();
+
+try{
+
+await API.updateCard("created_at", card.created_at, {
+description: text
+});
+
+card.description = text;
+
+modal.classList.remove("active");
+
+}catch{
+
+alert("Ошибка сохранения");
+
+}
+
+};
+
+});
+}
+
 /* =========================
    9. CARD EVENTS
 ========================= */
