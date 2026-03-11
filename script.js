@@ -229,11 +229,8 @@ function buildCardElement(card){
       }
     });
   });
-
-  return el;
-}
-
-const moreBtn = el.querySelector(".card-more-btn");
+  
+  const moreBtn = el.querySelector(".card-more-btn");
 
 if(moreBtn){
 
@@ -271,6 +268,11 @@ alert("Ошибка сохранения");
 
 });
 }
+
+  return el;
+}
+
+
 
 /* =========================
    9. CARD EVENTS
