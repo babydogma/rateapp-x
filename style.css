@@ -183,10 +183,15 @@ body {
 position:relative;
 overflow:hidden;
 
-border-radius: var(--radius-md);
-border: 2px solid transparent;
+  display: flex;
+  gap: 14px;
+  align-items: center;
 
-background:
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+
+  background:
 linear-gradient(var(--color-bg-secondary), var(--color-bg-primary)) padding-box,
 linear-gradient(
 90deg,
@@ -195,9 +200,9 @@ hsl(var(--hue),90%,60%) 50%,
 transparent 100%
 ) border-box;
 
-animation: borderPulse 3.5s ease-in-out infinite;
+  animation: borderPulse 3.5s ease-in-out infinite;
 
-transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .card:hover{
@@ -214,12 +219,14 @@ box-shadow:
 /* ===== IMAGE LEFT ===== */
 
 .card__image {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
+
   border-radius: var(--radius-sm);
-  background: #111;
-}
+  flex-shrink: 0;
+
+  border: 1px solid rgba(255,255,255,0.06);
 
   box-shadow:
     inset 0 4px 10px rgba(0,0,0,0.8),
@@ -227,11 +234,13 @@ box-shadow:
     0 8px 20px rgba(0,0,0,0.45);
 }
 
-.card-content{
-display:flex;
-align-items:center;
-gap:14px;
-padding:14px;
+.card-content {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: flex-start;
+  position: relative;
+  padding: 12px;
 }
 
 .card__image {
