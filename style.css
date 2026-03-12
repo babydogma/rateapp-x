@@ -60,7 +60,25 @@ body {
 
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
+
+  background:
+
+radial-gradient(
+800px at 20% -10%,
+rgba(212,175,55,0.15),
+transparent 60%
+),
+
+radial-gradient(
+600px at 120% 20%,
+rgba(255,200,120,0.12),
+transparent 60%
+),
+
+#0f0f10;
 }
+
+
 
 /* =========================================================
    3. LAYOUT
