@@ -186,9 +186,8 @@ function buildCardElement(card){
   el.className = "card";
 
   el.innerHTML = `
-  <div class="swipe-wrapper">
-    <div class="delete-bg">Удалить</div>
-    <div class="card-content">
+  <div class="delete-bg">Удалить</div>
+<div class="card-content">
       <img class="card__image" src="${card.image_url || ''}" alt="" onerror="this.src='https://via.placeholder.com/140x140/111/fff?text=Фото';">
 
       <div class="card-right-column">
@@ -198,9 +197,8 @@ function buildCardElement(card){
         <input type="range" class="slider" min="0" max="10" step="0.5" value="${card.rating || 0}">
         <select class="category-select"></select>
         <div class="created">${formatDateDDMMYY(card.created_at || card.created)}</div>
-      </div>
-    </div>
-  </div>
+   </div>
+</div>
 `;
 
   el.style.setProperty('--hue', getHue(card.rating));
