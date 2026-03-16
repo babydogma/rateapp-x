@@ -538,3 +538,21 @@ async function init(){
 }
 
 init();
+
+document.querySelectorAll(".nav-emoji").forEach(btn=>{
+
+  btn.addEventListener("click",()=>{
+
+    const page = btn.dataset.page;
+
+    if(page==="categories"){
+      window.location.href = "/categories.html";
+    }
+
+    if(page==="home"){
+      window.location.href = "/";
+    }
+
+  });
+
+});
