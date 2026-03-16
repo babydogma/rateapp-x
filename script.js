@@ -368,24 +368,6 @@ function setupCardEvents(el,card){
         card.description=text;
         modal.classList.remove("active");
       };
-      
-      const category = el.querySelector(".category-select");
-
-category.value = card.category || "Разное";
-
-category.addEventListener("change", async()=>{
-
-  const value = category.value;
-
-  await API.updateCard(
-    "created_at",
-    card.created_at,
-    { category:value }
-  );
-
-  card.category = value;
-
-});
 
     };
 
