@@ -234,17 +234,7 @@ box-shadow:
 display:flex;
 align-items:center;
 gap:14px;
-padding:14px;
-}
-
-.card__image {
-  width: 140px;
-  height: auto;
-  object-fit: cover;
-  border-radius: 12px;
-  flex-shrink: 0;
-  background: #111;
-}
+padding:
 
 .card-right-column {
   flex: 1;
