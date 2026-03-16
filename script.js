@@ -80,23 +80,64 @@ const API = {
 
   async uploadPhoto(file){
 
-    const fileName = `${Date.now()}_${file.name}`;
+  const img = new Image();
+  const reader = new FileReader();
 
-    await supabaseClient
+  const dataURL = await new Promise(resolve=>{
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+
+  img.src = dataURL;
+
+  await new Promise(resolve=>{
+    img.onload = resolve;
+  });
+
+  const size = 512;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+
+  const ctx = canvas.getContext("2d");
+
+  const min = Math.min(img.width, img.height);
+
+  const sx = (img.width - min)/2;
+  const sy = (img.height - min)/2;
+
+  ctx.drawImage(
+    img,
+    sx,
+    sy,
+    min,
+    min,
+    0,
+    0,
+    size,
+    size
+  );
+
+  const blob = await new Promise(resolve=>{
+    canvas.toBlob(resolve,"image/jpeg",0.85);
+  });
+
+  const fileName = `${Date.now()}.jpg`;
+
+  await supabaseClient
+    .storage
+    .from("photos")
+    .upload(fileName,blob);
+
+  const { data } =
+    supabaseClient
       .storage
       .from("photos")
-      .upload(fileName,file);
+      .getPublicUrl(fileName);
 
-    const { data } =
-      supabaseClient
-        .storage
-        .from("photos")
-        .getPublicUrl(fileName);
-
-    return data.publicUrl;
-  }
-
-};
+  return data.publicUrl;
+}
 
 /* =========================
    UTILS
