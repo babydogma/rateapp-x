@@ -12,50 +12,21 @@ const addBtn = document.getElementById("addSleepBtn");
 ========================= */
 
 async function fetchSleep() {
-  const { data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("sleep_entries")
     .select("*")
     .order("sleep_date", { ascending: false });
 
-  return data || [];
-}
-
-/* =========================
-   RENDER
-========================= */
-
-function render(entries) {
-  list.innerHTML = "";
-
-  entries.forEach(e => {
-    const el = document.createElement("div");
-    el.className = "card";
-
-    el.innerHTML = `
-      <div>${e.sleep_date}</div>
-      <div>${e.bed_time} → ${e.wake_time}</div>
-      <div>${Math.floor(e.duration_minutes / 60)}ч ${e.duration_minutes % 60}м</div>
-      <div>Сон: ${e.sleep_rating}/10</div>
-      <div>Настроение: ${e.mood_rating}/10</div>
-      <div>${e.note || ""}</div>
-    `;
-
-    list.appendChild(el);
-  });
-
-  if (entries.length) {
-    const avg = (
-      entries.reduce((s, e) => s + e.sleep_rating, 0) / entries.length
-    ).toFixed(1);
-
-    stats.textContent = `Средний сон: ${avg}`;
-  } else {
-    stats.textContent = "Нет данных";
+  if (error) {
+    console.error("fetchSleep error:", error);
+    return { data: [], error };
   }
+
+  return { data: data || [], error: null };
 }
 
 /* =========================
-   ADD
+   UTILS
 ========================= */
 
 function calcDuration(bed, wake) {
@@ -70,26 +41,125 @@ function calcDuration(bed, wake) {
   return w - b;
 }
 
+function formatDuration(minutes) {
+  const safe = Number(minutes) || 0;
+  const h = Math.floor(safe / 60);
+  const m = safe % 60;
+  return `${h}ч ${m}м`;
+}
+
+/* =========================
+   RENDER
+========================= */
+
+function render(entries, loadError = null) {
+  list.innerHTML = "";
+
+  if (loadError) {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <div class="card-content">
+        <div class="card-right-column">
+          <div class="card__title">Ошибка загрузки сна</div>
+          <div class="card__description-preview is-empty">
+            ${loadError.message}
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(el);
+    stats.textContent = "Не удалось загрузить записи";
+    return;
+  }
+
+  if (!entries.length) {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <div class="card-content">
+        <div class="card-right-column">
+          <div class="card__title">Пока нет записей сна</div>
+          <div class="card__description-preview is-empty">
+            Нажми на + и добавь первую запись
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(el);
+    stats.textContent = "Записей сна: 0";
+    return;
+  }
+
+  entries.forEach((entry) => {
+    const el = document.createElement("div");
+    el.className = "card";
+
+    el.innerHTML = `
+      <div class="card-content">
+        <div class="card-right-column">
+          <div class="card__title">${entry.sleep_date || "Без даты"}</div>
+          <div class="card__description-preview">
+            ${entry.bed_time || "--:--"} → ${entry.wake_time || "--:--"} • ${formatDuration(entry.duration_minutes)}
+          </div>
+          <div class="rating">Сон: ${Number(entry.sleep_rating) || 0}/10</div>
+          <div class="card__description-preview">
+            Настроение: ${Number(entry.mood_rating) || 0}/10
+          </div>
+          <div class="card__description-preview ${entry.note ? "" : "is-empty"}">
+            ${entry.note || "Без заметки"}
+          </div>
+        </div>
+      </div>
+    `;
+
+    list.appendChild(el);
+  });
+
+  const avgSleep = (
+    entries.reduce((sum, e) => sum + (Number(e.sleep_rating) || 0), 0) / entries.length
+  ).toFixed(1);
+
+  const avgDuration = Math.round(
+    entries.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / entries.length
+  );
+
+  stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
+}
+
+/* =========================
+   ADD
+========================= */
+
 addBtn.onclick = async () => {
   const date = prompt("Дата (2026-03-17)");
   const bed = prompt("Во сколько лёг (01:30)");
   const wake = prompt("Во сколько встал (08:40)");
   const rating = Number(prompt("Оценка сна 0-10"));
   const mood = Number(prompt("Настроение 0-10"));
+  const note = prompt("Заметка") || "";
 
   if (!date || !bed || !wake) return;
 
   const duration = calcDuration(bed, wake);
 
-  await supabaseClient.from("sleep_entries").insert({
-    sleep_date: date,
-    bed_time: bed,
-    wake_time: wake,
-    duration_minutes: duration,
-    sleep_rating: rating,
-    mood_rating: mood,
-    note: ""
-  });
+  const { error } = await supabaseClient
+    .from("sleep_entries")
+    .insert({
+      sleep_date: date,
+      bed_time: bed,
+      wake_time: wake,
+      duration_minutes: duration,
+      sleep_rating: Number.isFinite(rating) ? rating : 0,
+      mood_rating: Number.isFinite(mood) ? mood : 0,
+      note
+    });
+
+  if (error) {
+    console.error("insertSleep error:", error);
+    alert(`Не удалось добавить запись: ${error.message}`);
+    return;
+  }
 
   init();
 };
@@ -98,13 +168,22 @@ addBtn.onclick = async () => {
    NAV
 ========================= */
 
-document.querySelectorAll(".nav-emoji").forEach(btn => {
+document.querySelectorAll(".nav-emoji").forEach((btn) => {
   btn.onclick = () => {
     const page = btn.dataset.page;
 
-    if (page === "home") location.href = "index.html";
-    if (page === "categories") location.href = "categories.html";
-    if (page === "sleep") location.href = "sleep.html";
+    if (page === "home") {
+      localStorage.removeItem("activeCategory");
+      location.href = "index.html";
+    }
+
+    if (page === "sleep") {
+      location.href = "sleep.html";
+    }
+
+    if (page === "categories") {
+      location.href = "categories.html";
+    }
   };
 });
 
@@ -113,8 +192,8 @@ document.querySelectorAll(".nav-emoji").forEach(btn => {
 ========================= */
 
 async function init() {
-  const data = await fetchSleep();
-  render(data);
+  const result = await fetchSleep();
+  render(result.data, result.error);
 }
 
 init();
