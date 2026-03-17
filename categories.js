@@ -5,7 +5,20 @@
 const DOM = {
   grid: document.getElementById("categoriesGrid"),
   stats: document.getElementById("categoriesStats"),
-  addBtn: document.getElementById("addCategoryBtn")
+  addBtn: document.getElementById("addCategoryBtn"),
+
+  categoryModal: document.getElementById("categoryModal"),
+  categoryModalTitle: document.getElementById("categoryModalTitle"),
+  categoryNameInput: document.getElementById("categoryNameInput"),
+  categoryEmojiInput: document.getElementById("categoryEmojiInput"),
+  categoryModalCancel: document.getElementById("categoryModalCancel"),
+  categoryModalSave: document.getElementById("categoryModalSave"),
+
+  confirmModal: document.getElementById("confirmModal"),
+  confirmModalTitle: document.getElementById("confirmModalTitle"),
+  confirmModalText: document.getElementById("confirmModalText"),
+  confirmModalCancel: document.getElementById("confirmModalCancel"),
+  confirmModalConfirm: document.getElementById("confirmModalConfirm")
 };
 
 const DEFAULT_CATEGORIES = [
@@ -23,6 +36,12 @@ const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+const modalState = {
+  mode: "create",
+  editIndex: null,
+  onConfirm: null
+};
 
 /* =========================
    STORAGE
@@ -100,6 +119,147 @@ async function renameCardsCategory(oldName, newName) {
 }
 
 /* =========================
+   MODALS
+========================= */
+
+function openCategoryModal({ mode, category = null, index = null }) {
+  modalState.mode = mode;
+  modalState.editIndex = index;
+
+  DOM.categoryModalTitle.textContent =
+    mode === "edit" ? "Редактировать категорию" : "Новая категория";
+
+  DOM.categoryModalSave.textContent =
+    mode === "edit" ? "Сохранить" : "Создать";
+
+  DOM.categoryNameInput.value = category?.name || "";
+  DOM.categoryEmojiInput.value = category?.emoji || "📁";
+
+  DOM.categoryModal.classList.add("active");
+
+  requestAnimationFrame(() => {
+    DOM.categoryNameInput.focus();
+    DOM.categoryNameInput.select();
+  });
+}
+
+function closeCategoryModal() {
+  DOM.categoryModal.classList.remove("active");
+  DOM.categoryNameInput.value = "";
+  DOM.categoryEmojiInput.value = "";
+  modalState.mode = "create";
+  modalState.editIndex = null;
+}
+
+function openConfirmModal({ title, text, confirmText = "Удалить", onConfirm }) {
+  modalState.onConfirm = onConfirm;
+
+  DOM.confirmModalTitle.textContent = title;
+  DOM.confirmModalText.textContent = text;
+  DOM.confirmModalConfirm.textContent = confirmText;
+
+  DOM.confirmModal.classList.add("active");
+}
+
+function closeConfirmModal() {
+  DOM.confirmModal.classList.remove("active");
+  modalState.onConfirm = null;
+}
+
+function setupModals() {
+  DOM.categoryModalCancel.onclick = closeCategoryModal;
+
+  DOM.categoryModal.addEventListener("click", (e) => {
+    if (e.target === DOM.categoryModal) {
+      closeCategoryModal();
+    }
+  });
+
+  DOM.confirmModalCancel.onclick = closeConfirmModal;
+
+  DOM.confirmModal.addEventListener("click", (e) => {
+    if (e.target === DOM.confirmModal) {
+      closeConfirmModal();
+    }
+  });
+
+  DOM.confirmModalConfirm.onclick = async () => {
+    const handler = modalState.onConfirm;
+    closeConfirmModal();
+
+    if (typeof handler === "function") {
+      await handler();
+    }
+  };
+
+  DOM.categoryModalSave.onclick = async () => {
+    const name = DOM.categoryNameInput.value.trim();
+    const emoji = DOM.categoryEmojiInput.value.trim() || "📁";
+
+    if (!name) {
+      DOM.categoryNameInput.focus();
+      return;
+    }
+
+    const categories = getCategories();
+
+    if (modalState.mode === "create") {
+      const duplicate = categories.some((item) => item.name === name);
+
+      if (duplicate) {
+        alert("Категория с таким названием уже есть");
+        return;
+      }
+
+      categories.push({ name, emoji });
+      saveCategories(categories);
+      closeCategoryModal();
+      init();
+      return;
+    }
+
+    if (modalState.mode === "edit") {
+      const index = modalState.editIndex;
+      if (index === null || !categories[index]) {
+        closeCategoryModal();
+        return;
+      }
+
+      const oldCategory = categories[index];
+
+      const duplicate = categories.some(
+        (item, i) => i !== index && item.name === name
+      );
+
+      if (duplicate) {
+        alert("Категория с таким названием уже есть");
+        return;
+      }
+
+      try {
+        if (name !== oldCategory.name) {
+          await renameCardsCategory(oldCategory.name, name);
+        }
+
+        categories[index] = { name, emoji };
+        saveCategories(categories);
+
+        const activeCategory = localStorage.getItem("activeCategory");
+        if (activeCategory === oldCategory.name) {
+          localStorage.setItem("activeCategory", name);
+        }
+
+        closeCategoryModal();
+        init();
+      } catch (error) {
+        console.error(error);
+        alert("Не удалось переименовать категорию");
+      }
+    }
+  };
+}
+
+/* =========================
    RENDER
 ========================= */
 
@@ -132,51 +292,13 @@ function renderCategories(categories, cards) {
       window.location.href = "index.html";
     });
 
-    el.querySelector(".category-edit").onclick = async (e) => {
+    el.querySelector(".category-edit").onclick = (e) => {
       e.stopPropagation();
-
-      const newName = prompt("Новое название", cat.name);
-      if (!newName) return;
-
-      const trimmedName = newName.trim();
-      if (!trimmedName) return;
-
-      const newEmoji = prompt("Эмодзи", cat.emoji);
-      if (!newEmoji) return;
-
-      const trimmedEmoji = newEmoji.trim() || cat.emoji;
-
-      const duplicate = categories.some(
-        (item, i) => i !== index && item.name === trimmedName
-      );
-
-      if (duplicate) {
-        alert("Категория с таким названием уже есть");
-        return;
-      }
-
-      try {
-        if (trimmedName !== cat.name) {
-          await renameCardsCategory(cat.name, trimmedName);
-        }
-
-        categories[index] = {
-          name: trimmedName,
-          emoji: trimmedEmoji
-        };
-
-        saveCategories(categories);
-
-        const activeCategory = localStorage.getItem("activeCategory");
-        if (activeCategory === cat.name) {
-          localStorage.setItem("activeCategory", trimmedName);
-        }
-
-        init();
-      } catch (error) {
-        console.error(error);
-        alert("Не удалось переименовать категорию");
-      }
+      openCategoryModal({
+        mode: "edit",
+        category: cat,
+        index
+      });
     };
 
     enableCategorySwipeDelete(wrapper, el, cat, categories, cards);
@@ -219,37 +341,35 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
         (c) => (c.category || "Разное") === cat.name
       );
 
-      let confirmText = `Удалить категорию "${cat.name}"?`;
+      const text = hasCards
+        ? `Удалить категорию «${cat.name}»? Карточки из неё будут перенесены в «Разное».`
+        : `Удалить категорию «${cat.name}»?`;
 
-      if (hasCards) {
-        confirmText =
-          `Удалить категорию "${cat.name}"?\n\n` +
-          `Все карточки из неё будут автоматически перенесены в "Разное".`;
-      }
+      openConfirmModal({
+        title: "Удаление категории",
+        text,
+        confirmText: "Удалить",
+        onConfirm: async () => {
+          try {
+            if (hasCards) {
+              await moveCardsToDefaultCategory(cat.name);
+            }
 
-      const approved = confirm(confirmText);
+            const updated = categories.filter((item) => item.name !== cat.name);
+            saveCategories(updated);
 
-      if (approved) {
-        try {
-          if (hasCards) {
-            await moveCardsToDefaultCategory(cat.name);
+            const activeCategory = localStorage.getItem("activeCategory");
+            if (activeCategory === cat.name) {
+              localStorage.removeItem("activeCategory");
+            }
+
+            init();
+          } catch (error) {
+            console.error(error);
+            alert("Не удалось удалить категорию");
           }
-
-          const updated = categories.filter((item) => item.name !== cat.name);
-          saveCategories(updated);
-
-          const activeCategory = localStorage.getItem("activeCategory");
-          if (activeCategory === cat.name) {
-            localStorage.removeItem("activeCategory");
-          }
-
-          init();
-          return;
-        } catch (error) {
-          console.error(error);
-          alert("Не удалось удалить категорию");
         }
-      }
+      });
     }
 
     categoryEl.style.transform = "";
@@ -261,26 +381,9 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
    ADD CATEGORY
 ========================= */
 
-function setupAdd(categories) {
+function setupAdd() {
   DOM.addBtn.onclick = () => {
-    const name = prompt("Название категории");
-    if (!name) return;
-
-    const trimmedName = name.trim();
-    if (!trimmedName) return;
-
-    const duplicate = categories.some((item) => item.name === trimmedName);
-    if (duplicate) {
-      alert("Категория с таким названием уже есть");
-      return;
-    }
-
-    const emoji = (prompt("Эмодзи", "📁") || "📁").trim() || "📁";
-
-    categories.push({ name: trimmedName, emoji });
-    saveCategories(categories);
-
-    init();
+    openCategoryModal({ mode: "create" });
   };
 }
 
@@ -316,7 +419,8 @@ async function init() {
   const cards = await fetchCards();
 
   renderCategories(categories, cards);
-  setupAdd(categories);
+  setupAdd();
 }
 
+setupModals();
 init();
