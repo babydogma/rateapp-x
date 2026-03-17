@@ -375,6 +375,18 @@ function setupCardEvents(el, card) {
   const more = el.querySelector(".card-more-btn");
   const category = el.querySelector(".category-select");
 
+     slider.addEventListener("touchstart", (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  slider.addEventListener("touchmove", (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  slider.addEventListener("touchend", (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
   img.addEventListener("click", () => {
     if (!card.image_url) return;
     DOM.modalImg.src = card.image_url;
@@ -484,12 +496,22 @@ function setupCardEvents(el, card) {
 function enableSwipeDelete(cardEl, card) {
   let startX = 0;
   let diff = 0;
+  let isSliderDrag = false;
 
   cardEl.addEventListener("touchstart", (e) => {
+    isSliderDrag = Boolean(e.target.closest(".slider"));
+
+    if (isSliderDrag) {
+      diff = 0;
+      return;
+    }
+
     startX = e.touches[0].clientX;
   });
 
   cardEl.addEventListener("touchmove", (e) => {
+    if (isSliderDrag) return;
+
     diff = e.touches[0].clientX - startX;
 
     if (diff < 0) {
@@ -498,6 +520,13 @@ function enableSwipeDelete(cardEl, card) {
   });
 
   cardEl.addEventListener("touchend", async () => {
+    if (isSliderDrag) {
+      isSliderDrag = false;
+      cardEl.style.transform = "";
+      diff = 0;
+      return;
+    }
+
     if (diff < -120) {
       const approved = confirm("Удалить карточку?");
 
