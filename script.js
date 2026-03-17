@@ -54,6 +54,10 @@ const DEFAULT_CATEGORIES = [
 
 const DELETE_UNDO_MS = 5000;
 
+/* =========================
+   UNDO DELETE
+========================= */
+
 function ensureUndoToast() {
   let toast = document.getElementById("undoToast");
 
@@ -191,6 +195,11 @@ function getStoredCategories() {
   } catch {
     return DEFAULT_CATEGORIES;
   }
+}
+
+function getCategoryMetaByName(name) {
+  const categories = getStoredCategories();
+  return categories.find((item) => item.name === name) || { name: name || "Разное", emoji: "📁" };
 }
 
 function getCategoryNames(selectedValue) {
@@ -425,6 +434,50 @@ function getVisibleCards() {
   return cards;
 }
 
+function getDescriptionPreview(description) {
+  const trimmed = String(description || "").trim();
+  if (!trimmed) {
+    return {
+      text: "Описание пока не добавлено",
+      empty: true
+    };
+  }
+
+  const normalized = trimmed.replace(/\s+/g, " ");
+  const shortText = normalized.length > 90
+    ? `${normalized.slice(0, 90).trim()}…`
+    : normalized;
+
+  return {
+    text: shortText,
+    empty: false
+  };
+}
+
+function getMoreButtonLabel(description) {
+  return String(description || "").trim() ? "Редактировать описание" : "Добавить описание";
+}
+
+function updateDescriptionUI(card, previewEl, buttonEl) {
+  const preview = getDescriptionPreview(card.description);
+
+  previewEl.textContent = preview.text;
+  previewEl.classList.toggle("is-empty", preview.empty);
+  buttonEl.textContent = getMoreButtonLabel(card.description);
+}
+
+function updateCategoryChipUI(categoryName, chipLabelEl) {
+  const meta = getCategoryMetaByName(categoryName || "Разное");
+  chipLabelEl.textContent = `${meta.emoji} ${meta.name}`;
+}
+
+function closeAllCategorySelects(exceptWrap = null) {
+  document.querySelectorAll(".category-select-wrap.is-open").forEach((wrap) => {
+    if (exceptWrap && wrap === exceptWrap) return;
+    wrap.classList.remove("is-open");
+  });
+}
+
 /* =========================
    STATS
 ========================= */
@@ -475,6 +528,9 @@ function buildCard(card) {
 
   const safeTitle = escapeHtml(card.text || "");
   const selectedCategory = card.category || "Разное";
+  const preview = getDescriptionPreview(card.description);
+  const moreLabel = getMoreButtonLabel(card.description);
+  const categoryMeta = getCategoryMetaByName(selectedCategory);
 
   el.innerHTML = `
     <div class="delete-bg">Удалить</div>
@@ -490,7 +546,13 @@ function buildCard(card) {
       <div class="card-right-column">
         <div class="card__title" data-placeholder="Добавить название">${safeTitle}</div>
 
-        <button class="card-more-btn" type="button">Подробнее</button>
+        <div class="card__description-preview ${preview.empty ? "is-empty" : ""}">
+          ${escapeHtml(preview.text)}
+        </div>
+
+        <button class="card-more-btn ${preview.empty ? "is-empty" : ""}" type="button">
+          ${escapeHtml(moreLabel)}
+        </button>
 
         <div class="rating">${Number(card.rating) || 0}/10</div>
 
@@ -503,11 +565,20 @@ function buildCard(card) {
           value="${Number(card.rating) || 0}"
         >
 
-        <select class="category-select">
-          ${getCategoryOptions(selectedCategory)}
-        </select>
+        <div class="card-meta-row">
+          <div class="category-select-wrap">
+            <button class="category-chip" type="button">
+              <span class="category-chip__label">${escapeHtml(`${categoryMeta.emoji} ${categoryMeta.name}`)}</span>
+              <span class="category-chip__arrow">▾</span>
+            </button>
 
-        <div class="created">${formatDate(card.created_at)}</div>
+            <select class="category-select">
+              ${getCategoryOptions(selectedCategory)}
+            </select>
+          </div>
+
+          <div class="created">${formatDate(card.created_at)}</div>
+        </div>
       </div>
     </div>
   `;
@@ -534,7 +605,11 @@ function setupCardEvents(el, card) {
   const rating = el.querySelector(".rating");
   const title = el.querySelector(".card__title");
   const more = el.querySelector(".card-more-btn");
+  const preview = el.querySelector(".card__description-preview");
   const category = el.querySelector(".category-select");
+  const categoryWrap = el.querySelector(".category-select-wrap");
+  const categoryChip = el.querySelector(".category-chip");
+  const categoryChipLabel = el.querySelector(".category-chip__label");
 
   slider.addEventListener("touchstart", (e) => {
     e.stopPropagation();
@@ -610,6 +685,24 @@ function setupCardEvents(el, card) {
   });
 
   category.value = card.category || "Разное";
+  updateDescriptionUI(card, preview, more);
+  updateCategoryChipUI(card.category || "Разное", categoryChipLabel);
+
+  categoryChip.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = !categoryWrap.classList.contains("is-open");
+    closeAllCategorySelects();
+    categoryWrap.classList.toggle("is-open", willOpen);
+
+    if (willOpen) {
+      category.focus();
+      category.click();
+    }
+  });
+
+  category.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
 
   category.addEventListener("change", async () => {
     const oldCategory = card.category || "Разное";
@@ -618,6 +711,8 @@ function setupCardEvents(el, card) {
     try {
       await API.updateCard(card.id, { category: value });
       card.category = value;
+      updateCategoryChipUI(value, categoryChipLabel);
+      categoryWrap.classList.remove("is-open");
 
       if (state.activeCategory && oldCategory === state.activeCategory && value !== state.activeCategory) {
         renderCards();
@@ -627,6 +722,7 @@ function setupCardEvents(el, card) {
     } catch (error) {
       console.error(error);
       category.value = oldCategory;
+      updateCategoryChipUI(oldCategory, categoryChipLabel);
       alert("Не удалось сохранить категорию");
     }
   });
@@ -635,6 +731,7 @@ function setupCardEvents(el, card) {
     if (!DOM.descriptionModal || !DOM.descriptionInput || !DOM.saveDescription) return;
 
     DOM.descriptionInput.value = card.description || "";
+    DOM.descriptionInput.placeholder = "Напиши пару слов: что понравилось, чем запомнилось, стоит ли советовать";
     DOM.descriptionModal.classList.add("active");
 
     const saveHandler = async () => {
@@ -643,6 +740,7 @@ function setupCardEvents(el, card) {
       try {
         await API.updateCard(card.id, { description: text });
         card.description = text;
+        updateDescriptionUI(card, preview, more);
         DOM.descriptionModal.classList.remove("active");
       } catch (error) {
         console.error(error);
@@ -696,7 +794,7 @@ function enableSwipeDelete(cardEl, card) {
       return;
     }
 
-        if (diff < -120) {
+    if (diff < -120) {
       scheduleCardDelete(card);
     }
 
@@ -813,6 +911,12 @@ function setupNavigation() {
         window.location.href = "categories.html";
       }
     });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".category-select-wrap")) {
+      closeAllCategorySelects();
+    }
   });
 }
 
