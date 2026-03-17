@@ -1,14 +1,12 @@
-/* =========================================================
-   RATEAPP X — CATEGORIES PAGE
-========================================================= */
+/* =========================
+   CATEGORIES FULL SYSTEM
+========================= */
 
-const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
-
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const DOM = {
+  grid: document.getElementById("categoriesGrid"),
+  stats: document.getElementById("categoriesStats"),
+  addBtn: document.getElementById("addCategoryBtn")
+};
 
 const DEFAULT_CATEGORIES = [
   { name: "Разное", emoji: "📦" },
@@ -18,135 +16,133 @@ const DEFAULT_CATEGORIES = [
   { name: "Семья", emoji: "👨‍👩‍👧" }
 ];
 
-const DOM = {
-  grid: document.getElementById("categoriesGrid"),
-  stats: document.getElementById("categoriesStats"),
-  addBtn: document.getElementById("addCategoryBtn")
-};
+/* =========================
+   STORAGE
+========================= */
 
-function escapeHtml(str = "") {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function getCategories() {
+  const saved = localStorage.getItem("categories");
+  return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
 }
 
-function setupNavigation() {
-  document.querySelectorAll(".nav-emoji").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const page = btn.dataset.page;
-
-      if (page === "home") {
-        window.location.href = "index.html";
-      }
-
-      if (page === "categories") {
-        window.location.href = "categories.html";
-      }
-    });
-  });
+function saveCategories(categories) {
+  localStorage.setItem("categories", JSON.stringify(categories));
 }
+
+/* =========================
+   FETCH CARDS
+========================= */
 
 async function fetchCards() {
-  const { data, error } = await supabaseClient
+  const { data } = await supabase
+    .createClient(
+      "https://qlogmylywwdbczxolidl.supabase.co",
+      "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4"
+    )
     .from("cards")
     .select("category");
-
-  if (error) {
-    console.error("fetchCards error:", error);
-    return [];
-  }
 
   return data || [];
 }
 
-function buildCategoryMap(cards) {
-  const map = new Map();
+/* =========================
+   RENDER
+========================= */
 
-  DEFAULT_CATEGORIES.forEach((item) => {
-    map.set(item.name, {
-      name: item.name,
-      emoji: item.emoji,
-      count: 0
-    });
-  });
-
-  cards.forEach((card) => {
-    const name = (card.category || "Разное").trim() || "Разное";
-
-    if (!map.has(name)) {
-      map.set(name, {
-        name,
-        emoji: "🏷️",
-        count: 0
-      });
-    }
-
-    map.get(name).count += 1;
-  });
-
-  return [...map.values()];
-}
-
-function renderStats(categories, totalCards) {
-  if (!DOM.stats) return;
-  DOM.stats.textContent = `Категорий: ${categories.length} • Карточек: ${totalCards}`;
-}
-
-function buildCategoryCard(category) {
-  const el = document.createElement("div");
-  el.className = "category-block";
-
-  el.innerHTML = `
-    <div class="cat-emoji">${escapeHtml(category.emoji)}</div>
-    <div class="cat-title">${escapeHtml(category.name)} (${category.count})</div>
-  `;
-
-  el.addEventListener("click", () => {
-    alert(`Категория: ${category.name}\nКарточек: ${category.count}`);
-  });
-
-  return el;
-}
-
-function renderCategories(categories) {
-  if (!DOM.grid) return;
-
+function renderCategories(categories, cards) {
   DOM.grid.innerHTML = "";
 
-  categories.forEach((category) => {
-    DOM.grid.appendChild(buildCategoryCard(category));
+  categories.forEach((cat, index) => {
+    const count = cards.filter(
+      (c) => (c.category || "Разное") === cat.name
+    ).length;
+
+    const el = document.createElement("div");
+    el.className = "category-block";
+
+    el.innerHTML = `
+      <div class="cat-emoji">${cat.emoji}</div>
+      <div class="cat-title">${cat.name} (${count})</div>
+      <button class="category-edit">✏️</button>
+    `;
+
+    /* 👉 ПЕРЕХОД В КАТЕГОРИЮ */
+    el.addEventListener("click", () => {
+      localStorage.setItem("activeCategory", cat.name);
+      window.location.href = "index.html";
+    });
+
+    /* 👉 РЕДАКТИРОВАНИЕ */
+    el.querySelector(".category-edit").onclick = (e) => {
+      e.stopPropagation();
+
+      const newName = prompt("Новое название", cat.name);
+      if (!newName) return;
+
+      const newEmoji = prompt("Эмодзи", cat.emoji);
+      if (!newEmoji) return;
+
+      categories[index] = {
+        name: newName,
+        emoji: newEmoji
+      };
+
+      saveCategories(categories);
+      init();
+    };
+
+    DOM.grid.appendChild(el);
   });
+
+  DOM.stats.textContent =
+    `Категорий: ${categories.length} • Карточек: ${cards.length}`;
 }
 
-function setupAddCategory() {
-  if (!DOM.addBtn) return;
+/* =========================
+   ADD CATEGORY
+========================= */
 
-  DOM.addBtn.addEventListener("click", () => {
-    const name = prompt("Введите название новой категории");
+function setupAdd(categories) {
+  DOM.addBtn.onclick = () => {
+    const name = prompt("Название категории");
     if (!name) return;
 
-    const trimmed = name.trim();
-    if (!trimmed) return;
+    const emoji = prompt("Эмодзи", "📁") || "📁";
 
-    alert(
-      `Категория "${trimmed}" будет доступна после того, как ты выберешь её в карточках.\n\n` +
-      `Если хочешь, следующим сообщением я могу сразу дать тебе версию, где свои категории создаются и сохраняются полноценно.`
-    );
+    categories.push({ name, emoji });
+    saveCategories(categories);
+
+    init();
+  };
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function setupNavigation() {
+  document.querySelectorAll(".nav-emoji").forEach((btn) => {
+    btn.onclick = () => {
+      const page = btn.dataset.page;
+
+      if (page === "home") window.location.href = "index.html";
+      if (page === "categories") window.location.href = "categories.html";
+    };
   });
 }
+
+/* =========================
+   INIT
+========================= */
 
 async function init() {
   setupNavigation();
-  setupAddCategory();
 
+  const categories = getCategories();
   const cards = await fetchCards();
-  const categories = buildCategoryMap(cards);
 
-  renderCategories(categories);
-  renderStats(categories, cards.length);
+  renderCategories(categories, cards);
+  setupAdd(categories);
 }
 
 init();
