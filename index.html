@@ -19,7 +19,6 @@
 
 <body>
 
-<!-- DESCRIPTION MODAL -->
 <div id="descriptionModal" class="description-modal">
   <div class="description-box">
     <textarea id="descriptionInput" placeholder="Введите описание..."></textarea>
@@ -27,57 +26,40 @@
   </div>
 </div>
 
-<!-- IMAGE MODAL -->
 <div id="imageModal" class="image-modal">
   <img id="modalImg" alt="Preview">
 </div>
 
 <main class="app">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="app-title">
-      <div class="logo-text">RateApp X</div>
-    </div>
-  </header>
+  <section class="top-panel">
+    <header class="header">
+      <div class="app-title">
+        <div class="logo-text">RateApp X</div>
+      </div>
+    </header>
 
-  <div class="divider"></div>
+    <section class="stats" id="stats">
+      Загрузка...
+    </section>
 
-  <!-- STATS -->
-  <section class="stats" id="stats">
-    Загрузка...
+    <section class="rating-filters">
+      <button id="filterGood" class="rating-filter" data-filter="good">🤩</button>
+      <button id="filterMid" class="rating-filter" data-filter="mid">😏</button>
+      <button id="filterBad" class="rating-filter" data-filter="bad">🤡</button>
+    </section>
   </section>
 
-  <div class="divider"></div>
-
-  <!-- FILTERS -->
-  <section class="rating-filters">
-
-    <button id="filterGood" class="rating-filter" data-filter="good">🤩</button>
-    <button id="filterMid" class="rating-filter" data-filter="mid">😏</button>
-    <button id="filterBad" class="rating-filter" data-filter="bad">🤡</button>
-
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- CARDS -->
   <section class="layout-grid" id="grid"></section>
 
 </main>
 
-<!-- FILE INPUT -->
 <input id="photoInput" type="file" accept="image/*" hidden>
 
-<!-- NAV -->
 <nav class="bottom-nav">
-
   <button class="nav-emoji" data-page="home">🏠</button>
-
   <button id="addBtn" class="add-btn">+</button>
-
   <button class="nav-emoji" data-page="categories">📂</button>
-
 </nav>
 
 <script src="script.js"></script>
