@@ -645,6 +645,8 @@ async function init() {
   renderStats();
 }
 
+localStorage.removeItem("activeCategory");
+
 const activeCategory = localStorage.getItem("activeCategory");
 
 if (activeCategory) {
