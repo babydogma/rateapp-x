@@ -44,12 +44,47 @@ const DOM = {
 };
 
 const DEFAULT_CATEGORIES = [
-  "Разное",
-  "Еда",
-  "Фильм",
-  "Сериалы",
-  "Семья"
+  { name: "Разное", emoji: "📦" },
+  { name: "Еда", emoji: "🍔" },
+  { name: "Фильм", emoji: "🎬" },
+  { name: "Сериалы", emoji: "📺" },
+  { name: "Семья", emoji: "👨‍👩‍👧" }
 ];
+
+/* =========================
+   STORAGE
+========================= */
+
+function getStoredCategories() {
+  try {
+    const saved = localStorage.getItem("categories");
+    const parsed = saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+
+    if (!Array.isArray(parsed) || !parsed.length) {
+      return DEFAULT_CATEGORIES;
+    }
+
+    const normalized = parsed
+      .map((item) => ({
+        name: String(item?.name || "").trim(),
+        emoji: String(item?.emoji || "📁").trim() || "📁"
+      }))
+      .filter((item) => item.name);
+
+    if (!normalized.some((item) => item.name === "Разное")) {
+      normalized.unshift({ name: "Разное", emoji: "📦" });
+    }
+
+    return normalized;
+  } catch {
+    return DEFAULT_CATEGORIES;
+  }
+}
+
+function getCategoryNames(selectedValue) {
+  const fromStorage = getStoredCategories().map((item) => item.name);
+  return [...new Set([...fromStorage, selectedValue].filter(Boolean))];
+}
 
 /* =========================
    API
@@ -184,7 +219,7 @@ function updateFilterButtons() {
 }
 
 function getCategoryOptions(selectedValue) {
-  const values = [...new Set([...DEFAULT_CATEGORIES, selectedValue].filter(Boolean))];
+  const values = getCategoryNames(selectedValue);
 
   return values
     .map((name) => {
@@ -254,36 +289,14 @@ async function compressImageToSquare(file, size = 512, quality = 0.85) {
   });
 }
 
-/* =========================
-   STATS
-========================= */
-
-function renderStats() {
-  if (!DOM.stats) return;
-
-  if (!state.cards.length) {
-    DOM.stats.textContent = "Карточек: 0";
-    return;
-  }
-
-  const avg = (
-    state.cards.reduce((sum, card) => sum + (Number(card.rating) || 0), 0) /
-    state.cards.length
-  ).toFixed(1);
-
-  DOM.stats.textContent = `Средняя оценка: ${avg} • Карточек: ${state.cards.length}`;
-}
-
-/* =========================
-   RENDER CARDS
-========================= */
-
-function renderCards() {
-  if (!DOM.grid) return;
-
-  DOM.grid.innerHTML = "";
-
+function getVisibleCards() {
   let cards = [...state.cards];
+
+  if (state.activeCategory) {
+    cards = cards.filter(
+      (c) => (c.category || "Разное") === state.activeCategory
+    );
+  }
 
   if (state.ratingFilter === "good") {
     cards = cards.filter((c) => Number(c.rating) >= 8);
@@ -296,6 +309,42 @@ function renderCards() {
   if (state.ratingFilter === "bad") {
     cards = cards.filter((c) => Number(c.rating) < 5);
   }
+
+  return cards;
+}
+
+/* =========================
+   STATS
+========================= */
+
+function renderStats() {
+  if (!DOM.stats) return;
+
+  const visibleCards = getVisibleCards();
+
+  if (!visibleCards.length) {
+    DOM.stats.textContent = "Карточек: 0";
+    return;
+  }
+
+  const avg = (
+    visibleCards.reduce((sum, card) => sum + (Number(card.rating) || 0), 0) /
+    visibleCards.length
+  ).toFixed(1);
+
+  DOM.stats.textContent = `Средняя оценка: ${avg} • Карточек: ${visibleCards.length}`;
+}
+
+/* =========================
+   RENDER CARDS
+========================= */
+
+function renderCards() {
+  if (!DOM.grid) return;
+
+  DOM.grid.innerHTML = "";
+
+  const cards = getVisibleCards();
 
   cards.forEach((card) => {
     DOM.grid.appendChild(buildCard(card));
@@ -375,7 +424,7 @@ function setupCardEvents(el, card) {
   const more = el.querySelector(".card-more-btn");
   const category = el.querySelector(".category-select");
 
-     slider.addEventListener("touchstart", (e) => {
+  slider.addEventListener("touchstart", (e) => {
     e.stopPropagation();
   }, { passive: true });
 
@@ -451,13 +500,21 @@ function setupCardEvents(el, card) {
   category.value = card.category || "Разное";
 
   category.addEventListener("change", async () => {
+    const oldCategory = card.category || "Разное";
     const value = category.value;
 
     try {
       await API.updateCard(card.id, { category: value });
       card.category = value;
+
+      if (state.activeCategory && oldCategory === state.activeCategory && value !== state.activeCategory) {
+        renderCards();
+      }
+
+      renderStats();
     } catch (error) {
       console.error(error);
+      category.value = oldCategory;
       alert("Не удалось сохранить категорию");
     }
   });
@@ -576,7 +633,7 @@ if (DOM.photoInput) {
         image_url: url,
         text: "",
         rating: 0,
-        category: "Разное",
+        category: state.activeCategory || "Разное",
         description: ""
       });
 
@@ -626,16 +683,19 @@ function setupFilters() {
   DOM.filterGood?.addEventListener("click", () => {
     state.ratingFilter = state.ratingFilter === "good" ? null : "good";
     renderCards();
+    renderStats();
   });
 
   DOM.filterMid?.addEventListener("click", () => {
     state.ratingFilter = state.ratingFilter === "mid" ? null : "mid";
     renderCards();
+    renderStats();
   });
 
   DOM.filterBad?.addEventListener("click", () => {
     state.ratingFilter = state.ratingFilter === "bad" ? null : "bad";
     renderCards();
+    renderStats();
   });
 }
 
@@ -649,6 +709,7 @@ function setupNavigation() {
       const page = btn.dataset.page;
 
       if (page === "home") {
+        localStorage.removeItem("activeCategory");
         window.location.href = "index.html";
       }
 
@@ -667,22 +728,13 @@ async function init() {
   setupNavigation();
   setupFilters();
 
+  state.activeCategory = localStorage.getItem("activeCategory");
+
   const cards = await API.fetchCards();
-
-  const activeCategory = localStorage.getItem("activeCategory");
-
-  if (activeCategory) {
-    state.cards = cards.filter(
-      (c) => (c.category || "Разное") === activeCategory
-    );
-  } else {
-    state.cards = cards;
-  }
+  state.cards = cards;
 
   renderCards();
   renderStats();
-
-  localStorage.removeItem("activeCategory");
 }
 
 init();
