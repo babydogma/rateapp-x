@@ -21,7 +21,8 @@ const supabaseClient = supabase.createClient(
 const state = {
   cards: [],
   ratingFilter: null,
-  activeCategory: null
+  activeCategory: null,
+  pendingDelete: null
 };
 
 /* =========================
@@ -50,6 +51,117 @@ const DEFAULT_CATEGORIES = [
   { name: "Сериалы", emoji: "📺" },
   { name: "Семья", emoji: "👨‍👩‍👧" }
 ];
+
+const DELETE_UNDO_MS = 5000;
+
+function ensureUndoToast() {
+  let toast = document.getElementById("undoToast");
+
+  if (toast) {
+    return {
+      toast,
+      text: toast.querySelector(".undo-toast__text"),
+      button: toast.querySelector(".undo-toast__button")
+    };
+  }
+
+  toast = document.createElement("div");
+  toast.id = "undoToast";
+  toast.className = "undo-toast";
+  toast.innerHTML = `
+    <div class="undo-toast__text">Карточка удалена</div>
+    <button type="button" class="undo-toast__button">Отменить</button>
+  `;
+
+  document.body.appendChild(toast);
+
+  return {
+    toast,
+    text: toast.querySelector(".undo-toast__text"),
+    button: toast.querySelector(".undo-toast__button")
+  };
+}
+
+function hideUndoToast() {
+  const toast = document.getElementById("undoToast");
+  if (toast) {
+    toast.classList.remove("active");
+  }
+}
+
+function showUndoToast(message, onUndo) {
+  const { toast, text, button } = ensureUndoToast();
+
+  text.textContent = message;
+
+  const newButton = button.cloneNode(true);
+  button.replaceWith(newButton);
+
+  newButton.addEventListener("click", () => {
+    onUndo();
+  });
+
+  toast.classList.add("active");
+}
+
+async function finalizePendingDelete(cardId) {
+  const pending = state.pendingDelete;
+
+  if (!pending || pending.card.id !== cardId) return;
+
+  try {
+    await API.deleteCard(cardId);
+  } catch (error) {
+    console.error(error);
+    state.cards.splice(pending.index, 0, pending.card);
+    renderCards();
+    renderStats();
+    alert("Не удалось удалить карточку");
+  } finally {
+    if (state.pendingDelete && state.pendingDelete.card.id === cardId) {
+      state.pendingDelete = null;
+    }
+    hideUndoToast();
+  }
+}
+
+function scheduleCardDelete(card) {
+  if (state.pendingDelete) {
+    clearTimeout(state.pendingDelete.timerId);
+    finalizePendingDelete(state.pendingDelete.card.id);
+  }
+
+  const index = state.cards.findIndex((c) => c.id === card.id);
+  if (index === -1) return;
+
+  const removedCard = state.cards[index];
+  state.cards.splice(index, 1);
+
+  renderCards();
+  renderStats();
+
+  const timerId = setTimeout(() => {
+    finalizePendingDelete(card.id);
+  }, DELETE_UNDO_MS);
+
+  state.pendingDelete = {
+    card: removedCard,
+    index,
+    timerId
+  };
+
+  showUndoToast("Карточка удалена", () => {
+    if (!state.pendingDelete || state.pendingDelete.card.id !== card.id) return;
+
+    clearTimeout(state.pendingDelete.timerId);
+    state.cards.splice(state.pendingDelete.index, 0, state.pendingDelete.card);
+    state.pendingDelete = null;
+
+    hideUndoToast();
+    renderCards();
+    renderStats();
+  });
+}
 
 /* =========================
    STORAGE
@@ -584,24 +696,8 @@ function enableSwipeDelete(cardEl, card) {
       return;
     }
 
-    if (diff < -120) {
-      const approved = confirm("Удалить карточку?");
-
-      if (approved) {
-        try {
-          await API.deleteCard(card.id);
-
-          state.cards = state.cards.filter(
-            (c) => c.id !== card.id
-          );
-
-          renderCards();
-          renderStats();
-        } catch (error) {
-          console.error(error);
-          alert("Не удалось удалить карточку");
-        }
-      }
+        if (diff < -120) {
+      scheduleCardDelete(card);
     }
 
     cardEl.style.transform = "";
