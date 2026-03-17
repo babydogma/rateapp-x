@@ -544,52 +544,68 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  background: none;
-  border: none;
-  color: #fff;
+  background: linear-gradient(180deg, rgba(20, 24, 29, 0.96), rgba(10, 12, 15, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  color: #c7ced8;
   cursor: pointer;
+  position: relative;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
 }
 
-.add-btn {
+.nav-emoji::before {
+  content: "";
   position: absolute;
-  left: 50%;
-  top: -22px;
-  transform: translateX(-50%);
-
-  width: 68px;
-  height: 68px;
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 36px;
-  font-weight: 700;
-
-  color: #0b0b0b;
-
-  background: radial-gradient(
-    circle at 30% 30%,
-    #fff6cc,
-    #e0b84f 60%,
-    #b98a2c
+  inset: 1px;
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.025),
+    rgba(255, 255, 255, 0.005)
   );
+  pointer-events: none;
+}
 
-  border: 2px solid rgba(255, 215, 120, 0.5);
-
+.nav-emoji:hover {
+  transform: translateY(-1px);
   box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.7),
-    0 0 20px rgba(255, 215, 120, 0.7),
-    0 0 45px rgba(255, 200, 80, 0.45);
+    0 14px 24px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
 
-  backdrop-filter: blur(8px);
+.nav-emoji:active {
+  transform: scale(0.96);
+}
 
-  z-index: var(--z-fab);
-  cursor: pointer;
-  transition: all 0.25s ease;
+.nav-emoji.is-current {
+  background: linear-gradient(180deg, rgba(34, 30, 22, 0.98), rgba(18, 16, 12, 0.98));
+  border-color: rgba(200, 169, 90, 0.28);
+  color: var(--color-gold);
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(200, 169, 90, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  position: relative;
+  z-index: 1;
 }
 
 .add-btn:active {
@@ -922,6 +938,12 @@ button {
     padding: 18px 12px;
     padding-bottom: calc(118px + env(safe-area-inset-bottom));
     border-radius: 22px;
+  }
+
+     .nav-emoji {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
   }
    
 /* =========================
