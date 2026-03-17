@@ -88,28 +88,17 @@ button {
   grid-template-columns: 1fr;
   gap: 18px;
   margin-top: 18px;
-  padding: 22px 16px;
+  padding: 18px 14px;
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
   position: relative;
   z-index: var(--z-base);
-  border-radius: 28px;
+  border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(19, 19, 21, 0.96), rgba(11, 11, 12, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.045);
+    linear-gradient(180deg, rgba(16, 16, 18, 0.78), rgba(10, 10, 11, 0.88));
+  border: 1px solid rgba(255, 255, 255, 0.03);
   box-shadow:
-    0 22px 50px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-
-.layout-grid::before {
-  content: "Коллекция";
-  position: absolute;
-  top: 12px;
-  left: 18px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(198, 178, 122, 0.68);
+    0 14px 34px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .layout-categories {
@@ -127,15 +116,15 @@ button {
 
 .header {
   margin-top: 12px;
-  padding: 26px 20px 14px;
+  padding: 24px 20px 12px;
   text-align: center;
-  border-radius: 26px 26px 18px 18px;
+  border-radius: 24px 24px 16px 16px;
   background:
-    linear-gradient(180deg, rgba(28, 28, 30, 0.96), rgba(15, 15, 16, 0.92));
-  border: 1px solid rgba(255, 255, 255, 0.05);
+    linear-gradient(180deg, rgba(24, 24, 26, 0.92), rgba(15, 15, 16, 0.88));
+  border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 12px 28px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
   position: relative;
   overflow: hidden;
 }
@@ -157,16 +146,13 @@ button {
 
 .stats {
   margin: 0 10px;
-  padding: 18px 16px;
+  padding: 14px 16px;
   text-align: center;
   font-size: 15px;
   color: var(--color-text-secondary);
-  background:
-    linear-gradient(180deg, rgba(24, 24, 26, 0.96), rgba(14, 14, 15, 0.96));
-  border-left: 1px solid rgba(255, 255, 255, 0.04);
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  background: rgba(16, 16, 17, 0.72);
+  border-left: 1px solid rgba(255, 255, 255, 0.025);
+  border-right: 1px solid rgba(255, 255, 255, 0.025);
 }
 
 .app-title {
@@ -686,29 +672,15 @@ button {
   justify-content: center;
   gap: 12px;
   margin: 0 10px;
-  padding: 16px 18px 20px;
+  padding: 14px 18px 18px;
   background:
-    linear-gradient(180deg, rgba(24, 24, 26, 0.96), rgba(13, 13, 14, 0.96));
-  border-radius: 0 0 24px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+    linear-gradient(180deg, rgba(21, 21, 23, 0.92), rgba(13, 13, 14, 0.92));
+  border-radius: 0 0 22px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-top: none;
   box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    0 10px 24px rgba(0, 0, 0, 0.22);
   position: relative;
-}
-
-.rating-filters::before {
-  content: "Фильтр по оценке";
-  position: absolute;
-  top: 6px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(198, 178, 122, 0.7);
 }
 
 .rating-filter {
