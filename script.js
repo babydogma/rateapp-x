@@ -907,11 +907,22 @@ function setupNavigation() {
         window.location.href = "index.html";
       }
 
+      if (page === "sleep") {
+        window.location.href = "sleep.html";
+      }
+
       if (page === "categories") {
         window.location.href = "categories.html";
       }
     });
   });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".category-select-wrap")) {
+      closeAllCategorySelects();
+    }
+  });
+}
 
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".category-select-wrap")) {
