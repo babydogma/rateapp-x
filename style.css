@@ -94,10 +94,10 @@ button {
   z-index: var(--z-base);
   border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(16, 16, 18, 0.78), rgba(10, 10, 11, 0.88));
+    linear-gradient(180deg, rgba(15, 15, 17, 0.72), rgba(10, 10, 11, 0.88));
   border: 1px solid rgba(255, 255, 255, 0.03);
   box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.24),
+    0 14px 34px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
@@ -115,21 +115,34 @@ button {
    ========================================================= */
 
 .header {
-  margin-top: 12px;
-  padding: 24px 20px 12px;
+  margin-top: 0;
+  padding: 18px 18px 10px;
   text-align: center;
-  border-radius: 24px 24px 16px 16px;
-  background:
-    linear-gradient(180deg, rgba(24, 24, 26, 0.92), rgba(15, 15, 16, 0.88));
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  border-radius: 22px 22px 14px 14px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .header::after {
+  display: none;
+}
+
+.stats {
+  margin: 0;
+  padding: 12px 16px 10px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  position: relative;
+}
+
+.stats::after {
   content: "";
   position: absolute;
   left: 18px;
@@ -138,27 +151,57 @@ button {
   height: 1px;
   background: linear-gradient(
     90deg,
-    transparent,
-    rgba(212, 175, 55, 0.35),
-    transparent
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 20%,
+    rgba(212, 175, 55, 0.16) 50%,
+    rgba(255, 255, 255, 0.04) 80%,
+    transparent 100%
   );
-}
-
-.stats {
-  margin: 0 10px;
-  padding: 14px 16px;
-  text-align: center;
-  font-size: 15px;
-  color: var(--color-text-secondary);
-  background: rgba(16, 16, 17, 0.72);
-  border-left: 1px solid rgba(255, 255, 255, 0.025);
-  border-right: 1px solid rgba(255, 255, 255, 0.025);
 }
 
 .app-title {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.top-panel {
+  margin-top: 12px;
+  padding: 10px 10px 14px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(24, 24, 26, 0.96), rgba(12, 12, 13, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  position: relative;
+  overflow: hidden;
+}
+
+.top-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top center, rgba(212, 175, 55, 0.09), transparent 42%);
+  pointer-events: none;
+}
+
+.top-panel::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.24),
+    transparent
+  );
+  pointer-events: none;
 }
 
 .logo-text {
@@ -184,32 +227,7 @@ button {
    ========================================================= */
 
 .divider {
-  height: 10px;
-  margin: 0 10px;
-  position: relative;
-  background: transparent;
-  overflow: visible;
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-
-.divider::before {
-  content: "";
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  top: 50%;
-  height: 1px;
-  transform: translateY(-50%);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 20%,
-    rgba(212, 175, 55, 0.18) 50%,
-    rgba(255, 255, 255, 0.05) 80%,
-    transparent 100%
-  );
-  animation: none;
+  display: none;
 }
 
 /* =========================================================
@@ -875,35 +893,32 @@ button {
     padding: 0 10px 8px;
   }
 
-  .header {
+  .top-panel {
     margin-top: 10px;
-    padding: 22px 16px 12px;
-    border-radius: 22px 22px 16px 16px;
+    padding: 8px 8px 12px;
+    border-radius: 22px;
+  }
+
+  .header {
+    padding: 16px 14px 8px;
+    border-radius: 18px 18px 12px 12px;
   }
 
   .stats {
-    margin: 0 6px;
-    padding: 16px 14px;
-  }
-
-  .divider {
-    margin: 0 6px;
+    padding: 10px 14px 10px;
   }
 
   .rating-filters {
-    margin: 0 6px;
-    padding: 16px 14px 18px;
-    border-radius: 0 0 20px 20px;
+    padding: 14px 14px 4px;
   }
 
   .layout-grid {
     margin-top: 16px;
-    padding: 20px 12px;
+    padding: 18px 12px;
     padding-bottom: calc(118px + env(safe-area-inset-bottom));
     border-radius: 22px;
   }
-}
-
+   
 /* =========================
    UNDO TOAST
    ========================= */
