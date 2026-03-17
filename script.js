@@ -639,22 +639,21 @@ async function init() {
   setupFilters();
 
   const cards = await API.fetchCards();
-  state.cards = cards;
+
+  const activeCategory = localStorage.getItem("activeCategory");
+
+  if (activeCategory) {
+    state.cards = cards.filter(
+      (c) => (c.category || "Разное") === activeCategory
+    );
+  } else {
+    state.cards = cards;
+  }
 
   renderCards();
   renderStats();
-}
 
-localStorage.removeItem("activeCategory");
-
-const activeCategory = localStorage.getItem("activeCategory");
-
-if (activeCategory) {
-  state.cards = cards.filter(
-    (c) => (c.category || "Разное") === activeCategory
-  );
-} else {
-  state.cards = cards;
+  localStorage.removeItem("activeCategory");
 }
 
 init();
