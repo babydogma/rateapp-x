@@ -837,3 +837,65 @@ button {
     font-size: 18px;
   }
 }
+
+/* =========================
+   UNDO TOAST
+   ========================= */
+
+.undo-toast{
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(18,18,18,0.96);
+  border: 1px solid rgba(212,175,55,0.16);
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.45),
+    0 0 18px rgba(212,175,55,0.08);
+  color: var(--color-text-primary);
+  z-index: 120;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.undo-toast.active{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.undo-toast__text{
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.undo-toast__button{
+  border: none;
+  background: transparent;
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 4px;
+}
+
+.undo-toast__button:active{
+  transform: scale(0.96);
+}
+
+@media (max-width: 420px){
+  .undo-toast{
+    bottom: 88px;
+    padding: 13px 14px;
+  }
+}
