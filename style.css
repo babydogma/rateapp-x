@@ -51,7 +51,9 @@ html {
 
 body {
   min-height: 100vh;
-  background: linear-gradient(180deg, #080808 0%, #0f0f10 100%);
+  background:
+    radial-gradient(circle at top center, rgba(212, 175, 55, 0.08), transparent 34%),
+    linear-gradient(180deg, #060606 0%, #0b0b0c 24%, #101012 100%);
   color: var(--color-text-primary);
   padding-top: env(safe-area-inset-top);
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
@@ -72,6 +74,9 @@ button {
 
 .app {
   width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 12px 10px;
 }
 
 /* =========================================================
@@ -82,10 +87,29 @@ button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
-  padding: 20px;
+  margin-top: 18px;
+  padding: 22px 16px;
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
   position: relative;
   z-index: var(--z-base);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(19, 19, 21, 0.96), rgba(11, 11, 12, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.layout-grid::before {
+  content: "Коллекция";
+  position: absolute;
+  top: 12px;
+  left: 18px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(198, 178, 122, 0.68);
 }
 
 .layout-categories {
@@ -102,15 +126,47 @@ button {
    ========================================================= */
 
 .header {
-  padding: 24px 20px 10px;
+  margin-top: 12px;
+  padding: 26px 20px 14px;
   text-align: center;
+  border-radius: 26px 26px 18px 18px;
+  background:
+    linear-gradient(180deg, rgba(28, 28, 30, 0.96), rgba(15, 15, 16, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.35),
+    transparent
+  );
 }
 
 .stats {
+  margin: 0 10px;
+  padding: 18px 16px;
   text-align: center;
   font-size: 15px;
-  margin-bottom: 4px;
   color: var(--color-text-secondary);
+  background:
+    linear-gradient(180deg, rgba(24, 24, 26, 0.96), rgba(14, 14, 15, 0.96));
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .app-title {
@@ -142,39 +198,32 @@ button {
    ========================================================= */
 
 .divider {
-  height: 2px;
-  margin: 24px 40px;
+  height: 10px;
+  margin: 0 10px;
   position: relative;
-  background: var(--color-gold-soft);
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
+  background: transparent;
+  overflow: visible;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 .divider::before {
   content: "";
   position: absolute;
-  inset: 0;
+  left: 18px;
+  right: 18px;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 215, 120, 0.9) 50%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(212, 175, 55, 0.18) 50%,
+    rgba(255, 255, 255, 0.05) 80%,
     transparent 100%
   );
-  transform: translateX(100%);
-  animation: shine 4s linear infinite;
+  animation: none;
 }
 
 /* =========================================================
@@ -196,10 +245,10 @@ button {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-md);
-  border: 2px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 
   background:
-    linear-gradient(var(--color-bg-secondary), var(--color-bg-primary)) padding-box,
+    linear-gradient(180deg, rgba(29, 29, 31, 0.98), rgba(15, 15, 16, 0.98)) padding-box,
     linear-gradient(
       90deg,
       transparent 0%,
@@ -217,7 +266,10 @@ button {
     opacity 0.35s ease;
   touch-action: pan-y;
   z-index: 2;
-  margin-top: 4px;
+  margin-top: 0;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 255, 255, 0.015);
 }
 
 .card:hover {
@@ -633,37 +685,47 @@ button {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin: 18px 0 10px;
-  padding: 0 20px;
+  margin: 0 10px;
+  padding: 16px 18px 20px;
+  background:
+    linear-gradient(180deg, rgba(24, 24, 26, 0.96), rgba(13, 13, 14, 0.96));
+  border-radius: 0 0 24px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: none;
+  box-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  position: relative;
+}
+
+.rating-filters::before {
+  content: "Фильтр по оценке";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(198, 178, 122, 0.7);
 }
 
 .rating-filter {
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 22px;
-
-  background: #111;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-
+  background: linear-gradient(180deg, #171719, #0f0f10);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.rating-filter:active {
-  transform: scale(0.96);
-}
-
-.rating-filter.active {
-  border: 1px solid #d4af37;
-  box-shadow:
-    0 0 0 1px rgba(212, 175, 55, 0.6),
-    0 0 10px rgba(212, 175, 55, 0.35);
-  transform: translateY(-1px);
 }
 
 /* =========================================================
@@ -835,6 +897,38 @@ button {
 
   .rating {
     font-size: 18px;
+  }
+
+    .app {
+    padding: 0 10px 8px;
+  }
+
+  .header {
+    margin-top: 10px;
+    padding: 22px 16px 12px;
+    border-radius: 22px 22px 16px 16px;
+  }
+
+  .stats {
+    margin: 0 6px;
+    padding: 16px 14px;
+  }
+
+  .divider {
+    margin: 0 6px;
+  }
+
+  .rating-filters {
+    margin: 0 6px;
+    padding: 16px 14px 18px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .layout-grid {
+    margin-top: 16px;
+    padding: 20px 12px;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom));
+    border-radius: 22px;
   }
 }
 
