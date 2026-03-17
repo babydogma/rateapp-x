@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
@@ -13,111 +13,74 @@
 <meta name="theme-color" content="#0e0e0f" />
 
 <link rel="stylesheet" href="style.css">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<div id="descriptionModal" class="description-modal">
-  <div class="description-box">
-
-    <textarea id="descriptionInput" placeholder="Введите описание..."></textarea>
-
-    <button id="saveDescription">Сохранить</button>
-
-  </div>
-</div>
-
 <body>
 
-  <!-- =========================
-       IMAGE MODAL
-  ========================== -->
-  <div id="imageModal" class="image-modal">
-    <img id="modalImg" alt="Preview">
+<!-- DESCRIPTION MODAL -->
+<div id="descriptionModal" class="description-modal">
+  <div class="description-box">
+    <textarea id="descriptionInput" placeholder="Введите описание..."></textarea>
+    <button id="saveDescription">Сохранить</button>
   </div>
-
-  <!-- =========================
-       APP WRAPPER
-  ========================== -->
-  <main class="app">
-
-    <!-- Header -->
-    <header class="header">
-  <div class="app-title logo-shine">
-  <div class="logo-text">RateApp X</div>
 </div>
-</header>
 
-    <div class="divider"></div>
+<!-- IMAGE MODAL -->
+<div id="imageModal" class="image-modal">
+  <img id="modalImg" alt="Preview">
+</div>
 
-    <!-- Stats -->
-    <section class="stats" id="stats">
-      Загрузка...
-    </section>
-    
-    <div class="divider"></div>
+<main class="app">
 
-    <!-- =========================
-         RATING FILTERS
-    ========================== -->
-    <section class="rating-filters">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="app-title">
+      <div class="logo-text">RateApp X</div>
+    </div>
+  </header>
 
-<button id="filterGood" class="rating-filter" data-filter="good">
-🤩
-</button>
+  <div class="divider"></div>
 
-<button id="filterMid" class="rating-filter" data-filter="mid">
-😏
-</button>
+  <!-- STATS -->
+  <section class="stats" id="stats">
+    Загрузка...
+  </section>
 
-<button id="filterBad" class="rating-filter" data-filter="bad">
-🤡
-</button>
+  <div class="divider"></div>
 
-</section>
+  <!-- FILTERS -->
+  <section class="rating-filters">
 
-<div class="divider"></div>
+    <button id="filterGood" class="rating-filter" data-filter="good">🤩</button>
+    <button id="filterMid" class="rating-filter" data-filter="mid">😏</button>
+    <button id="filterBad" class="rating-filter" data-filter="bad">🤡</button>
 
-    <!-- Cards Grid -->
-    <section class="layout-grid" id="grid"></section>
+  </section>
 
-  </main>
+  <div class="divider"></div>
 
-  <!-- Hidden File Input -->
-  <input id="photoInput" type="file" accept="image/*" hidden>
+  <!-- CARDS -->
+  <section class="layout-grid" id="grid"></section>
 
-  <!-- =========================
-       Bottom Navigation
-  ========================== -->
-  <nav class="bottom-nav" role="navigation" aria-label="Навигация">
+</main>
 
-    <button 
-      class="nav-emoji" 
-      data-page="home" 
-      title="Главная"
-      aria-label="Главная"
-    >
-      🏠
-    </button>
+<!-- FILE INPUT -->
+<input id="photoInput" type="file" accept="image/*" hidden>
 
-    <button 
-  id="addBtn" 
-  class="add-btn" 
-  aria-label="Добавить фото"
->
-+
-</button>
+<!-- NAV -->
+<nav class="bottom-nav">
 
-    <button 
-      class="nav-emoji" 
-      data-page="categories" 
-      title="Категории"
-      aria-label="Категории"
-    >
-      📂
-    </button>
+  <button class="nav-emoji" data-page="home">🏠</button>
 
-  </nav>
+  <button id="addBtn" class="add-btn">+</button>
 
-  <script src="/script.js"></script>
+  <button class="nav-emoji" data-page="categories">📂</button>
+
+</nav>
+
+<script src="script.js"></script>
+
 </body>
 </html>
