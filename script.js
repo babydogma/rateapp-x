@@ -645,4 +645,14 @@ async function init() {
   renderStats();
 }
 
+const activeCategory = localStorage.getItem("activeCategory");
+
+if (activeCategory) {
+  state.cards = cards.filter(
+    (c) => (c.category || "Разное") === activeCategory
+  );
+} else {
+  state.cards = cards;
+}
+
 init();
