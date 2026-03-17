@@ -84,11 +84,11 @@ const API = {
     return data?.[0] || null;
   },
 
-  async updateCard(key, value, updates) {
+  async updateCard(id, updates) {
     const { error } = await supabaseClient
       .from("cards")
       .update(updates)
-      .eq(key, value);
+      .eq("id", id);
 
     if (error) {
       console.error("updateCard error:", error);
@@ -100,7 +100,7 @@ const API = {
     const { error } = await supabaseClient
       .from("cards")
       .delete()
-      .eq("created_at", id);
+      .eq("id", id);
 
     if (error) {
       console.error("deleteCard error:", error);
@@ -393,7 +393,7 @@ function setupCardEvents(el, card) {
     const val = Number(slider.value);
 
     try {
-      await API.updateCard("created_at", card.created_at, { rating: val });
+      await API.updateCard(card.id, { rating: val });
       card.rating = val;
       renderStats();
     } catch (error) {
@@ -417,7 +417,7 @@ function setupCardEvents(el, card) {
       const newTitle = input.value.trim();
 
       try {
-        await API.updateCard("created_at", card.created_at, { text: newTitle });
+        await API.updateCard(card.id, { text: newTitle });
         card.text = newTitle;
         title.textContent = newTitle;
       } catch (error) {
@@ -442,7 +442,7 @@ function setupCardEvents(el, card) {
     const value = category.value;
 
     try {
-      await API.updateCard("created_at", card.created_at, { category: value });
+      await API.updateCard(card.id, { category: value });
       card.category = value;
     } catch (error) {
       console.error(error);
@@ -460,7 +460,7 @@ function setupCardEvents(el, card) {
       const text = DOM.descriptionInput.value.trim();
 
       try {
-        await API.updateCard("created_at", card.created_at, { description: text });
+        await API.updateCard(card.id, { description: text });
         card.description = text;
         DOM.descriptionModal.classList.remove("active");
       } catch (error) {
@@ -503,10 +503,10 @@ function enableSwipeDelete(cardEl, card) {
 
       if (approved) {
         try {
-          await API.deleteCard(card.created_at);
+          await API.deleteCard(card.id);
 
           state.cards = state.cards.filter(
-            (c) => c.created_at !== card.created_at
+            (c) => c.id !== card.id
           );
 
           renderCards();
