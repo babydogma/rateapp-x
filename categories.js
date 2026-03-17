@@ -16,13 +16,42 @@ const DEFAULT_CATEGORIES = [
   { name: "Семья", emoji: "👨‍👩‍👧" }
 ];
 
+const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 /* =========================
    STORAGE
 ========================= */
 
 function getCategories() {
-  const saved = localStorage.getItem("categories");
-  return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+  try {
+    const saved = localStorage.getItem("categories");
+    const parsed = saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+
+    if (!Array.isArray(parsed) || !parsed.length) {
+      return DEFAULT_CATEGORIES;
+    }
+
+    const normalized = parsed
+      .map((item) => ({
+        name: String(item?.name || "").trim(),
+        emoji: String(item?.emoji || "📁").trim() || "📁"
+      }))
+      .filter((item) => item.name);
+
+    if (!normalized.some((item) => item.name === "Разное")) {
+      normalized.unshift({ name: "Разное", emoji: "📦" });
+    }
+
+    return normalized;
+  } catch {
+    return DEFAULT_CATEGORIES;
+  }
 }
 
 function saveCategories(categories) {
@@ -30,34 +59,42 @@ function saveCategories(categories) {
 }
 
 /* =========================
-   FETCH CARDS
+   FETCH / UPDATE CARDS
 ========================= */
 
 async function fetchCards() {
-  const { data } = await supabase
-    .createClient(
-      "https://qlogmylywwdbczxolidl.supabase.co",
-      "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4"
-    )
+  const { data, error } = await supabaseClient
     .from("cards")
     .select("category");
+
+  if (error) {
+    console.error("fetchCards error:", error);
+    return [];
+  }
 
   return data || [];
 }
 
 async function moveCardsToDefaultCategory(deletedCategoryName) {
-  const client = supabase.createClient(
-    "https://qlogmylywwdbczxolidl.supabase.co",
-    "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4"
-  );
-
-  const { error } = await client
+  const { error } = await supabaseClient
     .from("cards")
     .update({ category: "Разное" })
     .eq("category", deletedCategoryName);
 
   if (error) {
     console.error("moveCardsToDefaultCategory error:", error);
+    throw error;
+  }
+}
+
+async function renameCardsCategory(oldName, newName) {
+  const { error } = await supabaseClient
+    .from("cards")
+    .update({ category: newName })
+    .eq("category", oldName);
+
+  if (error) {
+    console.error("renameCardsCategory error:", error);
     throw error;
   }
 }
@@ -90,44 +127,57 @@ function renderCategories(categories, cards) {
       <button class="category-edit">✏️</button>
     `;
 
-    /* ПЕРЕХОД В КАТЕГОРИЮ */
     el.addEventListener("click", () => {
       localStorage.setItem("activeCategory", cat.name);
       window.location.href = "index.html";
     });
 
-    /* РЕДАКТИРОВАНИЕ */
-    el.querySelector(".category-edit").onclick = (e) => {
-  e.stopPropagation();
+    el.querySelector(".category-edit").onclick = async (e) => {
+      e.stopPropagation();
 
-  const newName = prompt("Новое название", cat.name);
-  if (!newName) return;
+      const newName = prompt("Новое название", cat.name);
+      if (!newName) return;
 
-  const trimmedName = newName.trim();
-  if (!trimmedName) return;
+      const trimmedName = newName.trim();
+      if (!trimmedName) return;
 
-  const newEmoji = prompt("Эмодзи", cat.emoji);
-  if (!newEmoji) return;
+      const newEmoji = prompt("Эмодзи", cat.emoji);
+      if (!newEmoji) return;
 
-  const trimmedEmoji = newEmoji.trim() || cat.emoji;
+      const trimmedEmoji = newEmoji.trim() || cat.emoji;
 
-  const duplicate = categories.some(
-    (item, i) => i !== index && item.name === trimmedName
-  );
+      const duplicate = categories.some(
+        (item, i) => i !== index && item.name === trimmedName
+      );
 
-  if (duplicate) {
-    alert("Категория с таким названием уже есть");
-    return;
-  }
+      if (duplicate) {
+        alert("Категория с таким названием уже есть");
+        return;
+      }
 
-  categories[index] = {
-    name: trimmedName,
-    emoji: trimmedEmoji
-  };
+      try {
+        if (trimmedName !== cat.name) {
+          await renameCardsCategory(cat.name, trimmedName);
+        }
 
-  saveCategories(categories);
-  init();
-};
+        categories[index] = {
+          name: trimmedName,
+          emoji: trimmedEmoji
+        };
+
+        saveCategories(categories);
+
+        const activeCategory = localStorage.getItem("activeCategory");
+        if (activeCategory === cat.name) {
+          localStorage.setItem("activeCategory", trimmedName);
+        }
+
+        init();
+      } catch (error) {
+        console.error(error);
+        alert("Не удалось переименовать категорию");
+      }
+    };
 
     enableCategorySwipeDelete(wrapper, el, cat, categories, cards);
 
@@ -188,6 +238,11 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
           const updated = categories.filter((item) => item.name !== cat.name);
           saveCategories(updated);
 
+          const activeCategory = localStorage.getItem("activeCategory");
+          if (activeCategory === cat.name) {
+            localStorage.removeItem("activeCategory");
+          }
+
           init();
           return;
         } catch (error) {
@@ -211,9 +266,18 @@ function setupAdd(categories) {
     const name = prompt("Название категории");
     if (!name) return;
 
-    const emoji = prompt("Эмодзи", "📁") || "📁";
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
 
-    categories.push({ name, emoji });
+    const duplicate = categories.some((item) => item.name === trimmedName);
+    if (duplicate) {
+      alert("Категория с таким названием уже есть");
+      return;
+    }
+
+    const emoji = (prompt("Эмодзи", "📁") || "📁").trim() || "📁";
+
+    categories.push({ name: trimmedName, emoji });
     saveCategories(categories);
 
     init();
@@ -229,8 +293,14 @@ function setupNavigation() {
     btn.onclick = () => {
       const page = btn.dataset.page;
 
-      if (page === "home") window.location.href = "index.html";
-      if (page === "categories") window.location.href = "categories.html";
+      if (page === "home") {
+        localStorage.removeItem("activeCategory");
+        window.location.href = "index.html";
+      }
+
+      if (page === "categories") {
+        window.location.href = "categories.html";
+      }
     };
   });
 }
