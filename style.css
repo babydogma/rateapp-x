@@ -1063,3 +1063,141 @@ button {
     padding: 13px 14px;
   }
 }
+
+/* =========================================================
+   16. CATEGORY / CONFIRM MODALS
+   ========================================================= */
+
+.category-modal,
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.68);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.category-modal.active,
+.confirm-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.category-modal__box,
+.confirm-modal__box {
+  width: 100%;
+  max-width: 420px;
+  background: #11161b;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(200, 169, 90, 0.16);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.46);
+}
+
+.category-modal__title,
+.confirm-modal__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 16px;
+}
+
+.category-modal__label {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.category-modal__label + .category-modal__input {
+  margin-bottom: 14px;
+}
+
+.category-modal__input {
+  width: 100%;
+  background: #171d23;
+  color: white;
+  border: 1px solid rgba(200, 169, 90, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.category-modal__input:focus {
+  border-color: rgba(200, 169, 90, 0.34);
+  box-shadow: 0 0 0 1px rgba(200, 169, 90, 0.18);
+}
+
+.confirm-modal__text {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+
+.category-modal__actions,
+.confirm-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.category-modal__btn {
+  min-width: 110px;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.18s ease;
+}
+
+.category-modal__btn:active {
+  transform: scale(0.97);
+}
+
+.category-modal__btn--ghost {
+  background: #1b2229;
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.category-modal__btn--primary {
+  background: #c8a95a;
+  color: #0d0d0d;
+  box-shadow: 0 8px 18px rgba(200, 169, 90, 0.20);
+}
+
+.category-modal__btn--danger {
+  background: #9d3b3b;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(157, 59, 59, 0.18);
+}
+
+@media (max-width: 420px) {
+  .category-modal__box,
+  .confirm-modal__box {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .category-modal__title,
+  .confirm-modal__title {
+    font-size: 18px;
+  }
+
+  .category-modal__actions,
+  .confirm-modal__actions {
+    flex-direction: column;
+  }
+
+  .category-modal__btn {
+    width: 100%;
+  }
+}
