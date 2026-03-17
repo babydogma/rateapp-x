@@ -924,13 +924,6 @@ function setupNavigation() {
   });
 }
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".category-select-wrap")) {
-      closeAllCategorySelects();
-    }
-  });
-}
-
 /* =========================
    INIT
 ========================= */
@@ -949,16 +942,3 @@ async function init() {
 }
 
 init();
-
-if (page === "home") {
-  localStorage.removeItem("activeCategory");
-  window.location.href = "index.html";
-}
-
-if (page === "sleep") {
-  window.location.href = "sleep.html";
-}
-
-if (page === "categories") {
-  window.location.href = "categories.html";
-}
