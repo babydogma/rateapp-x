@@ -1,3 +1,5 @@
+document.getElementById("sleepStats").textContent = "JS загружен";
+
 const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 
@@ -6,10 +8,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const list = document.getElementById("sleepList");
 const stats = document.getElementById("sleepStats");
 const addBtn = document.getElementById("addSleepBtn");
-
-/* =========================
-   FETCH
-========================= */
 
 async function fetchSleep() {
   const { data, error } = await supabaseClient
@@ -24,10 +22,6 @@ async function fetchSleep() {
 
   return { data: data || [], error: null };
 }
-
-/* =========================
-   UTILS
-========================= */
 
 function calcDuration(bed, wake) {
   const [bh, bm] = bed.split(":").map(Number);
@@ -48,35 +42,34 @@ function formatDuration(minutes) {
   return `${h}ч ${m}м`;
 }
 
-/* =========================
-   RENDER
-========================= */
-
 function render(entries, loadError = null) {
   list.innerHTML = "";
 
   if (loadError) {
-    const el = document.createElement("div");
-    el.className = "card";
-    el.innerHTML = `
+    stats.textContent = `Ошибка: ${loadError.message}`;
+
+    const errorCard = document.createElement("div");
+    errorCard.className = "card";
+    errorCard.innerHTML = `
       <div class="card-content">
         <div class="card-right-column">
-          <div class="card__title">Ошибка загрузки сна</div>
+          <div class="card__title">Не удалось загрузить записи сна</div>
           <div class="card__description-preview is-empty">
             ${loadError.message}
           </div>
         </div>
       </div>
     `;
-    list.appendChild(el);
-    stats.textContent = "Не удалось загрузить записи";
+    list.appendChild(errorCard);
     return;
   }
 
   if (!entries.length) {
-    const el = document.createElement("div");
-    el.className = "card";
-    el.innerHTML = `
+    stats.textContent = "Записей сна: 0";
+
+    const emptyCard = document.createElement("div");
+    emptyCard.className = "card";
+    emptyCard.innerHTML = `
       <div class="card-content">
         <div class="card-right-column">
           <div class="card__title">Пока нет записей сна</div>
@@ -86,8 +79,7 @@ function render(entries, loadError = null) {
         </div>
       </div>
     `;
-    list.appendChild(el);
-    stats.textContent = "Записей сна: 0";
+    list.appendChild(emptyCard);
     return;
   }
 
@@ -127,10 +119,6 @@ function render(entries, loadError = null) {
   stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
 }
 
-/* =========================
-   ADD
-========================= */
-
 addBtn.onclick = async () => {
   const date = prompt("Дата (2026-03-17)");
   const bed = prompt("Во сколько лёг (01:30)");
@@ -164,10 +152,6 @@ addBtn.onclick = async () => {
   init();
 };
 
-/* =========================
-   NAV
-========================= */
-
 document.querySelectorAll(".nav-emoji").forEach((btn) => {
   btn.onclick = () => {
     const page = btn.dataset.page;
@@ -187,11 +171,9 @@ document.querySelectorAll(".nav-emoji").forEach((btn) => {
   };
 });
 
-/* =========================
-   INIT
-========================= */
-
 async function init() {
+  stats.textContent = "Грузим записи сна...";
+
   const result = await fetchSleep();
   render(result.data, result.error);
 }
