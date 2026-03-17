@@ -1,222 +1,69 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Категории — RateApp X</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>RateApp X — Категории</title>
 
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0e0e0f" />
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0e0e0f" />
 
-<link rel="stylesheet" href="/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <div class="header">Категории</div>
-  <div class="stats" id="catsStats"></div>
-  <div class="divider"></div>
+  <main class="app">
+    <header class="header">
+      <div class="app-title">
+        <div class="logo-text">Категории</div>
+      </div>
+    </header>
 
-  <div id="categoriesGrid" class="categories-grid"></div>
+    <div class="divider"></div>
 
-  <div class="category-block category-block--add" id="addCategoryBtn">
-    <div class="cat-emoji">＋</div>
-    <div class="cat-title">Новая категория</div>
-  </div>
+    <section class="stats" id="categoriesStats">
+      Загрузка категорий...
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="categories-grid" id="categoriesGrid"></section>
+  </main>
 
   <nav class="bottom-nav" role="navigation" aria-label="Навигация">
-    <button class="nav-emoji" data-page="home">🏠</button>
-    <button id="addBtnCats" class="add-btn"></button>
-    <button class="nav-emoji active" data-page="categories">📂</button>
+    <button
+      class="nav-emoji"
+      data-page="home"
+      title="Главная"
+      aria-label="Главная"
+    >
+      🏠
+    </button>
+
+    <button
+      id="addCategoryBtn"
+      class="add-btn"
+      aria-label="Добавить категорию"
+      type="button"
+    >
+      +
+    </button>
+
+    <button
+      class="nav-emoji"
+      data-page="categories"
+      title="Категории"
+      aria-label="Категории"
+    >
+      📂
+    </button>
   </nav>
 
-<script>
-
-/* =========================
-   CATEGORIES
-========================= */
-
-const DEFAULT_CATEGORIES = [
-  { id: "Фильм", emoji: "🎬" },
-  { id: "Сериалы", emoji: "📺" },
-  { id: "Еда", emoji: "🍔" },
-  { id: "Семья", emoji: "👪" },
-  { id: "Разное", emoji: "🔖" }
-];
-
-function getCategories(){
-  const saved = localStorage.getItem("categories");
-  return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
-}
-
-function saveCategories(cats){
-  localStorage.setItem("categories", JSON.stringify(cats));
-}
-
-/* =========================
-   SUPABASE
-========================= */
-
-const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* =========================
-   DOM
-========================= */
-
-const categoriesGrid = document.getElementById("categoriesGrid");
-const catsStats = document.getElementById("catsStats");
-const addCategoryBtn = document.getElementById("addCategoryBtn");
-
-/* =========================
-   DELETE CATEGORY
-========================= */
-
-async function deleteCategory(categoryId){
-
-  if(categoryId === "Разное"){
-    alert('Категорию "Разное" удалить нельзя');
-    return;
-  }
-
-  const confirmDelete = confirm(
-    `Удалить категорию "${categoryId}"?\nКарточки будут перемещены в "Разное".`
-  );
-
-  if(!confirmDelete) return;
-
-  try{
-
-    await supabaseClient
-      .from("cards")
-      .update({ category: "Разное" })
-      .eq("category", categoryId);
-
-    let cats = getCategories();
-    cats = cats.filter(c => c.id !== categoryId);
-    saveCategories(cats);
-
-    renderCategoryBlocks();
-
-  } catch{
-    alert("Ошибка удаления категории");
-  }
-}
-
-/* ===== РЕДАКТИРОВАНИЕ ЭМОДЗИ ===== */
-function editCategoryEmoji(categoryId){
-  const newEmoji = prompt(`Введите новый эмодзи для категории "${categoryId}" (или оставьте пустым для 📁):`) || "📁";
-  
-  let cats = getCategories();
-  const cat = cats.find(c => c.id === categoryId);
-  if(cat){
-    cat.emoji = newEmoji.trim();
-    saveCategories(cats);
-    renderCategoryBlocks();
-  } else {
-    alert("Категория не найдена");
-  }
-}
-
-/* =========================
-   RENDER
-========================= */
-
-function createCategoryBlock(cat){
-
-  const el = document.createElement("div");
-  el.className = "category-block";
-
-  el.innerHTML = `
-    <div class="cat-emoji">${cat.emoji}</div>
-    <div class="cat-title">${cat.id}</div>
-    <button class="category-edit">✏️</button>
-    <button class="category-delete">✕</button>
-  `;
-
-  el.addEventListener("click", (e)=>{
-    if(e.target.classList.contains("category-delete") || e.target.classList.contains("category-edit")) return;
-    window.location.href = "/index.html?category=" + encodeURIComponent(cat.id);
-  });
-
-  el.querySelector(".category-delete").addEventListener("click", (e)=>{
-    e.stopPropagation();
-    deleteCategory(cat.id);
-  });
-
-  el.querySelector(".category-edit").addEventListener("click", (e)=>{
-    e.stopPropagation();
-    editCategoryEmoji(cat.id);
-  });
-
-  return el;
-}
-
-function renderCategoryBlocks(){
-  categoriesGrid.innerHTML = "";
-  const cats = getCategories();
-
-  cats.forEach(c=>{
-    categoriesGrid.appendChild(createCategoryBlock(c));
-  });
-
-  catsStats.textContent = `Категорий: ${cats.length}`;
-}
-
-/* =========================
-   ADD CATEGORY
-========================= */
-
-addCategoryBtn.addEventListener("click", () => {
-
-  const name = prompt("Введите название категории:");
-  if(!name || !name.trim()) return;
-
-  const cats = getCategories();
-
-  if(cats.some(c => c.id === name.trim())){
-    alert("Такая категория уже существует");
-    return;
-  }
-
-  const emoji = prompt("Введите эмодзи для категории (или оставьте пустым для 📁):") || "📁";
-
-  cats.push({
-    id: name.trim(),
-    emoji: emoji.trim()
-  });
-
-  saveCategories(cats);
-  renderCategoryBlocks();
-});
-
-/* =========================
-   NAVIGATION
-========================= */
-
-document.getElementById("addBtnCats").addEventListener("click", ()=> {
-  location.href = "/index.html?openUpload=1";
-});
-
-document.querySelectorAll('.nav-emoji').forEach(btn=>{
-  btn.onclick = () => {
-    const page = btn.dataset.page;
-    if(page === 'home') location.href = '/index.html';
-    if(page === 'categories') location.href = '/categories.html';
-  };
-});
-
-/* =========================
-   INIT
-========================= */
-
-renderCategoryBlocks();
-
-</script>
+  <script src="categories.js"></script>
 </body>
 </html>
