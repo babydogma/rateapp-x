@@ -424,3 +424,16 @@ async function init() {
 
 setupModals();
 init();
+
+if (page === "home") {
+  localStorage.removeItem("activeCategory");
+  window.location.href = "index.html";
+}
+
+if (page === "sleep") {
+  window.location.href = "sleep.html";
+}
+
+if (page === "categories") {
+  window.location.href = "categories.html";
+}
