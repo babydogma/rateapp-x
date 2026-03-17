@@ -17,6 +17,55 @@
 </head>
 <body>
 
+  <div id="categoryModal" class="category-modal">
+    <div class="category-modal__box">
+      <div class="category-modal__title" id="categoryModalTitle">Новая категория</div>
+
+      <label class="category-modal__label" for="categoryNameInput">Название</label>
+      <input
+        id="categoryNameInput"
+        class="category-modal__input"
+        type="text"
+        placeholder="Введите название"
+        maxlength="40"
+      >
+
+      <label class="category-modal__label" for="categoryEmojiInput">Эмодзи</label>
+      <input
+        id="categoryEmojiInput"
+        class="category-modal__input"
+        type="text"
+        placeholder="📁"
+        maxlength="4"
+      >
+
+      <div class="category-modal__actions">
+        <button id="categoryModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
+          Отмена
+        </button>
+        <button id="categoryModalSave" type="button" class="category-modal__btn category-modal__btn--primary">
+          Сохранить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="confirm-modal">
+    <div class="confirm-modal__box">
+      <div class="confirm-modal__title" id="confirmModalTitle">Подтверждение</div>
+      <div class="confirm-modal__text" id="confirmModalText">Вы уверены?</div>
+
+      <div class="confirm-modal__actions">
+        <button id="confirmModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
+          Отмена
+        </button>
+        <button id="confirmModalConfirm" type="button" class="category-modal__btn category-modal__btn--danger">
+          Удалить
+        </button>
+      </div>
+    </div>
+  </div>
+
   <main class="app">
     <header class="header">
       <div class="app-title">
@@ -36,40 +85,40 @@
   </main>
 
   <nav class="bottom-nav" role="navigation" aria-label="Навигация">
-  <button
-    class="nav-emoji"
-    data-page="home"
-    title="Главная"
-    aria-label="Главная"
-  >
-    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 10.5L12 3l9 7.5"></path>
-      <path d="M5.5 9.5V20h13V9.5"></path>
-      <path d="M9.5 20v-5.5h5V20"></path>
-    </svg>
-  </button>
+    <button
+      class="nav-emoji"
+      data-page="home"
+      title="Главная"
+      aria-label="Главная"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 10.5L12 3l9 7.5"></path>
+        <path d="M5.5 9.5V20h13V9.5"></path>
+        <path d="M9.5 20v-5.5h5V20"></path>
+      </svg>
+    </button>
 
-  <button
-    id="addCategoryBtn"
-    class="add-btn"
-    aria-label="Добавить категорию"
-    type="button"
-  >
-    +
-  </button>
+    <button
+      id="addCategoryBtn"
+      class="add-btn"
+      aria-label="Добавить категорию"
+      type="button"
+    >
+      +
+    </button>
 
-  <button
-    class="nav-emoji is-current"
-    data-page="categories"
-    title="Категории"
-    aria-label="Категории"
-  >
-    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h4l2 2h6A2.5 2.5 0 0 1 20.5 9.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"></path>
-      <path d="M3.5 9h17"></path>
-    </svg>
-  </button>
-</nav>
+    <button
+      class="nav-emoji is-current"
+      data-page="categories"
+      title="Категории"
+      aria-label="Категории"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h4l2 2h6A2.5 2.5 0 0 1 20.5 9.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"></path>
+        <path d="M3.5 9h17"></path>
+      </svg>
+    </button>
+  </nav>
 
   <script src="categories.js"></script>
 </body>
