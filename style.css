@@ -87,6 +87,46 @@ button {
    3. LAYOUT
    ========================================================= */
 
+.top-panel {
+  margin-top: 12px;
+  padding: 10px 10px 14px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(21, 25, 30, 0.96), rgba(11, 13, 16, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  position: relative;
+  overflow: hidden;
+}
+
+.top-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top center, rgba(200, 169, 90, 0.07), transparent 40%),
+    radial-gradient(circle at 20% 0%, rgba(110, 126, 148, 0.08), transparent 34%);
+  pointer-events: none;
+}
+
+.top-panel::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(200, 169, 90, 0.20),
+    transparent
+  );
+  pointer-events: none;
+}
+
 .layout-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -169,46 +209,6 @@ button {
   align-items: center;
 }
 
-.top-panel {
-  margin-top: 12px;
-  padding: 10px 10px 14px;
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(21, 25, 30, 0.96), rgba(11, 13, 16, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  position: relative;
-  overflow: hidden;
-}
-
-.top-panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at top center, rgba(200, 169, 90, 0.07), transparent 40%),
-    radial-gradient(circle at 20% 0%, rgba(110, 126, 148, 0.08), transparent 34%);
-  pointer-events: none;
-}
-
-.top-panel::after {
-  content: "";
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  bottom: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(200, 169, 90, 0.20),
-    transparent
-  );
-  pointer-events: none;
-}
-
 .logo-text {
   font-size: 48px;
   font-weight: 700;
@@ -217,9 +217,9 @@ button {
   letter-spacing: 0.5px;
   background: linear-gradient(
     90deg,
-    #c9a96a,
-    #fff3c4,
-    #c9a96a
+    #c8a95a,
+    #f0ddb0,
+    #c8a95a
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -368,12 +368,12 @@ button {
 
 .card__title:empty::before {
   content: attr(data-placeholder);
-  color: #c6b27a;
+  color: #9ca6b2;
   opacity: 0.7;
 }
 
 .card__title:hover {
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  text-shadow: 0 0 8px rgba(200, 169, 90, 0.35);
 }
 
 .card__title input {
@@ -384,7 +384,7 @@ button {
   font-size: 18px;
   font-weight: 600;
   outline: none;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  border-bottom: 1px solid rgba(200, 169, 90, 0.3);
   padding-bottom: 4px;
 }
 
@@ -393,7 +393,7 @@ button {
   align-self: flex-start;
   background: none;
   border: none;
-  color: #cfa94a;
+  color: #c8a95a;
   font-size: 13px;
   cursor: pointer;
   opacity: 0.85;
@@ -430,7 +430,7 @@ button {
 
 .created {
   font-size: 13px;
-  color: #c6b27a;
+  color: #c2b18a;
   text-align: right;
   margin-top: 2px;
   align-self: flex-end;
@@ -450,9 +450,9 @@ button {
   background: linear-gradient(
     to right,
     var(--color-gold) var(--progress, 0%),
-    #2a2a2a var(--progress, 0%)
+    #2a2f36 var(--progress, 0%)
   );
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 12px rgba(200, 169, 90, 0.25);
   outline: none;
 }
 
@@ -464,8 +464,8 @@ button {
   border-radius: 50%;
   background: radial-gradient(circle, #fff, var(--color-gold));
   box-shadow:
-    0 0 12px rgba(212, 175, 55, 0.8),
-    0 0 25px rgba(212, 175, 55, 0.45);
+    0 0 12px rgba(200, 169, 90, 0.8),
+    0 0 25px rgba(200, 169, 90, 0.45);
   cursor: pointer;
   border: none;
 }
@@ -476,8 +476,8 @@ button {
   border-radius: 50%;
   background: radial-gradient(circle, #fff, var(--color-gold));
   box-shadow:
-    0 0 12px rgba(212, 175, 55, 0.8),
-    0 0 25px rgba(212, 175, 55, 0.45);
+    0 0 12px rgba(200, 169, 90, 0.8),
+    0 0 25px rgba(200, 169, 90, 0.45);
   cursor: pointer;
   border: none;
 }
@@ -491,8 +491,8 @@ button {
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(212, 175, 55, 0.08),
-    rgba(212, 175, 55, 0.25)
+    rgba(200, 169, 90, 0.08),
+    rgba(200, 169, 90, 0.25)
   );
   color: var(--color-gold);
   font-size: 18px;
@@ -608,6 +608,47 @@ button {
   z-index: 1;
 }
 
+.add-btn {
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  transform: translateX(-50%);
+
+  width: 68px;
+  height: 68px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 36px;
+  font-weight: 700;
+
+  color: #0b0b0b;
+
+  background: radial-gradient(
+    circle at 30% 30%,
+    #fff6cc,
+    #e0b84f 60%,
+    #b98a2c
+  );
+
+  border: 2px solid rgba(255, 215, 120, 0.5);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(255, 215, 120, 0.7),
+    0 0 45px rgba(255, 200, 80, 0.45);
+
+  backdrop-filter: blur(8px);
+
+  z-index: var(--z-fab);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
 .add-btn:active {
   transform: translateX(-50%) scale(0.92);
   box-shadow:
@@ -672,19 +713,19 @@ button {
 .description-box {
   width: 100%;
   max-width: 420px;
-  background: #111;
+  background: #11161b;
   padding: 20px;
   border-radius: 14px;
-  border: 1px solid rgba(212, 175, 55, 0.18);
+  border: 1px solid rgba(200, 169, 90, 0.16);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
 }
 
 .description-box textarea {
   width: 100%;
   height: 120px;
-  background: #1a1a1a;
+  background: #171d23;
   color: white;
-  border: 1px solid rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(200, 169, 90, 0.12);
   border-radius: 10px;
   padding: 10px;
   resize: none;
@@ -696,7 +737,7 @@ button {
   padding: 10px 16px;
   border: none;
   border-radius: 10px;
-  background: #cfa94a;
+  background: #c8a95a;
   color: black;
   cursor: pointer;
   font-weight: 600;
@@ -710,15 +751,12 @@ button {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin: 0 10px;
-  padding: 14px 18px 18px;
-  background:
-    linear-gradient(180deg, rgba(21, 21, 23, 0.92), rgba(13, 13, 14, 0.92));
-  border-radius: 0 0 22px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-top: none;
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.22);
+  margin: 0;
+  padding: 16px 18px 6px;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   position: relative;
 }
 
@@ -737,6 +775,18 @@ button {
     inset 0 1px 0 rgba(255, 255, 255, 0.025);
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.rating-filter:active {
+  transform: scale(0.96);
+}
+
+.rating-filter.active {
+  border: 1px solid var(--color-gold);
+  box-shadow:
+    0 0 0 1px rgba(200, 169, 90, 0.45),
+    0 0 10px rgba(200, 169, 90, 0.22);
+  transform: translateY(-1px);
 }
 
 /* =========================================================
@@ -762,10 +812,10 @@ button {
   font-weight: 600;
   background: linear-gradient(
     180deg,
-    var(--color-bg-secondary),
-    var(--color-bg-primary)
+    rgba(17, 20, 24, 0.96),
+    rgba(10, 12, 15, 0.96)
   );
-  border: 1px solid var(--color-gold-border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: transform 0.15s ease, border-color 0.2s ease;
 }
 
@@ -776,11 +826,11 @@ button {
 
 .category-block--add {
   margin: 28px 18px 120px 18px;
-  border: 2px dashed rgba(212, 175, 55, 0.35);
+  border: 2px dashed rgba(200, 169, 90, 0.30);
   background: linear-gradient(
     180deg,
-    rgba(212, 175, 55, 0.05),
-    rgba(0, 0, 0, 0.2)
+    rgba(200, 169, 90, 0.04),
+    rgba(0, 0, 0, 0.18)
   );
   justify-content: center;
   opacity: 0.85;
@@ -809,7 +859,7 @@ button {
   justify-content: center;
   border: none;
   background: transparent;
-  color: rgba(212, 175, 55, 0.65);
+  color: rgba(200, 169, 90, 0.65);
   font-size: 16px;
   cursor: pointer;
   transition:
@@ -822,7 +872,7 @@ button {
 .category-edit:hover,
 .category-delete:hover {
   color: var(--color-gold);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 10px rgba(200, 169, 90, 0.3);
 }
 
 .category-edit:active,
@@ -892,25 +942,7 @@ button {
     font-size: 40px;
   }
 
-  .card-content {
-    gap: 12px;
-    padding: 12px;
-  }
-
-  .card__image {
-    width: 120px;
-    height: 120px;
-  }
-
-  .card__title {
-    font-size: 17px;
-  }
-
-  .rating {
-    font-size: 18px;
-  }
-
-    .app {
+  .app {
     padding: 0 10px 8px;
   }
 
@@ -940,17 +972,41 @@ button {
     border-radius: 22px;
   }
 
-     .nav-emoji {
+  .card-content {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .card__image {
+    width: 120px;
+    height: 120px;
+  }
+
+  .card__title {
+    font-size: 17px;
+  }
+
+  .rating {
+    font-size: 18px;
+  }
+
+  .nav-emoji {
     width: 50px;
     height: 50px;
     border-radius: 16px;
   }
-   
+
+  .add-btn {
+    width: 64px;
+    height: 64px;
+  }
+}
+
 /* =========================
    UNDO TOAST
    ========================= */
 
-.undo-toast{
+.undo-toast {
   position: fixed;
   left: 16px;
   right: 16px;
@@ -962,10 +1018,10 @@ button {
   padding: 14px 16px;
   border-radius: 16px;
   background: rgba(16, 20, 24, 0.96);
-  border: 1px solid rgba(200,169,90,0.14);
+  border: 1px solid rgba(200, 169, 90, 0.14);
   box-shadow:
-    0 12px 30px rgba(0,0,0,0.45),
-    0 0 18px rgba(118,132,154,0.07);
+    0 12px 30px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(118, 132, 154, 0.07);
   color: var(--color-text-primary);
   z-index: 120;
   opacity: 0;
@@ -976,18 +1032,18 @@ button {
     transform 0.22s ease;
 }
 
-.undo-toast.active{
+.undo-toast.active {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.undo-toast__text{
+.undo-toast__text {
   font-size: 14px;
   color: var(--color-text-primary);
 }
 
-.undo-toast__button{
+.undo-toast__button {
   border: none;
   background: transparent;
   color: var(--color-gold);
@@ -997,12 +1053,12 @@ button {
   padding: 6px 4px;
 }
 
-.undo-toast__button:active{
+.undo-toast__button:active {
   transform: scale(0.96);
 }
 
-@media (max-width: 420px){
-  .undo-toast{
+@media (max-width: 420px) {
+  .undo-toast {
     bottom: 88px;
     padding: 13px 14px;
   }
