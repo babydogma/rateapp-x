@@ -45,6 +45,23 @@ async function fetchCards() {
   return data || [];
 }
 
+async function moveCardsToDefaultCategory(deletedCategoryName) {
+  const client = supabase.createClient(
+    "https://qlogmylywwdbczxolidl.supabase.co",
+    "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4"
+  );
+
+  const { error } = await client
+    .from("cards")
+    .update({ category: "Разное" })
+    .eq("category", deletedCategoryName);
+
+  if (error) {
+    console.error("moveCardsToDefaultCategory error:", error);
+    throw error;
+  }
+}
+
 /* =========================
    RENDER
 ========================= */
@@ -81,22 +98,36 @@ function renderCategories(categories, cards) {
 
     /* РЕДАКТИРОВАНИЕ */
     el.querySelector(".category-edit").onclick = (e) => {
-      e.stopPropagation();
+  e.stopPropagation();
 
-      const newName = prompt("Новое название", cat.name);
-      if (!newName) return;
+  const newName = prompt("Новое название", cat.name);
+  if (!newName) return;
 
-      const newEmoji = prompt("Эмодзи", cat.emoji);
-      if (!newEmoji) return;
+  const trimmedName = newName.trim();
+  if (!trimmedName) return;
 
-      categories[index] = {
-        name: newName.trim(),
-        emoji: newEmoji.trim()
-      };
+  const newEmoji = prompt("Эмодзи", cat.emoji);
+  if (!newEmoji) return;
 
-      saveCategories(categories);
-      init();
-    };
+  const trimmedEmoji = newEmoji.trim() || cat.emoji;
+
+  const duplicate = categories.some(
+    (item, i) => i !== index && item.name === trimmedName
+  );
+
+  if (duplicate) {
+    alert("Категория с таким названием уже есть");
+    return;
+  }
+
+  categories[index] = {
+    name: trimmedName,
+    emoji: trimmedEmoji
+  };
+
+  saveCategories(categories);
+  init();
+};
 
     enableCategorySwipeDelete(wrapper, el, cat, categories, cards);
 
@@ -127,6 +158,13 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
 
   categoryEl.addEventListener("touchend", async () => {
     if (diff < -120) {
+      if (cat.name === "Разное") {
+        alert('Категорию "Разное" удалять нельзя');
+        categoryEl.style.transform = "";
+        diff = 0;
+        return;
+      }
+
       const hasCards = cards.some(
         (c) => (c.category || "Разное") === cat.name
       );
@@ -136,16 +174,26 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
       if (hasCards) {
         confirmText =
           `Удалить категорию "${cat.name}"?\n\n` +
-          `Карточки из неё не удалятся, но у них останется старое название категории.`;
+          `Все карточки из неё будут автоматически перенесены в "Разное".`;
       }
 
       const approved = confirm(confirmText);
 
       if (approved) {
-        const updated = categories.filter((item) => item.name !== cat.name);
-        saveCategories(updated);
-        init();
-        return;
+        try {
+          if (hasCards) {
+            await moveCardsToDefaultCategory(cat.name);
+          }
+
+          const updated = categories.filter((item) => item.name !== cat.name);
+          saveCategories(updated);
+
+          init();
+          return;
+        } catch (error) {
+          console.error(error);
+          alert("Не удалось удалить категорию");
+        }
       }
     }
 
@@ -153,6 +201,7 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
     diff = 0;
   });
 }
+
 /* =========================
    ADD CATEGORY
 ========================= */
