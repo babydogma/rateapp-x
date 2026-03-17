@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sleep</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<main class="app">
+
+  <section class="top-panel">
+    <div class="logo-text">Sleep</div>
+    <div id="sleepStats">Загрузка...</div>
+  </section>
+
+  <button id="addSleepBtn" class="add-btn">+</button>
+
+  <section id="sleepList"></section>
+
+</main>
+
+<nav class="bottom-nav">
+  <button class="nav-emoji" data-page="home">🏠</button>
+  <button class="nav-emoji is-current" data-page="sleep">🌙</button>
+  <button class="nav-emoji" data-page="categories">📂</button>
+</nav>
+
+<script src="sleep.js"></script>
+
+</body>
+</html>
