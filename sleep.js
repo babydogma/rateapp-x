@@ -48,6 +48,24 @@ function formatDuration(minutes) {
   return `${h}ч ${m}м`;
 }
 
+function normalizeSleepDate(value) {
+  const raw = String(value || "").trim();
+
+  if (!raw) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return raw;
+  }
+
+  const ruMatch = raw.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (ruMatch) {
+    const [, day, month, year] = ruMatch;
+    return `${year}-${month}-${day}`;
+  }
+
+  return null;
+}
+
 /* =========================
    RENDER
 ========================= */
@@ -134,14 +152,21 @@ function render(entries, loadError = null) {
 ========================= */
 
 addBtn.onclick = async () => {
-  const date = prompt("Дата (2026-03-17)");
+  const rawDate = prompt("Дата (2026-03-17 или 19.03.2026)");
   const bed = prompt("Во сколько лёг (01:30)");
   const wake = prompt("Во сколько встал (08:40)");
   const rating = Number(prompt("Оценка сна 0-10"));
   const mood = Number(prompt("Настроение 0-10"));
   const note = prompt("Заметка") || "";
 
-  if (!date || !bed || !wake) return;
+  if (!rawDate || !bed || !wake) return;
+
+  const date = normalizeSleepDate(rawDate);
+
+  if (!date) {
+    alert("Дата должна быть в формате 2026-03-17 или 19.03.2026");
+    return;
+  }
 
   const duration = calcDuration(bed, wake);
 
