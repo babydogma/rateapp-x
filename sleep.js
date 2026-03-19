@@ -136,6 +136,24 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function getSleepStatus(rating) {
+  const value = clampRating(rating);
+
+  if (value <= 3) {
+    return { label: "Плохой сон", className: "is-bad" };
+  }
+
+  if (value <= 6) {
+    return { label: "Нормально", className: "is-mid" };
+  }
+
+  if (value <= 8) {
+    return { label: "Хороший сон", className: "is-good" };
+  }
+
+  return { label: "Отличный сон", className: "is-great" };
+}
+
 /* =========================
    MODAL
 ========================= */
@@ -339,7 +357,7 @@ function render(entries, loadError = null) {
 
   entries.forEach((entry) => {
     const wrapper = document.createElement("div");
-    wrapper.className = "swipe-wrapper";
+    wrapper.className = "swipe-wrapper sleep-entry-wrap";
 
     const deleteBg = document.createElement("div");
     deleteBg.className = "delete-bg";
@@ -351,17 +369,34 @@ function render(entries, loadError = null) {
     const sleepRating = clampRating(entry.sleep_rating);
     const moodRating = clampRating(entry.mood_rating);
     const safeNote = String(entry.note || "").trim();
+    const status = getSleepStatus(sleepRating);
 
     el.innerHTML = `
-      <div class="card-content">
-        <div class="card-right-column">
-          <div class="card__title">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
-          <div class="card__description-preview">
-            ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")} • ${escapeHtml(formatDuration(entry.duration_minutes))}
+      <div class="card-content sleep-card-content">
+        <div class="card-right-column sleep-card-column">
+          <div class="sleep-card-head">
+            <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
+            <div class="sleep-status-chip ${status.className}">${escapeHtml(status.label)}</div>
           </div>
-          <div class="rating">Сон: ${sleepRating}/10</div>
-          <div class="card__description-preview">Настроение: ${moodRating}/10</div>
-          <div class="card__description-preview ${safeNote ? "" : "is-empty"}">
+
+          <div class="sleep-chip-row">
+            <div class="sleep-info-chip">🌙 ${escapeHtml(entry.bed_time || "--:--")}</div>
+            <div class="sleep-info-chip">☀️ ${escapeHtml(entry.wake_time || "--:--")}</div>
+            <div class="sleep-info-chip">⏱ ${escapeHtml(formatDuration(entry.duration_minutes))}</div>
+          </div>
+
+          <div class="sleep-chip-row sleep-chip-row--metrics">
+            <div class="sleep-metric-chip">
+              <span>Сон</span>
+              <strong>${sleepRating}/10</strong>
+            </div>
+            <div class="sleep-metric-chip">
+              <span>Настроение</span>
+              <strong>${moodRating}/10</strong>
+            </div>
+          </div>
+
+          <div class="sleep-note-block ${safeNote ? "" : "is-empty"}">
             ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
           </div>
         </div>
