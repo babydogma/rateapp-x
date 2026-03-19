@@ -189,14 +189,37 @@
   }
 
   .sleep-entry-wrap {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-  }
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
 
-  .sleep-entry-card {
-    will-change: transform;
-  }
+.sleep-entry-card {
+  position: relative;
+  will-change: transform;
+  background:
+    linear-gradient(180deg, rgba(24, 28, 34, 0.98), rgba(13, 16, 20, 0.98)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.045) !important;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.01) !important;
+}
+
+.sleep-entry-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  border-radius: 999px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.sleep-entry-card::after {
+  display: none !important;
+}
 
   .sleep-card-content {
     padding: 14px !important;
@@ -220,40 +243,88 @@
   }
 
   .sleep-status-chip {
-    flex-shrink: 0;
-    padding: 7px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.04);
-    color: #e7e3dc;
-  }
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e7e3dc;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
 
-  .sleep-status-chip.is-bad {
-    background: rgba(166, 63, 63, 0.18);
-    border-color: rgba(166, 63, 63, 0.34);
-    color: #f0b0b0;
-  }
+.sleep-status-chip.is-bad {
+  background: rgba(166, 63, 63, 0.16);
+  border-color: rgba(166, 63, 63, 0.34);
+  color: #f0b0b0;
+  box-shadow:
+    0 0 18px rgba(166, 63, 63, 0.16),
+    0 0 34px rgba(166, 63, 63, 0.08);
+}
 
-  .sleep-status-chip.is-mid {
-    background: rgba(200, 169, 90, 0.14);
-    border-color: rgba(200, 169, 90, 0.24);
-    color: #e7d09a;
-  }
+.sleep-status-chip.is-mid {
+  background: rgba(200, 169, 90, 0.14);
+  border-color: rgba(200, 169, 90, 0.28);
+  color: #e7d09a;
+  box-shadow:
+    0 0 18px rgba(200, 169, 90, 0.14),
+    0 0 30px rgba(200, 169, 90, 0.07);
+}
 
-  .sleep-status-chip.is-good,
-  .sleep-status-chip.is-great {
-    background: rgba(85, 140, 106, 0.18);
-    border-color: rgba(85, 140, 106, 0.30);
-    color: #b9e0c6;
-  }
+.sleep-status-chip.is-good {
+  background: rgba(85, 140, 106, 0.17);
+  border-color: rgba(85, 140, 106, 0.30);
+  color: #b9e0c6;
+  box-shadow:
+    0 0 18px rgba(85, 140, 106, 0.14),
+    0 0 30px rgba(85, 140, 106, 0.07);
+}
 
-  .sleep-status-chip.is-oversleep {
+.sleep-status-chip.is-great {
+  background: rgba(116, 162, 96, 0.18);
+  border-color: rgba(116, 162, 96, 0.34);
+  color: #d5efb2;
+  box-shadow:
+    0 0 18px rgba(116, 162, 96, 0.16),
+    0 0 32px rgba(116, 162, 96, 0.08);
+}
+
+.sleep-status-chip.is-oversleep {
   background: rgba(124, 104, 168, 0.18);
-  border-color: rgba(124, 104, 168, 0.30);
+  border-color: rgba(124, 104, 168, 0.32);
   color: #d8c7f4;
-  }
+  box-shadow:
+    0 0 18px rgba(124, 104, 168, 0.16),
+    0 0 32px rgba(124, 104, 168, 0.08);
+}
+
+  .sleep-entry-card:has(.sleep-status-chip.is-bad)::before {
+  background: linear-gradient(90deg, transparent, rgba(166, 63, 63, 0.95), transparent);
+}
+
+.sleep-entry-card:has(.sleep-status-chip.is-mid)::before {
+  background: linear-gradient(90deg, transparent, rgba(200, 169, 90, 0.95), transparent);
+}
+
+.sleep-entry-card:has(.sleep-status-chip.is-good)::before {
+  background: linear-gradient(90deg, transparent, rgba(85, 140, 106, 0.95), transparent);
+}
+
+.sleep-entry-card:has(.sleep-status-chip.is-great)::before {
+  background: linear-gradient(90deg, transparent, rgba(116, 162, 96, 0.98), transparent);
+}
+
+.sleep-entry-card:has(.sleep-status-chip.is-oversleep)::before {
+  background: linear-gradient(90deg, transparent, rgba(124, 104, 168, 0.95), transparent);
+}
   
   .sleep-chip-row {
     display: flex;
