@@ -383,21 +383,27 @@ async function compressImageToSquare(file, size = 512, quality = 0.85) {
 
   const ctx = canvas.getContext("2d");
 
-  const srcSize = Math.min(img.width, img.height);
-  const sx = (img.width - srcSize) / 2;
-  const sy = (img.height - srcSize) / 2;
+  ctx.fillStyle = "#111";
+  ctx.fillRect(0, 0, size, size);
 
-  ctx.drawImage(
-    img,
-    sx,
-    sy,
-    srcSize,
-    srcSize,
-    0,
-    0,
-    size,
-    size
-  );
+  const scale = Math.min(size / img.width, size / img.height);
+  const drawWidth = img.width * scale;
+  const drawHeight = img.height * scale;
+  const dx = (size - drawWidth) / 2;
+  const dy = (size - drawHeight) / 2;
+
+  ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Не удалось сжать изображение"));
+        return;
+      }
+      resolve(blob);
+    }, "image/jpeg", quality);
+  });
+}
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
