@@ -25,17 +25,14 @@ const DOM = {
   noteInput: document.getElementById("sleepNoteInput"),
 
   confirmModal: document.getElementById("sleepConfirmModal"),
+  confirmTitle: document.getElementById("sleepConfirmTitle"),
+  confirmText: document.getElementById("sleepConfirmText"),
   confirmCancel: document.getElementById("sleepConfirmCancel"),
-  confirmDelete: document.getElementById("sleepConfirmDelete"),
-
-  noteConfirmModal: document.getElementById("sleepNoteConfirmModal"),
-  noteConfirmCancel: document.getElementById("sleepNoteConfirmCancel"),
-  noteConfirmDelete: document.getElementById("sleepNoteConfirmDelete")
+  confirmDelete: document.getElementById("sleepConfirmDelete")
 };
 
 const modalState = {
-  onConfirmDelete: null,
-  onConfirmNoteDelete: null
+  onConfirm: null
 };
 
 /* =========================
@@ -274,64 +271,33 @@ function setupSleepModal() {
 }
 
 /* =========================
-   DELETE CONFIRM
+   CONFIRM
 ========================= */
 
-function openDeleteConfirm(onConfirm) {
-  modalState.onConfirmDelete = onConfirm;
+function openConfirm({ title, text, onConfirm }) {
+  modalState.onConfirm = onConfirm;
+  if (DOM.confirmTitle) DOM.confirmTitle.textContent = title;
+  if (DOM.confirmText) DOM.confirmText.textContent = text;
   DOM.confirmModal?.classList.add("active");
 }
 
-function closeDeleteConfirm() {
+function closeConfirm() {
   DOM.confirmModal?.classList.remove("active");
-  modalState.onConfirmDelete = null;
+  modalState.onConfirm = null;
 }
 
-function setupDeleteConfirm() {
-  DOM.confirmCancel?.addEventListener("click", closeDeleteConfirm);
+function setupConfirm() {
+  DOM.confirmCancel?.addEventListener("click", closeConfirm);
 
   DOM.confirmModal?.addEventListener("click", (e) => {
     if (e.target === DOM.confirmModal) {
-      closeDeleteConfirm();
+      closeConfirm();
     }
   });
 
   DOM.confirmDelete?.addEventListener("click", async () => {
-    const handler = modalState.onConfirmDelete;
-    closeDeleteConfirm();
-
-    if (typeof handler === "function") {
-      await handler();
-    }
-  });
-}
-
-/* =========================
-   NOTE DELETE CONFIRM
-========================= */
-
-function openNoteDeleteConfirm(onConfirm) {
-  modalState.onConfirmNoteDelete = onConfirm;
-  DOM.noteConfirmModal?.classList.add("active");
-}
-
-function closeNoteDeleteConfirm() {
-  DOM.noteConfirmModal?.classList.remove("active");
-  modalState.onConfirmNoteDelete = null;
-}
-
-function setupNoteDeleteConfirm() {
-  DOM.noteConfirmCancel?.addEventListener("click", closeNoteDeleteConfirm);
-
-  DOM.noteConfirmModal?.addEventListener("click", (e) => {
-    if (e.target === DOM.noteConfirmModal) {
-      closeNoteDeleteConfirm();
-    }
-  });
-
-  DOM.noteConfirmDelete?.addEventListener("click", async () => {
-    const handler = modalState.onConfirmNoteDelete;
-    closeNoteDeleteConfirm();
+    const handler = modalState.onConfirm;
+    closeConfirm();
 
     if (typeof handler === "function") {
       await handler();
@@ -387,6 +353,9 @@ function render(entries, loadError = null) {
   }
 
   entries.forEach((entry) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "sleep-entry-wrap";
+
     const el = document.createElement("div");
     el.className = "card sleep-entry-card";
 
@@ -422,20 +391,25 @@ function render(entries, loadError = null) {
       noteDeleteBtn.addEventListener("click", (e) => {
         e.stopPropagation();
 
-        openNoteDeleteConfirm(async () => {
-          try {
-            await updateSleepEntry(entry.id, { note: "" });
-            await init();
-          } catch (error) {
-            console.error(error);
-            alert("Не удалось удалить заметку");
+        openConfirm({
+          title: "Удаление заметки",
+          text: "Удалить заметку у этой записи сна?",
+          onConfirm: async () => {
+            try {
+              await updateSleepEntry(entry.id, { note: "" });
+              await init();
+            } catch (error) {
+              console.error(error);
+              alert("Не удалось удалить заметку");
+            }
           }
         });
       });
     }
 
     enableSleepSwipeDelete(el, entry);
-    DOM.list.appendChild(el);
+    wrapper.appendChild(el);
+    DOM.list.appendChild(wrapper);
   });
 
   const avgSleep = (
@@ -450,7 +424,7 @@ function render(entries, loadError = null) {
 }
 
 /* =========================
-   SWIPE DELETE
+   SWIPE DELETE ENTRY
 ========================= */
 
 function enableSleepSwipeDelete(cardEl, entry) {
@@ -460,46 +434,57 @@ function enableSleepSwipeDelete(cardEl, entry) {
   let diffY = 0;
   let isHorizontal = false;
 
+  const deleteBg = cardEl.querySelector(".delete-bg");
+
   cardEl.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
     diffX = 0;
     diffY = 0;
     isHorizontal = false;
   }, { passive: true });
 
   cardEl.addEventListener("touchmove", (e) => {
-    diffX = e.touches[0].clientX - startX;
-    diffY = e.touches[0].clientY - startY;
+    const touch = e.touches[0];
+    diffX = touch.clientX - startX;
+    diffY = touch.clientY - startY;
 
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-      isHorizontal = true;
+    if (!isHorizontal) {
+      if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+        isHorizontal = true;
+      } else if (Math.abs(diffY) > Math.abs(diffX)) {
+        return;
+      }
     }
 
     if (isHorizontal && diffX < 0) {
-      cardEl.style.transform = `translateX(${diffX}px)`;
-      const deleteBg = cardEl.querySelector(".delete-bg");
+      const limited = Math.max(diffX, -140);
+      cardEl.style.transform = `translateX(${limited}px)`;
       if (deleteBg) {
-        deleteBg.style.opacity = Math.min(Math.abs(diffX) / 120, 1).toString();
+        deleteBg.style.opacity = String(Math.min(Math.abs(limited) / 100, 1));
       }
     }
   }, { passive: true });
 
   cardEl.addEventListener("touchend", () => {
-    if (isHorizontal && diffX < -120) {
-      openDeleteConfirm(async () => {
-        try {
-          await deleteSleepEntry(entry.id);
-          await init();
-        } catch (error) {
-          console.error(error);
-          alert("Не удалось удалить запись сна");
+    if (isHorizontal && diffX < -110) {
+      openConfirm({
+        title: "Удаление записи",
+        text: "Удалить эту запись сна?",
+        onConfirm: async () => {
+          try {
+            await deleteSleepEntry(entry.id);
+            await init();
+          } catch (error) {
+            console.error(error);
+            alert("Не удалось удалить запись сна");
+          }
         }
       });
     }
 
     cardEl.style.transform = "";
-    const deleteBg = cardEl.querySelector(".delete-bg");
     if (deleteBg) {
       deleteBg.style.opacity = "";
     }
@@ -549,6 +534,5 @@ async function init() {
 
 setupNavigation();
 setupSleepModal();
-setupDeleteConfirm();
-setupNoteDeleteConfirm();
+setupConfirm();
 init();
