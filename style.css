@@ -734,6 +734,21 @@ button {
   z-index: 1;
 }
 
+.nav-center-slot {
+  width: 68px;
+  height: 56px;
+  flex: 0 0 68px;
+  pointer-events: none;
+}
+
+@media (max-width: 420px) {
+  .nav-center-slot {
+    width: 64px;
+    height: 50px;
+    flex-basis: 64px;
+  }
+}
+
 .add-btn {
   position: absolute;
   left: 50%;
