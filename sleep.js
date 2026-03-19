@@ -29,6 +29,25 @@ async function fetchSleep() {
    UTILS
 ========================= */
 
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function isValidTime(value) {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(String(value || "").trim());
+}
+
+function clampRating(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return 0;
+  return Math.max(0, Math.min(10, num));
+}
+
 function calcDuration(bed, wake) {
   const [bh, bm] = bed.split(":").map(Number);
   const [wh, wm] = wake.split(":").map(Number);
@@ -78,6 +97,8 @@ function normalizeSleepDate(value) {
 ========================= */
 
 function render(entries, loadError = null) {
+  if (!list || !stats) return;
+
   list.innerHTML = "";
 
   if (loadError) {
@@ -90,7 +111,7 @@ function render(entries, loadError = null) {
         <div class="card-right-column">
           <div class="card__title">Ошибка загрузки сна</div>
           <div class="card__description-preview is-empty">
-            ${loadError.message}
+            ${escapeHtml(loadError.message)}
           </div>
         </div>
       </div>
@@ -122,19 +143,23 @@ function render(entries, loadError = null) {
     const el = document.createElement("div");
     el.className = "card";
 
+    const sleepRating = clampRating(entry.sleep_rating);
+    const moodRating = clampRating(entry.mood_rating);
+    const safeNote = String(entry.note || "").trim();
+
     el.innerHTML = `
       <div class="card-content">
         <div class="card-right-column">
-          <div class="card__title">${formatSleepDate(entry.sleep_date)}</div>
+          <div class="card__title">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
           <div class="card__description-preview">
-            ${entry.bed_time || "--:--"} → ${entry.wake_time || "--:--"} • ${formatDuration(entry.duration_minutes)}
+            ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")} • ${escapeHtml(formatDuration(entry.duration_minutes))}
           </div>
-          <div class="rating">Сон: ${Number(entry.sleep_rating) || 0}/10</div>
+          <div class="rating">Сон: ${sleepRating}/10</div>
           <div class="card__description-preview">
-            Настроение: ${Number(entry.mood_rating) || 0}/10
+            Настроение: ${moodRating}/10
           </div>
-          <div class="card__description-preview ${entry.note ? "" : "is-empty"}">
-            ${entry.note || "Без заметки"}
+          <div class="card__description-preview ${safeNote ? "" : "is-empty"}">
+            ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
           </div>
         </div>
       </div>
@@ -144,7 +169,7 @@ function render(entries, loadError = null) {
   });
 
   const avgSleep = (
-    entries.reduce((sum, e) => sum + (Number(e.sleep_rating) || 0), 0) / entries.length
+    entries.reduce((sum, e) => sum + clampRating(e.sleep_rating), 0) / entries.length
   ).toFixed(1);
 
   const avgDuration = Math.round(
@@ -158,45 +183,52 @@ function render(entries, loadError = null) {
    ADD
 ========================= */
 
-addBtn.onclick = async () => {
-  const rawDate = prompt("Дата (2026-03-17 или 19.03.2026)");
-  const bed = prompt("Во сколько лёг (01:30)");
-  const wake = prompt("Во сколько встал (08:40)");
-  const rating = Number(prompt("Оценка сна 0-10"));
-  const mood = Number(prompt("Настроение 0-10"));
-  const note = prompt("Заметка") || "";
+if (addBtn) {
+  addBtn.onclick = async () => {
+    const rawDate = prompt("Дата (2026-03-17 или 19.03.2026)");
+    const bed = prompt("Во сколько лёг (01:30)");
+    const wake = prompt("Во сколько встал (08:40)");
+    const rating = prompt("Оценка сна 0-10");
+    const mood = prompt("Настроение 0-10");
+    const note = prompt("Заметка") || "";
 
-  if (!rawDate || !bed || !wake) return;
+    if (!rawDate || !bed || !wake) return;
 
-  const date = normalizeSleepDate(rawDate);
+    const date = normalizeSleepDate(rawDate);
 
-  if (!date) {
-    alert("Дата должна быть в формате 2026-03-17 или 19.03.2026");
-    return;
-  }
+    if (!date) {
+      alert("Дата должна быть в формате 2026-03-17 или 19.03.2026");
+      return;
+    }
 
-  const duration = calcDuration(bed, wake);
+    if (!isValidTime(bed) || !isValidTime(wake)) {
+      alert("Время должно быть в формате HH:MM, например 01:30");
+      return;
+    }
 
-  const { error } = await supabaseClient
-    .from("sleep_entries")
-    .insert({
-      sleep_date: date,
-      bed_time: bed,
-      wake_time: wake,
-      duration_minutes: duration,
-      sleep_rating: Number.isFinite(rating) ? rating : 0,
-      mood_rating: Number.isFinite(mood) ? mood : 0,
-      note
-    });
+    const duration = calcDuration(bed, wake);
 
-  if (error) {
-    console.error("insertSleep error:", error);
-    alert(`Не удалось добавить запись: ${error.message}`);
-    return;
-  }
+    const { error } = await supabaseClient
+      .from("sleep_entries")
+      .insert({
+        sleep_date: date,
+        bed_time: bed,
+        wake_time: wake,
+        duration_minutes: duration,
+        sleep_rating: clampRating(rating),
+        mood_rating: clampRating(mood),
+        note: String(note).trim()
+      });
 
-  init();
-};
+    if (error) {
+      console.error("insertSleep error:", error);
+      alert(`Не удалось добавить запись: ${error.message}`);
+      return;
+    }
+
+    init();
+  };
+}
 
 /* =========================
    NAV
@@ -226,7 +258,10 @@ document.querySelectorAll(".nav-emoji").forEach((btn) => {
 ========================= */
 
 async function init() {
-  stats.textContent = "Грузим записи сна...";
+  if (stats) {
+    stats.textContent = "Грузим записи сна...";
+  }
+
   const result = await fetchSleep();
   render(result.data, result.error);
 }
