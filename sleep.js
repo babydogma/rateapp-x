@@ -35,10 +35,6 @@ const modalState = {
   onConfirm: null
 };
 
-/* =========================
-   FETCH / UPDATE
-========================= */
-
 async function fetchSleep() {
   const { data, error } = await supabaseClient
     .from("sleep_entries")
@@ -76,10 +72,6 @@ async function updateSleepEntry(id, updates) {
     throw error;
   }
 }
-
-/* =========================
-   UTILS
-========================= */
 
 function escapeHtml(str = "") {
   return String(str)
@@ -121,7 +113,6 @@ function formatDuration(minutes) {
 
 function formatSleepDate(dateStr) {
   if (!dateStr) return "Без даты";
-
   const [year, month, day] = dateStr.split("-");
   return `${day}.${month}.${year}`;
 }
@@ -132,12 +123,10 @@ function formatRatingValue(value) {
 
 function setSliderProgress(slider) {
   if (!slider) return;
-
   const min = Number(slider.min || 0);
   const max = Number(slider.max || 10);
   const value = Number(slider.value || 0);
   const progress = ((value - min) / (max - min)) * 100;
-
   slider.style.setProperty("--progress", `${progress}%`);
 }
 
@@ -148,10 +137,6 @@ function getTodayDateString() {
   const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
-
-/* =========================
-   MODAL
-========================= */
 
 function syncSleepSliderUI() {
   if (DOM.sleepRatingInput && DOM.sleepRatingValue) {
@@ -172,13 +157,11 @@ function resetSleepForm() {
   if (DOM.sleepRatingInput) DOM.sleepRatingInput.value = "0";
   if (DOM.moodRatingInput) DOM.moodRatingInput.value = "0";
   if (DOM.noteInput) DOM.noteInput.value = "";
-
   syncSleepSliderUI();
 }
 
 function openSleepModal() {
   if (!DOM.modal) return;
-
   resetSleepForm();
   DOM.modal.classList.add("active");
 
@@ -219,9 +202,7 @@ async function saveSleepEntry() {
 
   const duration = calcDuration(bed, wake);
 
-  if (DOM.modalSave) {
-    DOM.modalSave.disabled = true;
-  }
+  if (DOM.modalSave) DOM.modalSave.disabled = true;
 
   try {
     const { error } = await supabaseClient
@@ -245,9 +226,7 @@ async function saveSleepEntry() {
     closeSleepModal();
     await init();
   } finally {
-    if (DOM.modalSave) {
-      DOM.modalSave.disabled = false;
-    }
+    if (DOM.modalSave) DOM.modalSave.disabled = false;
   }
 }
 
@@ -269,10 +248,6 @@ function setupSleepModal() {
 
   resetSleepForm();
 }
-
-/* =========================
-   CONFIRM
-========================= */
 
 function openConfirm({ title, text, onConfirm }) {
   modalState.onConfirm = onConfirm;
@@ -298,16 +273,11 @@ function setupConfirm() {
   DOM.confirmDelete?.addEventListener("click", async () => {
     const handler = modalState.onConfirm;
     closeConfirm();
-
     if (typeof handler === "function") {
       await handler();
     }
   });
 }
-
-/* =========================
-   RENDER
-========================= */
 
 function render(entries, loadError = null) {
   if (!DOM.list || !DOM.stats) return;
@@ -316,16 +286,13 @@ function render(entries, loadError = null) {
 
   if (loadError) {
     DOM.stats.textContent = `Ошибка: ${loadError.message}`;
-
     const errorCard = document.createElement("div");
     errorCard.className = "card";
     errorCard.innerHTML = `
       <div class="card-content">
         <div class="card-right-column">
           <div class="card__title">Ошибка загрузки сна</div>
-          <div class="card__description-preview is-empty">
-            ${escapeHtml(loadError.message)}
-          </div>
+          <div class="card__description-preview is-empty">${escapeHtml(loadError.message)}</div>
         </div>
       </div>
     `;
@@ -335,16 +302,13 @@ function render(entries, loadError = null) {
 
   if (!entries.length) {
     DOM.stats.textContent = "Записей сна: 0";
-
     const emptyCard = document.createElement("div");
     emptyCard.className = "card";
     emptyCard.innerHTML = `
       <div class="card-content">
         <div class="card-right-column">
           <div class="card__title">Пока нет записей сна</div>
-          <div class="card__description-preview is-empty">
-            Нажми на + и добавь первую запись
-          </div>
+          <div class="card__description-preview is-empty">Нажми на + и добавь первую запись</div>
         </div>
       </div>
     `;
@@ -373,9 +337,7 @@ function render(entries, loadError = null) {
             ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")} • ${escapeHtml(formatDuration(entry.duration_minutes))}
           </div>
           <div class="rating">Сон: ${sleepRating}/10</div>
-          <div class="card__description-preview">
-            Настроение: ${moodRating}/10
-          </div>
+          <div class="card__description-preview">Настроение: ${moodRating}/10</div>
           <div class="sleep-note-row">
             <div class="card__description-preview ${safeNote ? "" : "is-empty"} sleep-note-text">
               ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
@@ -422,10 +384,6 @@ function render(entries, loadError = null) {
 
   DOM.stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
 }
-
-/* =========================
-   SWIPE DELETE ENTRY
-========================= */
 
 function enableSleepSwipeDelete(cardEl, entry) {
   let startX = 0;
@@ -485,18 +443,12 @@ function enableSleepSwipeDelete(cardEl, entry) {
     }
 
     cardEl.style.transform = "";
-    if (deleteBg) {
-      deleteBg.style.opacity = "";
-    }
+    if (deleteBg) deleteBg.style.opacity = "";
     diffX = 0;
     diffY = 0;
     isHorizontal = false;
   });
 }
-
-/* =========================
-   NAV
-========================= */
 
 function setupNavigation() {
   document.querySelectorAll(".nav-emoji").forEach((btn) => {
@@ -518,10 +470,6 @@ function setupNavigation() {
     };
   });
 }
-
-/* =========================
-   INIT
-========================= */
 
 async function init() {
   if (DOM.stats) {
