@@ -214,6 +214,7 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
   // 3 = Отличный сон
   // 4 = Пересып
 
+  // Базовый статус по длительности
   if (hours < 5) {
     level = 0;
   } else if (hours <= 6.5) {
@@ -226,31 +227,21 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
     level = 4;
   }
 
-  if (rating <= 3) {
-    level -= 1;
-  } else if (rating <= 5) {
-    level -= 0.5;
-  } else if (rating >= 9 && hours >= 7.6 && hours <= 8.5) {
-    level += 0.5;
-  }
-
-  if (hours < 5) {
-    level = 0;
-  }
-
-  if (hours < 6.6) {
+  // Жесткая коррекция по итоговой оценке сна
+  if (rating < 4) {
+    level = Math.min(level, 0);
+  } else if (rating < 6) {
     level = Math.min(level, 1);
-  }
-
-  if (hours < 7.6) {
+  } else if (rating < 8) {
     level = Math.min(level, 2);
+  } else if (rating < 9) {
+    level = Math.min(level, 3);
   }
 
+  // Пересып не должен превращаться в отличный сон
   if (hours > 8.5) {
-    level = Math.max(level, 4);
+    level = 4;
   }
-
-  level = Math.max(0, Math.min(4, Math.round(level)));
 
   const statuses = [
     { label: "Плохой сон", className: "is-bad" },
