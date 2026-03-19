@@ -136,22 +136,74 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
-function getSleepStatus(rating) {
-  const value = clampRating(rating);
+function getMoodEmoji(moodRating) {
+  const mood = clampRating(moodRating);
 
-  if (value <= 3) {
-    return { label: "Плохой сон", className: "is-bad" };
+  if (mood <= 2) return "😢";
+  if (mood <= 5) return "🙂";
+  if (mood <= 8) return "😌";
+  return "🥹";
+}
+
+function getSleepStatus(durationMinutes, sleepRating, moodRating) {
+  const hours = (Number(durationMinutes) || 0) / 60;
+  const rating = clampRating(sleepRating);
+  const moodEmoji = getMoodEmoji(moodRating);
+
+  let level = 0;
+  // 0 = Плохой сон
+  // 1 = Нормально
+  // 2 = Хороший сон
+  // 3 = Отличный сон
+
+  if (hours < 5) {
+    level = 0;
+  } else if (hours <= 6.5) {
+    level = 1;
+  } else if (hours <= 7.5) {
+    level = 2;
+  } else if (hours <= 8.5) {
+    level = 3;
+  } else {
+    level = 2;
   }
 
-  if (value <= 6) {
-    return { label: "Нормально", className: "is-mid" };
+  if (rating <= 3) {
+    level -= 1;
+  } else if (rating <= 5) {
+    level -= 0.5;
+  } else if (rating >= 9 && hours >= 7 && hours <= 8.5) {
+    level += 0.5;
   }
 
-  if (value <= 8) {
-    return { label: "Хороший сон", className: "is-good" };
+  if (hours < 5) {
+    level = 0;
   }
 
-  return { label: "Отличный сон", className: "is-great" };
+  if (hours < 6.6) {
+    level = Math.min(level, 1);
+  }
+
+  if (hours < 7.6) {
+    level = Math.min(level, 2);
+  }
+
+  level = Math.max(0, Math.min(3, Math.round(level)));
+
+  const statuses = [
+    { label: "Плохой сон", className: "is-bad" },
+    { label: "Нормально", className: "is-mid" },
+    { label: "Хороший сон", className: "is-good" },
+    { label: "Отличный сон", className: "is-great" }
+  ];
+
+  const base = statuses[level];
+
+  return {
+    label: `${base.label} ${moodEmoji}`,
+    className: base.className,
+    moodEmoji
+  };
 }
 
 /* =========================
@@ -369,7 +421,7 @@ function render(entries, loadError = null) {
     const sleepRating = clampRating(entry.sleep_rating);
     const moodRating = clampRating(entry.mood_rating);
     const safeNote = String(entry.note || "").trim();
-    const status = getSleepStatus(sleepRating);
+    const status = getSleepStatus(entry.duration_minutes, sleepRating, moodRating);
 
     el.innerHTML = `
       <div class="card-content sleep-card-content">
