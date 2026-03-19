@@ -405,17 +405,6 @@ async function compressImageToSquare(file, size = 512, quality = 0.85) {
   });
 }
 
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error("Не удалось сжать изображение"));
-        return;
-      }
-      resolve(blob);
-    }, "image/jpeg", quality);
-  });
-}
-
 function getVisibleCards() {
   let cards = [...state.cards];
 
