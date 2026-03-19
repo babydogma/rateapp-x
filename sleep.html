@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
-<link rel="stylesheet" href="style.css?v=20260319-7">
+<link rel="stylesheet" href="style.css?v=20260319-8">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -30,24 +30,35 @@
     max-width: min(420px, 100%) !important;
     max-height: calc(100vh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
     overflow-y: auto !important;
-    padding: 20px 16px 18px !important;
+    padding: 22px 18px 20px !important;
     margin: 0 auto !important;
   }
 
-  .sleep-modal-box .category-modal__title {
-    margin-bottom: 18px !important;
-    line-height: 1.08 !important;
+  .sleep-modal-inner {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
   }
 
-  .sleep-date-wrap {
-    width: 100% !important;
-    max-width: 250px !important;
-    margin: 0 auto 18px !important;
+  .sleep-modal-box .category-modal__title {
+    margin-bottom: 20px !important;
+    line-height: 1.08 !important;
+    text-align: left !important;
   }
 
   .sleep-modal-box .category-modal__label {
     display: block !important;
     margin-bottom: 9px !important;
+  }
+
+  .sleep-date-wrap {
+    width: 100% !important;
+    max-width: 250px !important;
+    margin: 0 auto 20px !important;
+  }
+
+  .sleep-date-wrap .category-modal__label {
+    text-align: left;
   }
 
   .sleep-date-shell,
@@ -86,14 +97,19 @@
   .sleep-time-row {
     display: flex !important;
     align-items: flex-start !important;
+    justify-content: center !important;
     gap: 12px !important;
     width: 100% !important;
-    margin-bottom: 18px !important;
+    margin: 0 auto 20px !important;
   }
 
   .sleep-time-field {
     flex: 1 1 0 !important;
     min-width: 0 !important;
+  }
+
+  .sleep-time-field .category-modal__label {
+    text-align: left;
   }
 
   .sleep-time-shell {
@@ -124,8 +140,9 @@
   }
 
   .sleep-slider-block {
-    margin-top: 2px !important;
-    margin-bottom: 18px !important;
+    width: 100%;
+    margin-top: 0 !important;
+    margin-bottom: 20px !important;
   }
 
   .sleep-slider-head {
@@ -149,52 +166,16 @@
     margin-top: 0 !important;
   }
 
+  .sleep-note-wrap {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
   .sleep-note-input {
     width: 100% !important;
     min-height: 120px !important;
     resize: vertical !important;
     box-sizing: border-box !important;
-  }
-
-  .sleep-entry-wrap {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-  }
-
-  .sleep-entry-card {
-    will-change: transform;
-  }
-
-  .sleep-note-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .sleep-note-text {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .sleep-note-delete-btn {
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
-    border: 1px solid rgba(200, 169, 90, 0.16);
-    border-radius: 999px;
-    background: linear-gradient(180deg, rgba(24, 29, 35, 0.96), rgba(15, 18, 22, 0.96));
-    color: var(--color-gold);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow:
-      0 8px 18px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  }
-
-  .sleep-note-delete-btn:active {
-    transform: scale(0.95);
   }
 
   @media (max-width: 420px) {
@@ -212,9 +193,13 @@
       border-radius: 14px !important;
     }
 
+    .sleep-modal-inner {
+      max-width: 330px;
+    }
+
     .sleep-date-wrap {
       max-width: 230px !important;
-      margin-bottom: 16px !important;
+      margin-bottom: 18px !important;
     }
 
     .sleep-date-shell {
@@ -230,7 +215,7 @@
 
     .sleep-time-row {
       gap: 10px !important;
-      margin-bottom: 16px !important;
+      margin-bottom: 18px !important;
     }
 
     .sleep-time-shell {
@@ -255,91 +240,95 @@
 
 <div id="sleepModal" class="category-modal sleep-modal">
   <div class="category-modal__box sleep-modal-box">
-    <div class="category-modal__title">Новая запись сна</div>
+    <div class="sleep-modal-inner">
+      <div class="category-modal__title">Новая запись сна</div>
 
-    <div class="sleep-date-wrap">
-      <label class="category-modal__label" for="sleepDateInput">Дата</label>
-      <div class="sleep-date-shell">
+      <div class="sleep-date-wrap">
+        <label class="category-modal__label" for="sleepDateInput">Дата</label>
+        <div class="sleep-date-shell">
+          <input
+            id="sleepDateInput"
+            class="sleep-date-input"
+            type="date"
+          >
+        </div>
+      </div>
+
+      <div class="sleep-time-row">
+        <div class="sleep-time-field">
+          <label class="category-modal__label" for="bedTimeInput">Когда лёг</label>
+          <div class="sleep-time-shell">
+            <input
+              id="bedTimeInput"
+              class="sleep-time-input"
+              type="time"
+              step="60"
+            >
+          </div>
+        </div>
+
+        <div class="sleep-time-field">
+          <label class="category-modal__label" for="wakeTimeInput">Когда встал</label>
+          <div class="sleep-time-shell">
+            <input
+              id="wakeTimeInput"
+              class="sleep-time-input"
+              type="time"
+              step="60"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="sleep-slider-block">
+        <div class="sleep-slider-head">
+          <label class="category-modal__label" for="sleepRatingInput">Оценка сна</label>
+          <div id="sleepRatingValue" class="sleep-slider-value">0/10</div>
+        </div>
         <input
-          id="sleepDateInput"
-          class="sleep-date-input"
-          type="date"
+          id="sleepRatingInput"
+          class="slider"
+          type="range"
+          min="0"
+          max="10"
+          step="0.5"
+          value="0"
         >
       </div>
-    </div>
 
-    <div class="sleep-time-row">
-      <div class="sleep-time-field">
-        <label class="category-modal__label" for="bedTimeInput">Когда лёг</label>
-        <div class="sleep-time-shell">
-          <input
-            id="bedTimeInput"
-            class="sleep-time-input"
-            type="time"
-            step="60"
-          >
+      <div class="sleep-slider-block">
+        <div class="sleep-slider-head">
+          <label class="category-modal__label" for="moodRatingInput">Настроение</label>
+          <div id="moodRatingValue" class="sleep-slider-value">0/10</div>
         </div>
+        <input
+          id="moodRatingInput"
+          class="slider"
+          type="range"
+          min="0"
+          max="10"
+          step="0.5"
+          value="0"
+        >
       </div>
 
-      <div class="sleep-time-field">
-        <label class="category-modal__label" for="wakeTimeInput">Когда встал</label>
-        <div class="sleep-time-shell">
-          <input
-            id="wakeTimeInput"
-            class="sleep-time-input"
-            type="time"
-            step="60"
-          >
-        </div>
+      <div class="sleep-note-wrap">
+        <label class="category-modal__label" for="sleepNoteInput">Заметка</label>
+        <textarea
+          id="sleepNoteInput"
+          class="category-modal__input sleep-note-input"
+          placeholder="Напиши пару слов о сне, самочувствии или причине"
+        ></textarea>
       </div>
-    </div>
 
-    <div class="sleep-slider-block">
-      <div class="sleep-slider-head">
-        <label class="category-modal__label" for="sleepRatingInput">Оценка сна</label>
-        <div id="sleepRatingValue" class="sleep-slider-value">0/10</div>
+      <div class="category-modal__actions">
+        <button id="sleepModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
+          Отмена
+        </button>
+        <button id="sleepModalSave" type="button" class="category-modal__btn category-modal__btn--primary">
+          Сохранить
+        </button>
       </div>
-      <input
-        id="sleepRatingInput"
-        class="slider"
-        type="range"
-        min="0"
-        max="10"
-        step="0.5"
-        value="0"
-      >
-    </div>
-
-    <div class="sleep-slider-block">
-      <div class="sleep-slider-head">
-        <label class="category-modal__label" for="moodRatingInput">Настроение</label>
-        <div id="moodRatingValue" class="sleep-slider-value">0/10</div>
-      </div>
-      <input
-        id="moodRatingInput"
-        class="slider"
-        type="range"
-        min="0"
-        max="10"
-        step="0.5"
-        value="0"
-      >
-    </div>
-
-    <label class="category-modal__label" for="sleepNoteInput">Заметка</label>
-    <textarea
-      id="sleepNoteInput"
-      class="category-modal__input sleep-note-input"
-      placeholder="Напиши пару слов о сне, самочувствии или причине"
-    ></textarea>
-
-    <div class="category-modal__actions">
-      <button id="sleepModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
-        Отмена
-      </button>
-      <button id="sleepModalSave" type="button" class="category-modal__btn category-modal__btn--primary">
-        Сохранить
-      </button>
     </div>
   </div>
 </div>
