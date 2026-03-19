@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0f" />
 
-<link rel="stylesheet" href="style.css?v=20260319-2">
+<link rel="stylesheet" href="style.css?v=20260319-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -26,6 +26,7 @@
   }
 
   .sleep-modal-box {
+    width: 100%;
     max-width: 460px;
     max-height: calc(100vh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     overflow-y: auto;
@@ -53,11 +54,12 @@
   }
 
   .sleep-modal-box .category-modal__input {
+    width: 100%;
+    min-width: 0;
     margin-bottom: 16px;
   }
 
-  .sleep-modal-box input[type="date"],
-  .sleep-modal-box input[type="time"] {
+  .sleep-date-input {
     min-height: 70px;
     font-size: 18px;
     font-weight: 600;
@@ -65,13 +67,37 @@
     color-scheme: dark;
   }
 
-  .sleep-modal-box input[type="date"]::-webkit-date-and-time-value,
-  .sleep-modal-box input[type="time"]::-webkit-date-and-time-value {
+  .sleep-time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .sleep-time-field {
+    min-width: 0;
+  }
+
+  .sleep-time-field .category-modal__label {
+    margin-bottom: 9px;
+  }
+
+  .sleep-time-input {
+    min-height: 64px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    color-scheme: dark;
+    margin-bottom: 0 !important;
+  }
+
+  .sleep-date-input::-webkit-date-and-time-value,
+  .sleep-time-input::-webkit-date-and-time-value {
     text-align: center;
   }
 
-  .sleep-modal-box input[type="date"]::-webkit-calendar-picker-indicator,
-  .sleep-modal-box input[type="time"]::-webkit-calendar-picker-indicator {
+  .sleep-date-input::-webkit-calendar-picker-indicator,
+  .sleep-time-input::-webkit-calendar-picker-indicator {
     opacity: 0.9;
     cursor: pointer;
   }
@@ -121,9 +147,17 @@
       border-radius: 14px;
     }
 
-    .sleep-modal-box input[type="date"],
-    .sleep-modal-box input[type="time"] {
+    .sleep-date-input {
       min-height: 64px;
+      font-size: 17px;
+    }
+
+    .sleep-time-row {
+      gap: 10px;
+    }
+
+    .sleep-time-input {
+      min-height: 60px;
       font-size: 17px;
     }
 
@@ -143,25 +177,31 @@
     <label class="category-modal__label" for="sleepDateInput">Дата</label>
     <input
       id="sleepDateInput"
-      class="category-modal__input"
+      class="category-modal__input sleep-date-input"
       type="date"
     >
 
-    <label class="category-modal__label" for="bedTimeInput">Во сколько лёг</label>
-    <input
-      id="bedTimeInput"
-      class="category-modal__input"
-      type="time"
-      step="60"
-    >
+    <div class="sleep-time-row">
+      <div class="sleep-time-field">
+        <label class="category-modal__label" for="bedTimeInput">Когда лёг</label>
+        <input
+          id="bedTimeInput"
+          class="category-modal__input sleep-time-input"
+          type="time"
+          step="60"
+        >
+      </div>
 
-    <label class="category-modal__label" for="wakeTimeInput">Во сколько встал</label>
-    <input
-      id="wakeTimeInput"
-      class="category-modal__input"
-      type="time"
-      step="60"
-    >
+      <div class="sleep-time-field">
+        <label class="category-modal__label" for="wakeTimeInput">Когда встал</label>
+        <input
+          id="wakeTimeInput"
+          class="category-modal__input sleep-time-input"
+          type="time"
+          step="60"
+        >
+      </div>
+    </div>
 
     <div class="sleep-slider-block">
       <div class="sleep-slider-head">
