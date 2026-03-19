@@ -336,7 +336,8 @@ button {
 .card__image {
   width: 140px;
   height: 140px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   border-radius: 12px;
   flex-shrink: 0;
   background: #111;
