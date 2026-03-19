@@ -22,7 +22,15 @@ const DOM = {
   moodRatingInput: document.getElementById("moodRatingInput"),
   moodRatingValue: document.getElementById("moodRatingValue"),
 
-  noteInput: document.getElementById("sleepNoteInput")
+  noteInput: document.getElementById("sleepNoteInput"),
+
+  confirmModal: document.getElementById("sleepConfirmModal"),
+  confirmCancel: document.getElementById("sleepConfirmCancel"),
+  confirmDelete: document.getElementById("sleepConfirmDelete")
+};
+
+const modalState = {
+  onConfirmDelete: null
 };
 
 /* =========================
@@ -41,6 +49,18 @@ async function fetchSleep() {
   }
 
   return { data: data || [], error: null };
+}
+
+async function deleteSleepEntry(id) {
+  const { error } = await supabaseClient
+    .from("sleep_entries")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("deleteSleepEntry error:", error);
+    throw error;
+  }
 }
 
 /* =========================
@@ -154,8 +174,7 @@ function openSleepModal() {
 }
 
 function closeSleepModal() {
-  if (!DOM.modal) return;
-  DOM.modal.classList.remove("active");
+  DOM.modal?.classList.remove("active");
 }
 
 async function saveSleepEntry() {
@@ -186,7 +205,9 @@ async function saveSleepEntry() {
 
   const duration = calcDuration(bed, wake);
 
-  DOM.modalSave.disabled = true;
+  if (DOM.modalSave) {
+    DOM.modalSave.disabled = true;
+  }
 
   try {
     const { error } = await supabaseClient
@@ -210,7 +231,9 @@ async function saveSleepEntry() {
     closeSleepModal();
     await init();
   } finally {
-    DOM.modalSave.disabled = false;
+    if (DOM.modalSave) {
+      DOM.modalSave.disabled = false;
+    }
   }
 }
 
@@ -231,6 +254,39 @@ function setupSleepModal() {
   DOM.moodRatingInput?.addEventListener("input", syncSleepSliderUI);
 
   resetSleepForm();
+}
+
+/* =========================
+   DELETE CONFIRM
+========================= */
+
+function openDeleteConfirm(onConfirm) {
+  modalState.onConfirmDelete = onConfirm;
+  DOM.confirmModal?.classList.add("active");
+}
+
+function closeDeleteConfirm() {
+  DOM.confirmModal?.classList.remove("active");
+  modalState.onConfirmDelete = null;
+}
+
+function setupDeleteConfirm() {
+  DOM.confirmCancel?.addEventListener("click", closeDeleteConfirm);
+
+  DOM.confirmModal?.addEventListener("click", (e) => {
+    if (e.target === DOM.confirmModal) {
+      closeDeleteConfirm();
+    }
+  });
+
+  DOM.confirmDelete?.addEventListener("click", async () => {
+    const handler = modalState.onConfirmDelete;
+    closeDeleteConfirm();
+
+    if (typeof handler === "function") {
+      await handler();
+    }
+  });
 }
 
 /* =========================
@@ -289,6 +345,8 @@ function render(entries, loadError = null) {
     const safeNote = String(entry.note || "").trim();
 
     el.innerHTML = `
+      <div class="delete-bg">Удалить</div>
+
       <div class="card-content">
         <div class="card-right-column">
           <div class="card__title">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
@@ -306,6 +364,7 @@ function render(entries, loadError = null) {
       </div>
     `;
 
+    enableSleepSwipeDelete(el, entry);
     DOM.list.appendChild(el);
   });
 
@@ -318,6 +377,44 @@ function render(entries, loadError = null) {
   );
 
   DOM.stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
+}
+
+/* =========================
+   SWIPE DELETE
+========================= */
+
+function enableSleepSwipeDelete(cardEl, entry) {
+  let startX = 0;
+  let diff = 0;
+
+  cardEl.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+
+  cardEl.addEventListener("touchmove", (e) => {
+    diff = e.touches[0].clientX - startX;
+
+    if (diff < 0) {
+      cardEl.style.transform = `translateX(${diff}px)`;
+    }
+  }, { passive: true });
+
+  cardEl.addEventListener("touchend", () => {
+    if (diff < -120) {
+      openDeleteConfirm(async () => {
+        try {
+          await deleteSleepEntry(entry.id);
+          await init();
+        } catch (error) {
+          console.error(error);
+          alert("Не удалось удалить запись сна");
+        }
+      });
+    }
+
+    cardEl.style.transform = "";
+    diff = 0;
+  });
 }
 
 /* =========================
@@ -360,4 +457,5 @@ async function init() {
 
 setupNavigation();
 setupSleepModal();
+setupDeleteConfirm();
 init();
