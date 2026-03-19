@@ -61,18 +61,6 @@ async function deleteSleepEntry(id) {
   }
 }
 
-async function updateSleepEntry(id, updates) {
-  const { error } = await supabaseClient
-    .from("sleep_entries")
-    .update(updates)
-    .eq("id", id);
-
-  if (error) {
-    console.error("updateSleepEntry error:", error);
-    throw error;
-  }
-}
-
 function escapeHtml(str = "") {
   return String(str)
     .replaceAll("&", "&amp;")
@@ -338,36 +326,12 @@ function render(entries, loadError = null) {
           </div>
           <div class="rating">Сон: ${sleepRating}/10</div>
           <div class="card__description-preview">Настроение: ${moodRating}/10</div>
-          <div class="sleep-note-row">
-            <div class="card__description-preview ${safeNote ? "" : "is-empty"} sleep-note-text">
-              ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
-            </div>
-            ${safeNote ? '<button type="button" class="sleep-note-delete-btn">✕</button>' : ""}
+          <div class="card__description-preview ${safeNote ? "" : "is-empty"}">
+            ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
           </div>
         </div>
       </div>
     `;
-
-    const noteDeleteBtn = el.querySelector(".sleep-note-delete-btn");
-    if (noteDeleteBtn) {
-      noteDeleteBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        openConfirm({
-          title: "Удаление заметки",
-          text: "Удалить заметку у этой записи сна?",
-          onConfirm: async () => {
-            try {
-              await updateSleepEntry(entry.id, { note: "" });
-              await init();
-            } catch (error) {
-              console.error(error);
-              alert("Не удалось удалить заметку");
-            }
-          }
-        });
-      });
-    }
 
     enableSleepSwipeDelete(el, entry);
     wrapper.appendChild(el);
