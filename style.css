@@ -1373,13 +1373,13 @@ button {
   overflow-y: auto;
   padding:
     calc(env(safe-area-inset-top) + 18px)
-    20px
+    16px
     calc(env(safe-area-inset-bottom) + 18px);
 }
 
 .sleep-modal-box {
   width: 100%;
-  max-width: 460px;
+  max-width: 430px;
   max-height: calc(100vh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   padding: 22px 20px 20px;
@@ -1401,61 +1401,76 @@ button {
   line-height: 1.1;
 }
 
-.sleep-date-wrap {
-  width: 100%;
-  max-width: 320px;
-  margin: 0 auto 16px;
+.sleep-modal-box .category-modal__label {
+  display: block;
+  margin-bottom: 9px;
 }
 
-.sleep-date-input {
+.sleep-date-wrap {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 18px;
+}
+
+.sleep-modal-box .sleep-date-input {
   display: block;
   width: 100%;
-  min-height: 68px;
+  min-width: 0;
+  min-height: 64px;
   padding: 12px 14px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   text-align: center;
   color-scheme: dark;
+  box-sizing: border-box;
 }
 
 .sleep-time-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  align-items: start;
+  column-gap: 14px;
+  row-gap: 0;
+  width: 100%;
   margin-bottom: 18px;
 }
 
 .sleep-time-field {
   min-width: 0;
+  width: 100%;
 }
 
-.sleep-time-input {
+.sleep-time-field .category-modal__label {
+  margin-bottom: 9px;
+}
+
+.sleep-modal-box .sleep-time-input {
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 62px;
+  min-height: 60px;
   padding: 12px 10px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   text-align: center;
   color-scheme: dark;
+  box-sizing: border-box;
+  margin: 0;
 }
 
-.sleep-date-input::-webkit-date-and-time-value,
-.sleep-time-input::-webkit-date-and-time-value {
+.sleep-modal-box .sleep-date-input::-webkit-date-and-time-value,
+.sleep-modal-box .sleep-time-input::-webkit-date-and-time-value {
   text-align: center;
 }
 
-.sleep-date-input::-webkit-calendar-picker-indicator,
-.sleep-time-input::-webkit-calendar-picker-indicator {
+.sleep-modal-box .sleep-date-input::-webkit-calendar-picker-indicator,
+.sleep-modal-box .sleep-time-input::-webkit-calendar-picker-indicator {
   opacity: 0.9;
   cursor: pointer;
 }
 
 .sleep-slider-block {
-  margin-top: 6px;
-  margin-bottom: 16px;
+  margin-top: 4px;
+  margin-bottom: 18px;
 }
 
 .sleep-slider-head {
@@ -1475,87 +1490,53 @@ button {
   color: var(--color-gold);
 }
 
-.sleep-note-input {
-  min-height: 110px;
-  resize: vertical;
-}
-
 .sleep-modal-box .slider {
   margin-top: 0;
 }
 
-.sleep-modal-box input[type="date"],
-.sleep-modal-box input[type="time"] {
-  color-scheme: dark;
-}
-
-.sleep-entry-card .delete-bg {
-  justify-content: flex-end;
-  padding-right: 24px;
-}
-
-.sleep-note-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.sleep-note-text {
-  flex: 1;
+.sleep-note-input {
+  width: 100%;
   min-width: 0;
-}
-
-.sleep-note-delete-btn {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  border: 1px solid rgba(200, 169, 90, 0.16);
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(24, 29, 35, 0.96), rgba(15, 18, 22, 0.96));
-  color: var(--color-gold);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.025);
-}
-
-.sleep-note-delete-btn:active {
-  transform: scale(0.95);
+  min-height: 120px;
+  resize: vertical;
+  box-sizing: border-box;
 }
 
 @media (max-width: 420px) {
   .sleep-modal {
     padding:
       calc(env(safe-area-inset-top) + 12px)
-      14px
+      12px
       calc(env(safe-area-inset-bottom) + 12px);
   }
 
   .sleep-modal-box {
     max-width: 100%;
     max-height: calc(100vh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    padding: 18px;
+    padding: 18px 16px 18px;
     border-radius: 14px;
   }
 
   .sleep-date-wrap {
-    max-width: 280px;
+    max-width: 260px;
+    margin-bottom: 16px;
   }
 
-  .sleep-date-input {
-    min-height: 62px;
-    font-size: 17px;
+  .sleep-modal-box .sleep-date-input {
+    min-height: 60px;
+    font-size: 16px;
+    padding: 10px 12px;
   }
 
   .sleep-time-row {
-    gap: 10px;
+    column-gap: 10px;
+    margin-bottom: 16px;
   }
 
-  .sleep-time-input {
-    min-height: 58px;
-    font-size: 17px;
+  .sleep-modal-box .sleep-time-input {
+    min-height: 56px;
+    font-size: 16px;
+    padding: 10px 8px;
   }
 
   .sleep-slider-value {
@@ -1563,6 +1544,6 @@ button {
   }
 
   .sleep-note-input {
-    min-height: 100px;
+    min-height: 110px;
   }
 }
