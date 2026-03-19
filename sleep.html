@@ -188,6 +188,131 @@
     box-shadow: none !important;
   }
 
+  .sleep-entry-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+
+  .sleep-entry-card {
+    will-change: transform;
+  }
+
+  .sleep-card-content {
+    padding: 14px !important;
+  }
+
+  .sleep-card-column {
+    gap: 12px !important;
+  }
+
+  .sleep-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .sleep-card-date {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-gold);
+  }
+
+  .sleep-status-chip {
+    flex-shrink: 0;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
+    color: #e7e3dc;
+  }
+
+  .sleep-status-chip.is-bad {
+    background: rgba(166, 63, 63, 0.18);
+    border-color: rgba(166, 63, 63, 0.34);
+    color: #f0b0b0;
+  }
+
+  .sleep-status-chip.is-mid {
+    background: rgba(200, 169, 90, 0.14);
+    border-color: rgba(200, 169, 90, 0.24);
+    color: #e7d09a;
+  }
+
+  .sleep-status-chip.is-good,
+  .sleep-status-chip.is-great {
+    background: rgba(85, 140, 106, 0.18);
+    border-color: rgba(85, 140, 106, 0.30);
+    color: #b9e0c6;
+  }
+
+  .sleep-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sleep-info-chip,
+  .sleep-metric-chip {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, rgba(21, 25, 31, 0.96), rgba(13, 16, 20, 0.96));
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  }
+
+  .sleep-info-chip {
+    padding: 9px 11px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e3e7ec;
+  }
+
+  .sleep-chip-row--metrics {
+    gap: 10px;
+  }
+
+  .sleep-metric-chip {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .sleep-metric-chip span {
+    font-size: 12px;
+    color: #aeb6c1;
+    font-weight: 600;
+  }
+
+  .sleep-metric-chip strong {
+    font-size: 15px;
+    color: var(--color-gold);
+    font-weight: 700;
+  }
+
+  .sleep-note-block {
+    padding: 12px 13px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(19, 22, 27, 0.92), rgba(12, 15, 18, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: #c7ccd3;
+    font-size: 13px;
+    line-height: 1.42;
+  }
+
+  .sleep-note-block.is-empty {
+    color: #8f99a7;
+    font-style: italic;
+  }
+
   @media (max-width: 420px) {
     .sleep-modal {
       padding:
@@ -242,6 +367,28 @@
 
     .sleep-note-input {
       min-height: 110px !important;
+    }
+
+    .sleep-card-date {
+      font-size: 17px;
+    }
+
+    .sleep-status-chip {
+      padding: 6px 9px;
+      font-size: 11.5px;
+    }
+
+    .sleep-info-chip {
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+
+    .sleep-metric-chip {
+      padding: 9px 10px;
+    }
+
+    .sleep-metric-chip strong {
+      font-size: 14px;
     }
   }
 </style>
@@ -403,6 +550,6 @@
   <button id="addSleepBtn" class="add-btn" type="button">+</button>
 </nav>
 
-<script src="sleep.js?v=20260319-7"></script>
+<script src="sleep.js?v=20260319-10"></script>
 </body>
 </html>
