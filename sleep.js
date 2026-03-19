@@ -155,6 +155,7 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
   // 1 = Нормально
   // 2 = Хороший сон
   // 3 = Отличный сон
+  // 4 = Пересып
 
   if (hours < 5) {
     level = 0;
@@ -165,14 +166,14 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
   } else if (hours <= 8.5) {
     level = 3;
   } else {
-    level = 2;
+    level = 4;
   }
 
   if (rating <= 3) {
     level -= 1;
   } else if (rating <= 5) {
     level -= 0.5;
-  } else if (rating >= 9 && hours >= 7 && hours <= 8.5) {
+  } else if (rating >= 9 && hours >= 7.6 && hours <= 8.5) {
     level += 0.5;
   }
 
@@ -188,13 +189,18 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
     level = Math.min(level, 2);
   }
 
-  level = Math.max(0, Math.min(3, Math.round(level)));
+  if (hours > 8.5) {
+    level = Math.max(level, 4);
+  }
+
+  level = Math.max(0, Math.min(4, Math.round(level)));
 
   const statuses = [
     { label: "Плохой сон", className: "is-bad" },
     { label: "Нормально", className: "is-mid" },
     { label: "Хороший сон", className: "is-good" },
-    { label: "Отличный сон", className: "is-great" }
+    { label: "Отличный сон", className: "is-great" },
+    { label: "Пересып", className: "is-oversleep" }
   ];
 
   const base = statuses[level];
