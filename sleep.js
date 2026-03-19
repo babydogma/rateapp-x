@@ -48,6 +48,13 @@ function formatDuration(minutes) {
   return `${h}ч ${m}м`;
 }
 
+function formatSleepDate(dateStr) {
+  if (!dateStr) return "Без даты";
+
+  const [year, month, day] = dateStr.split("-");
+  return `${day}.${month}.${year}`;
+}
+
 function normalizeSleepDate(value) {
   const raw = String(value || "").trim();
 
@@ -118,7 +125,7 @@ function render(entries, loadError = null) {
     el.innerHTML = `
       <div class="card-content">
         <div class="card-right-column">
-          <div class="card__title">${entry.sleep_date || "Без даты"}</div>
+          <div class="card__title">${formatSleepDate(entry.sleep_date)}</div>
           <div class="card__description-preview">
             ${entry.bed_time || "--:--"} → ${entry.wake_time || "--:--"} • ${formatDuration(entry.duration_minutes)}
           </div>
