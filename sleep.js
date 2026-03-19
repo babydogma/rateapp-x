@@ -3,9 +3,27 @@ const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const list = document.getElementById("sleepList");
-const stats = document.getElementById("sleepStats");
-const addBtn = document.getElementById("addSleepBtn");
+const DOM = {
+  list: document.getElementById("sleepList"),
+  stats: document.getElementById("sleepStats"),
+  addBtn: document.getElementById("addSleepBtn"),
+
+  modal: document.getElementById("sleepModal"),
+  modalCancel: document.getElementById("sleepModalCancel"),
+  modalSave: document.getElementById("sleepModalSave"),
+
+  dateInput: document.getElementById("sleepDateInput"),
+  bedInput: document.getElementById("bedTimeInput"),
+  wakeInput: document.getElementById("wakeTimeInput"),
+
+  sleepRatingInput: document.getElementById("sleepRatingInput"),
+  sleepRatingValue: document.getElementById("sleepRatingValue"),
+
+  moodRatingInput: document.getElementById("moodRatingInput"),
+  moodRatingValue: document.getElementById("moodRatingValue"),
+
+  noteInput: document.getElementById("sleepNoteInput")
+};
 
 /* =========================
    FETCH
@@ -74,22 +92,145 @@ function formatSleepDate(dateStr) {
   return `${day}.${month}.${year}`;
 }
 
-function normalizeSleepDate(value) {
-  const raw = String(value || "").trim();
+function formatRatingValue(value) {
+  return `${clampRating(value)}/10`;
+}
 
-  if (!raw) return null;
+function setSliderProgress(slider) {
+  if (!slider) return;
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-    return raw;
+  const min = Number(slider.min || 0);
+  const max = Number(slider.max || 10);
+  const value = Number(slider.value || 0);
+  const progress = ((value - min) / (max - min)) * 100;
+
+  slider.style.setProperty("--progress", `${progress}%`);
+}
+
+function getTodayDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+function syncSleepSliderUI() {
+  if (DOM.sleepRatingInput && DOM.sleepRatingValue) {
+    DOM.sleepRatingValue.textContent = formatRatingValue(DOM.sleepRatingInput.value);
+    setSliderProgress(DOM.sleepRatingInput);
   }
 
-  const ruMatch = raw.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-  if (ruMatch) {
-    const [, day, month, year] = ruMatch;
-    return `${year}-${month}-${day}`;
+  if (DOM.moodRatingInput && DOM.moodRatingValue) {
+    DOM.moodRatingValue.textContent = formatRatingValue(DOM.moodRatingInput.value);
+    setSliderProgress(DOM.moodRatingInput);
+  }
+}
+
+function resetSleepForm() {
+  if (DOM.dateInput) DOM.dateInput.value = getTodayDateString();
+  if (DOM.bedInput) DOM.bedInput.value = "";
+  if (DOM.wakeInput) DOM.wakeInput.value = "";
+  if (DOM.sleepRatingInput) DOM.sleepRatingInput.value = "0";
+  if (DOM.moodRatingInput) DOM.moodRatingInput.value = "0";
+  if (DOM.noteInput) DOM.noteInput.value = "";
+
+  syncSleepSliderUI();
+}
+
+function openSleepModal() {
+  if (!DOM.modal) return;
+
+  resetSleepForm();
+  DOM.modal.classList.add("active");
+
+  requestAnimationFrame(() => {
+    DOM.dateInput?.focus();
+  });
+}
+
+function closeSleepModal() {
+  if (!DOM.modal) return;
+  DOM.modal.classList.remove("active");
+}
+
+async function saveSleepEntry() {
+  const date = String(DOM.dateInput?.value || "").trim();
+  const bed = String(DOM.bedInput?.value || "").trim();
+  const wake = String(DOM.wakeInput?.value || "").trim();
+  const sleepRating = clampRating(DOM.sleepRatingInput?.value);
+  const moodRating = clampRating(DOM.moodRatingInput?.value);
+  const note = String(DOM.noteInput?.value || "").trim();
+
+  if (!date) {
+    alert("Выбери дату");
+    DOM.dateInput?.focus();
+    return;
   }
 
-  return null;
+  if (!isValidTime(bed)) {
+    alert("Выбери корректное время, когда лёг");
+    DOM.bedInput?.focus();
+    return;
+  }
+
+  if (!isValidTime(wake)) {
+    alert("Выбери корректное время, когда встал");
+    DOM.wakeInput?.focus();
+    return;
+  }
+
+  const duration = calcDuration(bed, wake);
+
+  DOM.modalSave.disabled = true;
+
+  try {
+    const { error } = await supabaseClient
+      .from("sleep_entries")
+      .insert({
+        sleep_date: date,
+        bed_time: bed,
+        wake_time: wake,
+        duration_minutes: duration,
+        sleep_rating: sleepRating,
+        mood_rating: moodRating,
+        note
+      });
+
+    if (error) {
+      console.error("insertSleep error:", error);
+      alert(`Не удалось добавить запись: ${error.message}`);
+      return;
+    }
+
+    closeSleepModal();
+    await init();
+  } finally {
+    DOM.modalSave.disabled = false;
+  }
+}
+
+function setupSleepModal() {
+  if (!DOM.modal) return;
+
+  DOM.addBtn?.addEventListener("click", openSleepModal);
+  DOM.modalCancel?.addEventListener("click", closeSleepModal);
+  DOM.modalSave?.addEventListener("click", saveSleepEntry);
+
+  DOM.modal.addEventListener("click", (e) => {
+    if (e.target === DOM.modal) {
+      closeSleepModal();
+    }
+  });
+
+  DOM.sleepRatingInput?.addEventListener("input", syncSleepSliderUI);
+  DOM.moodRatingInput?.addEventListener("input", syncSleepSliderUI);
+
+  resetSleepForm();
 }
 
 /* =========================
@@ -97,12 +238,12 @@ function normalizeSleepDate(value) {
 ========================= */
 
 function render(entries, loadError = null) {
-  if (!list || !stats) return;
+  if (!DOM.list || !DOM.stats) return;
 
-  list.innerHTML = "";
+  DOM.list.innerHTML = "";
 
   if (loadError) {
-    stats.textContent = `Ошибка: ${loadError.message}`;
+    DOM.stats.textContent = `Ошибка: ${loadError.message}`;
 
     const errorCard = document.createElement("div");
     errorCard.className = "card";
@@ -116,12 +257,12 @@ function render(entries, loadError = null) {
         </div>
       </div>
     `;
-    list.appendChild(errorCard);
+    DOM.list.appendChild(errorCard);
     return;
   }
 
   if (!entries.length) {
-    stats.textContent = "Записей сна: 0";
+    DOM.stats.textContent = "Записей сна: 0";
 
     const emptyCard = document.createElement("div");
     emptyCard.className = "card";
@@ -135,7 +276,7 @@ function render(entries, loadError = null) {
         </div>
       </div>
     `;
-    list.appendChild(emptyCard);
+    DOM.list.appendChild(emptyCard);
     return;
   }
 
@@ -165,7 +306,7 @@ function render(entries, loadError = null) {
       </div>
     `;
 
-    list.appendChild(el);
+    DOM.list.appendChild(el);
   });
 
   const avgSleep = (
@@ -176,94 +317,47 @@ function render(entries, loadError = null) {
     entries.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / entries.length
   );
 
-  stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
-}
-
-/* =========================
-   ADD
-========================= */
-
-if (addBtn) {
-  addBtn.onclick = async () => {
-    const rawDate = prompt("Дата (2026-03-17 или 19.03.2026)");
-    const bed = prompt("Во сколько лёг (01:30)");
-    const wake = prompt("Во сколько встал (08:40)");
-    const rating = prompt("Оценка сна 0-10");
-    const mood = prompt("Настроение 0-10");
-    const note = prompt("Заметка") || "";
-
-    if (!rawDate || !bed || !wake) return;
-
-    const date = normalizeSleepDate(rawDate);
-
-    if (!date) {
-      alert("Дата должна быть в формате 2026-03-17 или 19.03.2026");
-      return;
-    }
-
-    if (!isValidTime(bed) || !isValidTime(wake)) {
-      alert("Время должно быть в формате HH:MM, например 01:30");
-      return;
-    }
-
-    const duration = calcDuration(bed, wake);
-
-    const { error } = await supabaseClient
-      .from("sleep_entries")
-      .insert({
-        sleep_date: date,
-        bed_time: bed,
-        wake_time: wake,
-        duration_minutes: duration,
-        sleep_rating: clampRating(rating),
-        mood_rating: clampRating(mood),
-        note: String(note).trim()
-      });
-
-    if (error) {
-      console.error("insertSleep error:", error);
-      alert(`Не удалось добавить запись: ${error.message}`);
-      return;
-    }
-
-    init();
-  };
+  DOM.stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
 }
 
 /* =========================
    NAV
 ========================= */
 
-document.querySelectorAll(".nav-emoji").forEach((btn) => {
-  btn.onclick = () => {
-    const page = btn.dataset.page;
+function setupNavigation() {
+  document.querySelectorAll(".nav-emoji").forEach((btn) => {
+    btn.onclick = () => {
+      const page = btn.dataset.page;
 
-    if (page === "home") {
-      localStorage.removeItem("activeCategory");
-      location.href = "index.html";
-    }
+      if (page === "home") {
+        localStorage.removeItem("activeCategory");
+        location.href = "index.html";
+      }
 
-    if (page === "sleep") {
-      location.href = "sleep.html";
-    }
+      if (page === "sleep") {
+        location.href = "sleep.html";
+      }
 
-    if (page === "categories") {
-      location.href = "categories.html";
-    }
-  };
-});
+      if (page === "categories") {
+        location.href = "categories.html";
+      }
+    };
+  });
+}
 
 /* =========================
    INIT
 ========================= */
 
 async function init() {
-  if (stats) {
-    stats.textContent = "Грузим записи сна...";
+  if (DOM.stats) {
+    DOM.stats.textContent = "Грузим записи сна...";
   }
 
   const result = await fetchSleep();
   render(result.data, result.error);
 }
 
+setupNavigation();
+setupSleepModal();
 init();
