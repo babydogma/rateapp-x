@@ -35,6 +35,10 @@ const modalState = {
   onConfirm: null
 };
 
+/* =========================
+   FETCH / DELETE
+========================= */
+
 async function fetchSleep() {
   const { data, error } = await supabaseClient
     .from("sleep_entries")
@@ -60,6 +64,10 @@ async function deleteSleepEntry(id) {
     throw error;
   }
 }
+
+/* =========================
+   UTILS
+========================= */
 
 function escapeHtml(str = "") {
   return String(str)
@@ -111,10 +119,12 @@ function formatRatingValue(value) {
 
 function setSliderProgress(slider) {
   if (!slider) return;
+
   const min = Number(slider.min || 0);
   const max = Number(slider.max || 10);
   const value = Number(slider.value || 0);
   const progress = ((value - min) / (max - min)) * 100;
+
   slider.style.setProperty("--progress", `${progress}%`);
 }
 
@@ -125,6 +135,10 @@ function getTodayDateString() {
   const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+/* =========================
+   MODAL
+========================= */
 
 function syncSleepSliderUI() {
   if (DOM.sleepRatingInput && DOM.sleepRatingValue) {
@@ -145,11 +159,13 @@ function resetSleepForm() {
   if (DOM.sleepRatingInput) DOM.sleepRatingInput.value = "0";
   if (DOM.moodRatingInput) DOM.moodRatingInput.value = "0";
   if (DOM.noteInput) DOM.noteInput.value = "";
+
   syncSleepSliderUI();
 }
 
 function openSleepModal() {
   if (!DOM.modal) return;
+
   resetSleepForm();
   DOM.modal.classList.add("active");
 
@@ -190,7 +206,9 @@ async function saveSleepEntry() {
 
   const duration = calcDuration(bed, wake);
 
-  if (DOM.modalSave) DOM.modalSave.disabled = true;
+  if (DOM.modalSave) {
+    DOM.modalSave.disabled = true;
+  }
 
   try {
     const { error } = await supabaseClient
@@ -214,7 +232,9 @@ async function saveSleepEntry() {
     closeSleepModal();
     await init();
   } finally {
-    if (DOM.modalSave) DOM.modalSave.disabled = false;
+    if (DOM.modalSave) {
+      DOM.modalSave.disabled = false;
+    }
   }
 }
 
@@ -237,10 +257,16 @@ function setupSleepModal() {
   resetSleepForm();
 }
 
+/* =========================
+   CONFIRM
+========================= */
+
 function openConfirm({ title, text, onConfirm }) {
   modalState.onConfirm = onConfirm;
+
   if (DOM.confirmTitle) DOM.confirmTitle.textContent = title;
   if (DOM.confirmText) DOM.confirmText.textContent = text;
+
   DOM.confirmModal?.classList.add("active");
 }
 
@@ -261,11 +287,16 @@ function setupConfirm() {
   DOM.confirmDelete?.addEventListener("click", async () => {
     const handler = modalState.onConfirm;
     closeConfirm();
+
     if (typeof handler === "function") {
       await handler();
     }
   });
 }
+
+/* =========================
+   RENDER
+========================= */
 
 function render(entries, loadError = null) {
   if (!DOM.list || !DOM.stats) return;
@@ -274,6 +305,7 @@ function render(entries, loadError = null) {
 
   if (loadError) {
     DOM.stats.textContent = `Ошибка: ${loadError.message}`;
+
     const errorCard = document.createElement("div");
     errorCard.className = "card";
     errorCard.innerHTML = `
@@ -290,6 +322,7 @@ function render(entries, loadError = null) {
 
   if (!entries.length) {
     DOM.stats.textContent = "Записей сна: 0";
+
     const emptyCard = document.createElement("div");
     emptyCard.className = "card";
     emptyCard.innerHTML = `
@@ -306,7 +339,11 @@ function render(entries, loadError = null) {
 
   entries.forEach((entry) => {
     const wrapper = document.createElement("div");
-    wrapper.className = "sleep-entry-wrap";
+    wrapper.className = "swipe-wrapper";
+
+    const deleteBg = document.createElement("div");
+    deleteBg.className = "delete-bg";
+    deleteBg.textContent = "Удалить";
 
     const el = document.createElement("div");
     el.className = "card sleep-entry-card";
@@ -316,8 +353,6 @@ function render(entries, loadError = null) {
     const safeNote = String(entry.note || "").trim();
 
     el.innerHTML = `
-      <div class="delete-bg">Удалить запись</div>
-
       <div class="card-content">
         <div class="card-right-column">
           <div class="card__title">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
@@ -333,7 +368,9 @@ function render(entries, loadError = null) {
       </div>
     `;
 
-    enableSleepSwipeDelete(el, entry);
+    enableSleepSwipeDelete(wrapper, el, entry);
+
+    wrapper.appendChild(deleteBg);
     wrapper.appendChild(el);
     DOM.list.appendChild(wrapper);
   });
@@ -349,14 +386,16 @@ function render(entries, loadError = null) {
   DOM.stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
 }
 
-function enableSleepSwipeDelete(cardEl, entry) {
+/* =========================
+   SWIPE DELETE
+========================= */
+
+function enableSleepSwipeDelete(wrapper, cardEl, entry) {
   let startX = 0;
   let startY = 0;
   let diffX = 0;
   let diffY = 0;
   let isHorizontal = false;
-
-  const deleteBg = cardEl.querySelector(".delete-bg");
 
   cardEl.addEventListener("touchstart", (e) => {
     const touch = e.touches[0];
@@ -383,14 +422,11 @@ function enableSleepSwipeDelete(cardEl, entry) {
     if (isHorizontal && diffX < 0) {
       const limited = Math.max(diffX, -140);
       cardEl.style.transform = `translateX(${limited}px)`;
-      if (deleteBg) {
-        deleteBg.style.opacity = String(Math.min(Math.abs(limited) / 100, 1));
-      }
     }
   }, { passive: true });
 
   cardEl.addEventListener("touchend", () => {
-    if (isHorizontal && diffX < -110) {
+    if (isHorizontal && diffX < -120) {
       openConfirm({
         title: "Удаление записи",
         text: "Удалить эту запись сна?",
@@ -407,12 +443,15 @@ function enableSleepSwipeDelete(cardEl, entry) {
     }
 
     cardEl.style.transform = "";
-    if (deleteBg) deleteBg.style.opacity = "";
     diffX = 0;
     diffY = 0;
     isHorizontal = false;
   });
 }
+
+/* =========================
+   NAV
+========================= */
 
 function setupNavigation() {
   document.querySelectorAll(".nav-emoji").forEach((btn) => {
@@ -434,6 +473,10 @@ function setupNavigation() {
     };
   });
 }
+
+/* =========================
+   INIT
+========================= */
 
 async function init() {
   if (DOM.stats) {
