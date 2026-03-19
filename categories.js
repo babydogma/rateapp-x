@@ -44,6 +44,19 @@ const modalState = {
 };
 
 /* =========================
+   UTILS
+========================= */
+
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* =========================
    STORAGE
 ========================= */
 
@@ -264,6 +277,8 @@ function setupModals() {
 ========================= */
 
 function renderCategories(categories, cards) {
+  if (!DOM.grid || !DOM.stats) return;
+
   DOM.grid.innerHTML = "";
 
   categories.forEach((cat, index) => {
@@ -282,9 +297,9 @@ function renderCategories(categories, cards) {
     el.className = "category-block";
 
     el.innerHTML = `
-      <div class="cat-emoji">${cat.emoji}</div>
-      <div class="cat-title">${cat.name} (${count})</div>
-      <button class="category-edit">✏️</button>
+      <div class="cat-emoji">${escapeHtml(cat.emoji)}</div>
+      <div class="cat-title">${escapeHtml(cat.name)} (${count})</div>
+      <button class="category-edit" type="button">✏️</button>
     `;
 
     el.addEventListener("click", () => {
@@ -382,6 +397,8 @@ function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) 
 ========================= */
 
 function setupAdd() {
+  if (!DOM.addBtn) return;
+
   DOM.addBtn.onclick = () => {
     openCategoryModal({ mode: "create" });
   };
