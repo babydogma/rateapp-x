@@ -26,15 +26,20 @@ const DOM = {
 
   confirmModal: document.getElementById("sleepConfirmModal"),
   confirmCancel: document.getElementById("sleepConfirmCancel"),
-  confirmDelete: document.getElementById("sleepConfirmDelete")
+  confirmDelete: document.getElementById("sleepConfirmDelete"),
+
+  noteConfirmModal: document.getElementById("sleepNoteConfirmModal"),
+  noteConfirmCancel: document.getElementById("sleepNoteConfirmCancel"),
+  noteConfirmDelete: document.getElementById("sleepNoteConfirmDelete")
 };
 
 const modalState = {
-  onConfirmDelete: null
+  onConfirmDelete: null,
+  onConfirmNoteDelete: null
 };
 
 /* =========================
-   FETCH
+   FETCH / UPDATE
 ========================= */
 
 async function fetchSleep() {
@@ -59,6 +64,18 @@ async function deleteSleepEntry(id) {
 
   if (error) {
     console.error("deleteSleepEntry error:", error);
+    throw error;
+  }
+}
+
+async function updateSleepEntry(id, updates) {
+  const { error } = await supabaseClient
+    .from("sleep_entries")
+    .update(updates)
+    .eq("id", id);
+
+  if (error) {
+    console.error("updateSleepEntry error:", error);
     throw error;
   }
 }
@@ -290,6 +307,39 @@ function setupDeleteConfirm() {
 }
 
 /* =========================
+   NOTE DELETE CONFIRM
+========================= */
+
+function openNoteDeleteConfirm(onConfirm) {
+  modalState.onConfirmNoteDelete = onConfirm;
+  DOM.noteConfirmModal?.classList.add("active");
+}
+
+function closeNoteDeleteConfirm() {
+  DOM.noteConfirmModal?.classList.remove("active");
+  modalState.onConfirmNoteDelete = null;
+}
+
+function setupNoteDeleteConfirm() {
+  DOM.noteConfirmCancel?.addEventListener("click", closeNoteDeleteConfirm);
+
+  DOM.noteConfirmModal?.addEventListener("click", (e) => {
+    if (e.target === DOM.noteConfirmModal) {
+      closeNoteDeleteConfirm();
+    }
+  });
+
+  DOM.noteConfirmDelete?.addEventListener("click", async () => {
+    const handler = modalState.onConfirmNoteDelete;
+    closeNoteDeleteConfirm();
+
+    if (typeof handler === "function") {
+      await handler();
+    }
+  });
+}
+
+/* =========================
    RENDER
 ========================= */
 
@@ -338,14 +388,14 @@ function render(entries, loadError = null) {
 
   entries.forEach((entry) => {
     const el = document.createElement("div");
-    el.className = "card";
+    el.className = "card sleep-entry-card";
 
     const sleepRating = clampRating(entry.sleep_rating);
     const moodRating = clampRating(entry.mood_rating);
     const safeNote = String(entry.note || "").trim();
 
     el.innerHTML = `
-      <div class="delete-bg">Удалить</div>
+      <div class="delete-bg">Удалить запись</div>
 
       <div class="card-content">
         <div class="card-right-column">
@@ -357,12 +407,32 @@ function render(entries, loadError = null) {
           <div class="card__description-preview">
             Настроение: ${moodRating}/10
           </div>
-          <div class="card__description-preview ${safeNote ? "" : "is-empty"}">
-            ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
+          <div class="sleep-note-row">
+            <div class="card__description-preview ${safeNote ? "" : "is-empty"} sleep-note-text">
+              ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
+            </div>
+            ${safeNote ? '<button type="button" class="sleep-note-delete-btn">✕</button>' : ""}
           </div>
         </div>
       </div>
     `;
+
+    const noteDeleteBtn = el.querySelector(".sleep-note-delete-btn");
+    if (noteDeleteBtn) {
+      noteDeleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        openNoteDeleteConfirm(async () => {
+          try {
+            await updateSleepEntry(entry.id, { note: "" });
+            await init();
+          } catch (error) {
+            console.error(error);
+            alert("Не удалось удалить заметку");
+          }
+        });
+      });
+    }
 
     enableSleepSwipeDelete(el, entry);
     DOM.list.appendChild(el);
@@ -385,22 +455,38 @@ function render(entries, loadError = null) {
 
 function enableSleepSwipeDelete(cardEl, entry) {
   let startX = 0;
-  let diff = 0;
+  let startY = 0;
+  let diffX = 0;
+  let diffY = 0;
+  let isHorizontal = false;
 
   cardEl.addEventListener("touchstart", (e) => {
     startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    diffX = 0;
+    diffY = 0;
+    isHorizontal = false;
   }, { passive: true });
 
   cardEl.addEventListener("touchmove", (e) => {
-    diff = e.touches[0].clientX - startX;
+    diffX = e.touches[0].clientX - startX;
+    diffY = e.touches[0].clientY - startY;
 
-    if (diff < 0) {
-      cardEl.style.transform = `translateX(${diff}px)`;
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      isHorizontal = true;
+    }
+
+    if (isHorizontal && diffX < 0) {
+      cardEl.style.transform = `translateX(${diffX}px)`;
+      const deleteBg = cardEl.querySelector(".delete-bg");
+      if (deleteBg) {
+        deleteBg.style.opacity = Math.min(Math.abs(diffX) / 120, 1).toString();
+      }
     }
   }, { passive: true });
 
   cardEl.addEventListener("touchend", () => {
-    if (diff < -120) {
+    if (isHorizontal && diffX < -120) {
       openDeleteConfirm(async () => {
         try {
           await deleteSleepEntry(entry.id);
@@ -413,7 +499,13 @@ function enableSleepSwipeDelete(cardEl, entry) {
     }
 
     cardEl.style.transform = "";
-    diff = 0;
+    const deleteBg = cardEl.querySelector(".delete-bg");
+    if (deleteBg) {
+      deleteBg.style.opacity = "";
+    }
+    diffX = 0;
+    diffY = 0;
+    isHorizontal = false;
   });
 }
 
@@ -458,4 +550,5 @@ async function init() {
 setupNavigation();
 setupSleepModal();
 setupDeleteConfirm();
+setupNoteDeleteConfirm();
 init();
