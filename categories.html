@@ -1,138 +1,447 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>RateApp X — Категории</title>
+/* =========================
+   CATEGORIES FULL SYSTEM
+========================= */
 
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0e0e0f" />
+const DOM = {
+  grid: document.getElementById("categoriesGrid"),
+  stats: document.getElementById("categoriesStats"),
+  addBtn: document.getElementById("addCategoryBtn"),
 
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
+  categoryModal: document.getElementById("categoryModal"),
+  categoryModalTitle: document.getElementById("categoryModalTitle"),
+  categoryNameInput: document.getElementById("categoryNameInput"),
+  categoryEmojiInput: document.getElementById("categoryEmojiInput"),
+  categoryModalCancel: document.getElementById("categoryModalCancel"),
+  categoryModalSave: document.getElementById("categoryModalSave"),
 
-  <div id="categoryModal" class="category-modal">
-    <div class="category-modal__box">
-      <div class="category-modal__title" id="categoryModalTitle">Новая категория</div>
+  confirmModal: document.getElementById("confirmModal"),
+  confirmModalTitle: document.getElementById("confirmModalTitle"),
+  confirmModalText: document.getElementById("confirmModalText"),
+  confirmModalCancel: document.getElementById("confirmModalCancel"),
+  confirmModalConfirm: document.getElementById("confirmModalConfirm")
+};
 
-      <label class="category-modal__label" for="categoryNameInput">Название</label>
-      <input
-        id="categoryNameInput"
-        class="category-modal__input"
-        type="text"
-        placeholder="Введите название"
-        maxlength="40"
-      >
+const DEFAULT_CATEGORIES = [
+  { name: "Разное", emoji: "📦" },
+  { name: "Еда", emoji: "🍔" },
+  { name: "Фильм", emoji: "🎬" },
+  { name: "Сериалы", emoji: "📺" },
+  { name: "Семья", emoji: "👨‍👩‍👧" }
+];
 
-      <label class="category-modal__label" for="categoryEmojiInput">Эмодзи</label>
-      <input
-        id="categoryEmojiInput"
-        class="category-modal__input"
-        type="text"
-        placeholder="📁"
-        maxlength="4"
-      >
+const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
 
-      <div class="category-modal__actions">
-        <button id="categoryModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
-          Отмена
-        </button>
-        <button id="categoryModalSave" type="button" class="category-modal__btn category-modal__btn--primary">
-          Сохранить
-        </button>
-      </div>
-    </div>
-  </div>
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-  <div id="confirmModal" class="confirm-modal">
-    <div class="confirm-modal__box">
-      <div class="confirm-modal__title" id="confirmModalTitle">Подтверждение</div>
-      <div class="confirm-modal__text" id="confirmModalText">Вы уверены?</div>
+const modalState = {
+  mode: "create",
+  editIndex: null,
+  onConfirm: null
+};
 
-      <div class="confirm-modal__actions">
-        <button id="confirmModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
-          Отмена
-        </button>
-        <button id="confirmModalConfirm" type="button" class="category-modal__btn category-modal__btn--danger">
-          Удалить
-        </button>
-      </div>
-    </div>
-  </div>
+/* =========================
+   UTILS
+========================= */
 
-  <main class="app">
-    <header class="header">
-      <div class="app-title">
-        <div class="logo-text">Категории</div>
-      </div>
-    </header>
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-    <div class="divider"></div>
+/* =========================
+   STORAGE
+========================= */
 
-    <section class="stats" id="categoriesStats">
-      Загрузка категорий...
-    </section>
+function getCategories() {
+  try {
+    const saved = localStorage.getItem("categories");
+    const parsed = saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
 
-    <div class="divider"></div>
+    if (!Array.isArray(parsed) || !parsed.length) {
+      return DEFAULT_CATEGORIES;
+    }
 
-    <section class="categories-grid" id="categoriesGrid"></section>
-  </main>
+    const normalized = parsed
+      .map((item) => ({
+        name: String(item?.name || "").trim(),
+        emoji: String(item?.emoji || "📁").trim() || "📁"
+      }))
+      .filter((item) => item.name);
 
-  <nav class="bottom-nav" role="navigation" aria-label="Навигация">
-  <button
-    class="nav-emoji"
-    data-page="home"
-    title="Главная"
-    aria-label="Главная"
-  >
-    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 10.5L12 3l9 7.5"></path>
-      <path d="M5.5 9.5V20h13V9.5"></path>
-      <path d="M9.5 20v-5.5h5V20"></path>
-    </svg>
-  </button>
+    if (!normalized.some((item) => item.name === "Разное")) {
+      normalized.unshift({ name: "Разное", emoji: "📦" });
+    }
 
-  <div class="nav-center-slot" aria-hidden="true"></div>
+    return normalized;
+  } catch {
+    return DEFAULT_CATEGORIES;
+  }
+}
 
-  <button
-    class="nav-emoji"
-    data-page="sleep"
-    title="Сон"
-    aria-label="Сон"
-  >
-    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M18.5 14.5A6.5 6.5 0 0 1 9.5 5.5a7.5 7.5 0 1 0 9 9z"></path>
-    </svg>
-  </button>
+function saveCategories(categories) {
+  localStorage.setItem("categories", JSON.stringify(categories));
+}
 
-  <button
-    class="nav-emoji is-current"
-    data-page="categories"
-    title="Категории"
-    aria-label="Категории"
-  >
-    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h4l2 2h6A2.5 2.5 0 0 1 20.5 9.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"></path>
-      <path d="M3.5 9h17"></path>
-    </svg>
-  </button>
+/* =========================
+   FETCH / UPDATE CARDS
+========================= */
 
-  <button
-    id="addCategoryBtn"
-    class="add-btn"
-    aria-label="Добавить категорию"
-    type="button"
-  >
-    +
-  </button>
-</nav>
+async function fetchCards() {
+  const { data, error } = await supabaseClient
+    .from("cards")
+    .select("category");
 
-  <script src="categories.js"></script>
-</body>
-</html>
+  if (error) {
+    console.error("fetchCards error:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function moveCardsToDefaultCategory(deletedCategoryName) {
+  const { error } = await supabaseClient
+    .from("cards")
+    .update({ category: "Разное" })
+    .eq("category", deletedCategoryName);
+
+  if (error) {
+    console.error("moveCardsToDefaultCategory error:", error);
+    throw error;
+  }
+}
+
+async function renameCardsCategory(oldName, newName) {
+  const { error } = await supabaseClient
+    .from("cards")
+    .update({ category: newName })
+    .eq("category", oldName);
+
+  if (error) {
+    console.error("renameCardsCategory error:", error);
+    throw error;
+  }
+}
+
+/* =========================
+   MODALS
+========================= */
+
+function openCategoryModal({ mode, category = null, index = null }) {
+  modalState.mode = mode;
+  modalState.editIndex = index;
+
+  DOM.categoryModalTitle.textContent =
+    mode === "edit" ? "Редактировать категорию" : "Новая категория";
+
+  DOM.categoryModalSave.textContent =
+    mode === "edit" ? "Сохранить" : "Создать";
+
+  DOM.categoryNameInput.value = category?.name || "";
+  DOM.categoryEmojiInput.value = category?.emoji || "📁";
+
+  DOM.categoryModal.classList.add("active");
+
+  requestAnimationFrame(() => {
+    DOM.categoryNameInput.focus();
+    DOM.categoryNameInput.select();
+  });
+}
+
+function closeCategoryModal() {
+  DOM.categoryModal.classList.remove("active");
+  DOM.categoryNameInput.value = "";
+  DOM.categoryEmojiInput.value = "";
+  modalState.mode = "create";
+  modalState.editIndex = null;
+}
+
+function openConfirmModal({ title, text, confirmText = "Удалить", onConfirm }) {
+  modalState.onConfirm = onConfirm;
+
+  DOM.confirmModalTitle.textContent = title;
+  DOM.confirmModalText.textContent = text;
+  DOM.confirmModalConfirm.textContent = confirmText;
+
+  DOM.confirmModal.classList.add("active");
+}
+
+function closeConfirmModal() {
+  DOM.confirmModal.classList.remove("active");
+  modalState.onConfirm = null;
+}
+
+function setupModals() {
+  DOM.categoryModalCancel.onclick = closeCategoryModal;
+
+  DOM.categoryModal.addEventListener("click", (e) => {
+    if (e.target === DOM.categoryModal) {
+      closeCategoryModal();
+    }
+  });
+
+  DOM.confirmModalCancel.onclick = closeConfirmModal;
+
+  DOM.confirmModal.addEventListener("click", (e) => {
+    if (e.target === DOM.confirmModal) {
+      closeConfirmModal();
+    }
+  });
+
+  DOM.confirmModalConfirm.onclick = async () => {
+    const handler = modalState.onConfirm;
+    closeConfirmModal();
+
+    if (typeof handler === "function") {
+      await handler();
+    }
+  };
+
+  DOM.categoryModalSave.onclick = async () => {
+    const name = DOM.categoryNameInput.value.trim();
+    const emoji = DOM.categoryEmojiInput.value.trim() || "📁";
+
+    if (!name) {
+      DOM.categoryNameInput.focus();
+      return;
+    }
+
+    const categories = getCategories();
+
+    if (modalState.mode === "create") {
+      const duplicate = categories.some((item) => item.name === name);
+
+      if (duplicate) {
+        alert("Категория с таким названием уже есть");
+        return;
+      }
+
+      categories.push({ name, emoji });
+      saveCategories(categories);
+      closeCategoryModal();
+      init();
+      return;
+    }
+
+    if (modalState.mode === "edit") {
+      const index = modalState.editIndex;
+      if (index === null || !categories[index]) {
+        closeCategoryModal();
+        return;
+      }
+
+      const oldCategory = categories[index];
+
+      const duplicate = categories.some(
+        (item, i) => i !== index && item.name === name
+      );
+
+      if (duplicate) {
+        alert("Категория с таким названием уже есть");
+        return;
+      }
+
+      try {
+        if (name !== oldCategory.name) {
+          await renameCardsCategory(oldCategory.name, name);
+        }
+
+        categories[index] = { name, emoji };
+        saveCategories(categories);
+
+        const activeCategory = localStorage.getItem("activeCategory");
+        if (activeCategory === oldCategory.name) {
+          localStorage.setItem("activeCategory", name);
+        }
+
+        closeCategoryModal();
+        init();
+      } catch (error) {
+        console.error(error);
+        alert("Не удалось переименовать категорию");
+      }
+    }
+  };
+}
+
+/* =========================
+   RENDER
+========================= */
+
+function renderCategories(categories, cards) {
+  if (!DOM.grid || !DOM.stats) return;
+
+  DOM.grid.innerHTML = "";
+
+  categories.forEach((cat, index) => {
+    const count = cards.filter(
+      (c) => (c.category || "Разное") === cat.name
+    ).length;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "swipe-wrapper";
+
+    const deleteBg = document.createElement("div");
+    deleteBg.className = "delete-bg";
+    deleteBg.textContent = "Удалить";
+
+    const el = document.createElement("div");
+    el.className = "category-block";
+
+    el.innerHTML = `
+      <div class="cat-emoji">${escapeHtml(cat.emoji)}</div>
+      <div class="cat-title">${escapeHtml(cat.name)} (${count})</div>
+      <button class="category-edit" type="button">✏️</button>
+    `;
+
+    el.addEventListener("click", () => {
+      localStorage.setItem("activeCategory", cat.name);
+      window.location.href = "index.html";
+    });
+
+    el.querySelector(".category-edit").onclick = (e) => {
+      e.stopPropagation();
+      openCategoryModal({
+        mode: "edit",
+        category: cat,
+        index
+      });
+    };
+
+    enableCategorySwipeDelete(wrapper, el, cat, categories, cards);
+
+    wrapper.appendChild(deleteBg);
+    wrapper.appendChild(el);
+    DOM.grid.appendChild(wrapper);
+  });
+
+  DOM.stats.textContent =
+    `Категорий: ${categories.length} • Карточек: ${cards.length}`;
+}
+
+function enableCategorySwipeDelete(wrapper, categoryEl, cat, categories, cards) {
+  let startX = 0;
+  let diff = 0;
+
+  categoryEl.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+  });
+
+  categoryEl.addEventListener("touchmove", (e) => {
+    diff = e.touches[0].clientX - startX;
+
+    if (diff < 0) {
+      categoryEl.style.transform = `translateX(${diff}px)`;
+    }
+  });
+
+  categoryEl.addEventListener("touchend", async () => {
+    if (diff < -120) {
+      if (cat.name === "Разное") {
+        alert('Категорию "Разное" удалять нельзя');
+        categoryEl.style.transform = "";
+        diff = 0;
+        return;
+      }
+
+      const hasCards = cards.some(
+        (c) => (c.category || "Разное") === cat.name
+      );
+
+      const text = hasCards
+        ? `Удалить категорию «${cat.name}»? Карточки из неё будут перенесены в «Разное».`
+        : `Удалить категорию «${cat.name}»?`;
+
+      openConfirmModal({
+        title: "Удаление категории",
+        text,
+        confirmText: "Удалить",
+        onConfirm: async () => {
+          try {
+            if (hasCards) {
+              await moveCardsToDefaultCategory(cat.name);
+            }
+
+            const updated = categories.filter((item) => item.name !== cat.name);
+            saveCategories(updated);
+
+            const activeCategory = localStorage.getItem("activeCategory");
+            if (activeCategory === cat.name) {
+              localStorage.removeItem("activeCategory");
+            }
+
+            init();
+          } catch (error) {
+            console.error(error);
+            alert("Не удалось удалить категорию");
+          }
+        }
+      });
+    }
+
+    categoryEl.style.transform = "";
+    diff = 0;
+  });
+}
+
+/* =========================
+   ADD CATEGORY
+========================= */
+
+function setupAdd() {
+  if (!DOM.addBtn) return;
+
+  DOM.addBtn.onclick = () => {
+    openCategoryModal({ mode: "create" });
+  };
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function setupNavigation() {
+  document.querySelectorAll(".nav-emoji").forEach((btn) => {
+    btn.onclick = () => {
+      const page = btn.dataset.page;
+
+      if (page === "home") {
+        localStorage.removeItem("activeCategory");
+        window.location.href = "index.html";
+      }
+
+      if (page === "sleep") {
+        window.location.href = "sleep.html";
+      }
+
+      if (page === "categories") {
+        window.location.href = "categories.html";
+      }
+    };
+  });
+}
+
+/* =========================
+   INIT
+========================= */
+
+async function init() {
+  setupNavigation();
+
+  const categories = getCategories();
+  const cards = await fetchCards();
+
+  renderCategories(categories, cards);
+  setupAdd();
+}
+
+setupModals();
+init();
