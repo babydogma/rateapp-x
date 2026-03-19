@@ -1363,3 +1363,61 @@ button {
     width: 100%;
   }
 }
+
+/* =========================================================
+   17. SLEEP MODAL
+   ========================================================= */
+
+.sleep-modal-box {
+  max-width: 460px;
+}
+
+.sleep-slider-block {
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+.sleep-slider-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sleep-slider-value {
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.sleep-note-input {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.sleep-modal-box .slider {
+  margin-top: 0;
+}
+
+.sleep-modal-box input[type="date"],
+.sleep-modal-box input[type="time"] {
+  color-scheme: dark;
+}
+
+@media (max-width: 420px) {
+  .sleep-modal-box {
+    max-width: 100%;
+  }
+
+  .sleep-slider-value {
+    font-size: 13px;
+  }
+
+  .sleep-note-input {
+    min-height: 100px;
+  }
+}
