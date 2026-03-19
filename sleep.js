@@ -16,6 +16,9 @@ const DOM = {
   bedInput: document.getElementById("bedTimeInput"),
   wakeInput: document.getElementById("wakeTimeInput"),
 
+  wakeCountInput: document.getElementById("wakeCountInput"),
+  dreamTypeInput: document.getElementById("dreamTypeInput"),
+
   moodRatingInput: document.getElementById("moodRatingInput"),
   moodRatingValue: document.getElementById("moodRatingValue"),
 
@@ -85,6 +88,13 @@ function clampRating(value) {
   return Math.max(0, Math.min(10, num));
 }
 
+function clampHalf(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return 0;
+  const rounded = Math.round(num * 2) / 2;
+  return Math.max(0, Math.min(10, rounded));
+}
+
 function calcDuration(bed, wake) {
   const [bh, bm] = bed.split(":").map(Number);
   const [wh, wm] = wake.split(":").map(Number);
@@ -114,6 +124,11 @@ function formatRatingValue(value) {
   return `${clampRating(value)}/10`;
 }
 
+function formatAutoSleepRating(value) {
+  const safe = clampHalf(value);
+  return Number.isInteger(safe) ? `${safe}/10` : `${safe.toFixed(1)}/10`;
+}
+
 function setSliderProgress(slider) {
   if (!slider) return;
 
@@ -133,7 +148,11 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
-function getAutoSleepRating(durationMinutes) {
+/* =========================
+   AUTO SLEEP RATING
+========================= */
+
+function getBaseSleepRating(durationMinutes) {
   const hours = (Number(durationMinutes) || 0) / 60;
 
   if (hours < 5) return 2;
@@ -143,6 +162,36 @@ function getAutoSleepRating(durationMinutes) {
   if (hours <= 9) return 9;
   return 7;
 }
+
+function getWakePenalty(wakeCountValue) {
+  const value = String(wakeCountValue || "0");
+
+  if (value === "0") return 0;
+  if (value === "1") return -0.5;
+  if (value === "2") return -1;
+  if (value === "3") return -1.5;
+  return -2;
+}
+
+function getDreamAdjustment(dreamTypeValue) {
+  const value = String(dreamTypeValue || "neutral");
+
+  if (value === "nightmare") return -1;
+  if (value === "good") return 1;
+  return 0;
+}
+
+function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue) {
+  const base = getBaseSleepRating(durationMinutes);
+  const wakePenalty = getWakePenalty(wakeCountValue);
+  const dreamAdjustment = getDreamAdjustment(dreamTypeValue);
+
+  return clampHalf(base + wakePenalty + dreamAdjustment);
+}
+
+/* =========================
+   STATUS / LABELS
+========================= */
 
 function getMoodEmoji(moodRating) {
   const mood = clampRating(moodRating);
@@ -155,7 +204,7 @@ function getMoodEmoji(moodRating) {
 
 function getSleepStatus(durationMinutes, sleepRating, moodRating) {
   const hours = (Number(durationMinutes) || 0) / 60;
-  const rating = clampRating(sleepRating);
+  const rating = clampHalf(sleepRating);
   const moodEmoji = getMoodEmoji(moodRating);
 
   let level = 0;
@@ -220,6 +269,20 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
   };
 }
 
+function getWakeCountLabel(wakeCountValue) {
+  const value = String(wakeCountValue || "0");
+  if (value === "4plus") return "более 3";
+  return value;
+}
+
+function getDreamLabel(dreamTypeValue) {
+  const value = String(dreamTypeValue || "neutral");
+
+  if (value === "nightmare") return "кошмар";
+  if (value === "good") return "кайф";
+  return "ничего такого";
+}
+
 /* =========================
    MODAL
 ========================= */
@@ -235,6 +298,8 @@ function resetSleepForm() {
   if (DOM.dateInput) DOM.dateInput.value = getTodayDateString();
   if (DOM.bedInput) DOM.bedInput.value = "";
   if (DOM.wakeInput) DOM.wakeInput.value = "";
+  if (DOM.wakeCountInput) DOM.wakeCountInput.value = "0";
+  if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = "neutral";
   if (DOM.moodRatingInput) DOM.moodRatingInput.value = "0";
   if (DOM.noteInput) DOM.noteInput.value = "";
 
@@ -260,6 +325,8 @@ async function saveSleepEntry() {
   const date = String(DOM.dateInput?.value || "").trim();
   const bed = String(DOM.bedInput?.value || "").trim();
   const wake = String(DOM.wakeInput?.value || "").trim();
+  const wakeCount = String(DOM.wakeCountInput?.value || "0").trim();
+  const dreamType = String(DOM.dreamTypeInput?.value || "neutral").trim();
   const moodRating = clampRating(DOM.moodRatingInput?.value);
   const note = String(DOM.noteInput?.value || "").trim();
 
@@ -282,7 +349,7 @@ async function saveSleepEntry() {
   }
 
   const duration = calcDuration(bed, wake);
-  const sleepRating = getAutoSleepRating(duration);
+  const sleepRating = getAutoSleepRating(duration, wakeCount, dreamType);
 
   if (DOM.modalSave) {
     DOM.modalSave.disabled = true;
@@ -298,6 +365,8 @@ async function saveSleepEntry() {
         duration_minutes: duration,
         sleep_rating: sleepRating,
         mood_rating: moodRating,
+        wake_count: wakeCount,
+        dream_type: dreamType,
         note
       });
 
@@ -425,8 +494,10 @@ function render(entries, loadError = null) {
     const el = document.createElement("div");
     el.className = "card sleep-entry-card";
 
-    const sleepRating = clampRating(entry.sleep_rating);
+    const sleepRating = clampHalf(entry.sleep_rating);
     const moodRating = clampRating(entry.mood_rating);
+    const wakeCount = String(entry.wake_count || "0");
+    const dreamType = String(entry.dream_type || "neutral");
     const safeNote = String(entry.note || "").trim();
     const status = getSleepStatus(entry.duration_minutes, sleepRating, moodRating);
 
@@ -444,10 +515,15 @@ function render(entries, loadError = null) {
             <div class="sleep-info-chip">⏱ ${escapeHtml(formatDuration(entry.duration_minutes))}</div>
           </div>
 
+          <div class="sleep-chip-row">
+            <div class="sleep-info-chip">Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</div>
+            <div class="sleep-info-chip">Снилось: ${escapeHtml(getDreamLabel(dreamType))}</div>
+          </div>
+
           <div class="sleep-chip-row sleep-chip-row--metrics">
             <div class="sleep-metric-chip">
               <span>Сон</span>
-              <strong>${sleepRating}/10</strong>
+              <strong>${formatAutoSleepRating(sleepRating)}</strong>
             </div>
             <div class="sleep-metric-chip">
               <span>Настроение</span>
@@ -470,7 +546,7 @@ function render(entries, loadError = null) {
   });
 
   const avgSleep = (
-    entries.reduce((sum, e) => sum + clampRating(e.sleep_rating), 0) / entries.length
+    entries.reduce((sum, e) => sum + clampHalf(e.sleep_rating), 0) / entries.length
   ).toFixed(1);
 
   const avgDuration = Math.round(
