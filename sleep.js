@@ -16,9 +16,6 @@ const DOM = {
   bedInput: document.getElementById("bedTimeInput"),
   wakeInput: document.getElementById("wakeTimeInput"),
 
-  sleepRatingInput: document.getElementById("sleepRatingInput"),
-  sleepRatingValue: document.getElementById("sleepRatingValue"),
-
   moodRatingInput: document.getElementById("moodRatingInput"),
   moodRatingValue: document.getElementById("moodRatingValue"),
 
@@ -136,6 +133,17 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function getAutoSleepRating(durationMinutes) {
+  const hours = (Number(durationMinutes) || 0) / 60;
+
+  if (hours < 5) return 2;
+  if (hours <= 6) return 4;
+  if (hours <= 7) return 6;
+  if (hours <= 8) return 8;
+  if (hours <= 9) return 9;
+  return 7;
+}
+
 function getMoodEmoji(moodRating) {
   const mood = clampRating(moodRating);
 
@@ -217,11 +225,6 @@ function getSleepStatus(durationMinutes, sleepRating, moodRating) {
 ========================= */
 
 function syncSleepSliderUI() {
-  if (DOM.sleepRatingInput && DOM.sleepRatingValue) {
-    DOM.sleepRatingValue.textContent = formatRatingValue(DOM.sleepRatingInput.value);
-    setSliderProgress(DOM.sleepRatingInput);
-  }
-
   if (DOM.moodRatingInput && DOM.moodRatingValue) {
     DOM.moodRatingValue.textContent = formatRatingValue(DOM.moodRatingInput.value);
     setSliderProgress(DOM.moodRatingInput);
@@ -232,7 +235,6 @@ function resetSleepForm() {
   if (DOM.dateInput) DOM.dateInput.value = getTodayDateString();
   if (DOM.bedInput) DOM.bedInput.value = "";
   if (DOM.wakeInput) DOM.wakeInput.value = "";
-  if (DOM.sleepRatingInput) DOM.sleepRatingInput.value = "0";
   if (DOM.moodRatingInput) DOM.moodRatingInput.value = "0";
   if (DOM.noteInput) DOM.noteInput.value = "";
 
@@ -258,7 +260,6 @@ async function saveSleepEntry() {
   const date = String(DOM.dateInput?.value || "").trim();
   const bed = String(DOM.bedInput?.value || "").trim();
   const wake = String(DOM.wakeInput?.value || "").trim();
-  const sleepRating = clampRating(DOM.sleepRatingInput?.value);
   const moodRating = clampRating(DOM.moodRatingInput?.value);
   const note = String(DOM.noteInput?.value || "").trim();
 
@@ -281,6 +282,7 @@ async function saveSleepEntry() {
   }
 
   const duration = calcDuration(bed, wake);
+  const sleepRating = getAutoSleepRating(duration);
 
   if (DOM.modalSave) {
     DOM.modalSave.disabled = true;
@@ -327,7 +329,6 @@ function setupSleepModal() {
     }
   });
 
-  DOM.sleepRatingInput?.addEventListener("input", syncSleepSliderUI);
   DOM.moodRatingInput?.addEventListener("input", syncSleepSliderUI);
 
   resetSleepForm();
