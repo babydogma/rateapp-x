@@ -383,10 +383,7 @@ async function compressImageToSquare(file, size = 512, quality = 0.85) {
 
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, size, size);
-
-  const scale = Math.min(size / img.width, size / img.height);
+  const scale = Math.max(size / img.width, size / img.height);
   const drawWidth = img.width * scale;
   const drawHeight = img.height * scale;
   const dx = (size - drawWidth) / 2;
