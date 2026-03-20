@@ -300,9 +300,31 @@ function getStatusMeta(durationMinutes, sleepRating, moodRating) {
 }
 
 function getRangeEntries(entries, days) {
+  if (!entries.length) return [];
+
   const today = new Date();
-  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const latestEntryDate = entries.reduce((latest, entry) => {
+    if (!entry.sleep_date) return latest;
+    const entryDate = new Date(`${entry.sleep_date}T12:00:00`);
+    return entryDate > latest ? entryDate : latest;
+  }, todayOnly);
+
+  const anchorDate = latestEntryDate > todayOnly ? latestEntryDate : todayOnly;
+
+  const end = new Date(
+    anchorDate.getFullYear(),
+    anchorDate.getMonth(),
+    anchorDate.getDate(),
+    23, 59, 59, 999
+  );
+
+  const start = new Date(
+    anchorDate.getFullYear(),
+    anchorDate.getMonth(),
+    anchorDate.getDate()
+  );
   start.setDate(start.getDate() - (days - 1));
 
   return entries
