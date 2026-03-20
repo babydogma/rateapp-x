@@ -5,7 +5,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DOM = {
   list: document.getElementById("sleepList"),
-  stats: document.getElementById("sleepStats"),
   addBtn: document.getElementById("addSleepBtn"),
 
   modal: document.getElementById("sleepModal"),
@@ -28,10 +27,10 @@ const DOM = {
   confirmTitle: document.getElementById("sleepConfirmTitle"),
   confirmText: document.getElementById("sleepConfirmText"),
   confirmCancel: document.getElementById("sleepConfirmCancel"),
-  confirmDelete: document.getElementById("sleepConfirmDelete")
-  
+  confirmDelete: document.getElementById("sleepConfirmDelete"),
+
   summarySwitcher: document.getElementById("sleepSummarySwitcher"),
-  summaryPanel: document.getElementById("sleepSummaryPanel"),
+  summaryPanel: document.getElementById("sleepSummaryPanel")
 };
 
 const modalState = {
@@ -292,63 +291,55 @@ function getDreamLabel(dreamTypeValue) {
   return "ничего такого";
 }
 
-function getStatusMeta(durationMinutes, sleepRating, moodRating) {
-  const status = getSleepStatus(durationMinutes, sleepRating, moodRating);
+/* =========================
+   SUMMARY
+========================= */
 
-  return {
-    label: status.label,
-    className: status.className
-  };
+function getStatusMeta(durationMinutes, sleepRating, moodRating) {
+  return getSleepStatus(durationMinutes, sleepRating, moodRating);
 }
 
 function getRangeEntries(entries, days) {
-  const now = new Date();
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const start = new Date(end);
+  const today = new Date();
+  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   start.setDate(start.getDate() - (days - 1));
 
-  return entries.filter((entry) => {
-    if (!entry.sleep_date) return false;
-    const date = new Date(`${entry.sleep_date}T00:00:00`);
-    return date >= start && date <= end;
-  });
+  return entries
+    .filter((entry) => {
+      if (!entry.sleep_date) return false;
+      const date = new Date(`${entry.sleep_date}T12:00:00`);
+      return date >= start && date <= end;
+    })
+    .sort((a, b) => new Date(`${a.sleep_date}T12:00:00`) - new Date(`${b.sleep_date}T12:00:00`));
 }
 
 function getWeekdayShort(dateStr) {
-  const date = new Date(`${dateStr}T00:00:00`);
+  const date = new Date(`${dateStr}T12:00:00`);
   return date.toLocaleDateString("ru-RU", { weekday: "short" });
 }
 
 function buildSummaryInsight(entries) {
-  if (!entries.length) return "Пока недостаточно данных для вывода";
+  if (!entries.length) return "Нет записей за выбранный период";
 
-  const badCount = entries.filter((e) => {
-    const status = getStatusMeta(e.duration_minutes, clampHalf(e.sleep_rating), clampRating(e.mood_rating));
-    return status.className === "is-bad";
-  }).length;
-
-  const oversleepCount = entries.filter((e) => {
-    const status = getStatusMeta(e.duration_minutes, clampHalf(e.sleep_rating), clampRating(e.mood_rating));
-    return status.className === "is-oversleep";
-  }).length;
-
-  const wakeHeavyCount = entries.filter((e) => String(e.wake_count || "0") === "3" || String(e.wake_count || "0") === "4plus").length;
+  const wakeHeavyCount = entries.filter((e) => ["3", "4plus"].includes(String(e.wake_count || "0"))).length;
   const nightmareCount = entries.filter((e) => String(e.dream_type || "neutral") === "nightmare").length;
+  const avgDuration = entries.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / entries.length;
 
   if (wakeHeavyCount >= Math.max(2, Math.ceil(entries.length / 3))) {
     return "Часто мешают пробуждения";
   }
 
   if (nightmareCount >= Math.max(2, Math.ceil(entries.length / 4))) {
-    return "Есть влияние кошмаров на качество сна";
+    return "Кошмары заметно режут качество сна";
   }
 
-  if (oversleepCount >= Math.max(2, Math.ceil(entries.length / 3))) {
-    return "Часто встречается пересып";
+  if (avgDuration < 6 * 60) {
+    return "Основная проблема — недосып";
   }
 
-  if (badCount >= Math.max(2, Math.ceil(entries.length / 3))) {
-    return "Сон нестабильный, много слабых ночей";
+  if (avgDuration > 8.5 * 60) {
+    return "Есть склонность к пересыпу";
   }
 
   return "В целом сон выглядит довольно стабильным";
@@ -356,24 +347,6 @@ function buildSummaryInsight(entries) {
 
 function buildSummaryData(entries, days) {
   const filtered = getRangeEntries(entries, days);
-
-  if (!filtered.length) {
-    return {
-      entries: [],
-      avgSleep: "0.0",
-      avgMood: "0.0",
-      avgDuration: "0ч 0м",
-      count: 0,
-      counts: {
-        bad: 0,
-        mid: 0,
-        good: 0,
-        great: 0,
-        oversleep: 0
-      },
-      insight: "Нет записей за выбранный период"
-    };
-  }
 
   const counts = {
     bad: 0,
@@ -384,7 +357,11 @@ function buildSummaryData(entries, days) {
   };
 
   filtered.forEach((entry) => {
-    const status = getStatusMeta(entry.duration_minutes, clampHalf(entry.sleep_rating), clampRating(entry.mood_rating));
+    const status = getStatusMeta(
+      entry.duration_minutes,
+      clampHalf(entry.sleep_rating),
+      clampRating(entry.mood_rating)
+    );
 
     if (status.className === "is-bad") counts.bad += 1;
     if (status.className === "is-mid") counts.mid += 1;
@@ -392,6 +369,18 @@ function buildSummaryData(entries, days) {
     if (status.className === "is-great") counts.great += 1;
     if (status.className === "is-oversleep") counts.oversleep += 1;
   });
+
+  if (!filtered.length) {
+    return {
+      entries: [],
+      avgSleep: "0.0",
+      avgMood: "0.0",
+      avgDuration: "0ч 0м",
+      count: 0,
+      counts,
+      insight: "Нет записей за выбранный период"
+    };
+  }
 
   const avgSleep = (
     filtered.reduce((sum, e) => sum + clampHalf(e.sleep_rating), 0) / filtered.length
@@ -428,7 +417,12 @@ function renderSummary(entries, range) {
     stripHtml = `
       <div class="sleep-summary-strip sleep-summary-strip--7">
         ${data.entries.map((entry) => {
-          const status = getStatusMeta(entry.duration_minutes, clampHalf(entry.sleep_rating), clampRating(entry.mood_rating));
+          const status = getStatusMeta(
+            entry.duration_minutes,
+            clampHalf(entry.sleep_rating),
+            clampRating(entry.mood_rating)
+          );
+
           return `
             <div class="sleep-summary-day">
               <div class="sleep-summary-day__label">${escapeHtml(getWeekdayShort(entry.sleep_date))}</div>
@@ -442,7 +436,11 @@ function renderSummary(entries, range) {
     stripHtml = `
       <div class="sleep-summary-strip sleep-summary-strip--30">
         ${data.entries.map((entry) => {
-          const status = getStatusMeta(entry.duration_minutes, clampHalf(entry.sleep_rating), clampRating(entry.mood_rating));
+          const status = getStatusMeta(
+            entry.duration_minutes,
+            clampHalf(entry.sleep_rating),
+            clampRating(entry.mood_rating)
+          );
           return `<div class="sleep-summary-dot ${status.className}"></div>`;
         }).join("")}
       </div>
@@ -464,6 +462,45 @@ function renderSummary(entries, range) {
   `;
 
   DOM.summaryPanel.hidden = false;
+}
+
+function updateSummaryToggleUI() {
+  if (!DOM.summarySwitcher) return;
+
+  DOM.summarySwitcher.querySelectorAll("[data-range]").forEach((btn) => {
+    const range = Number(btn.dataset.range);
+    btn.classList.toggle("is-active", summaryState.openedRange === range);
+  });
+
+  if (DOM.summaryPanel) {
+    DOM.summaryPanel.hidden = summaryState.openedRange == null;
+  }
+}
+
+function setupSummaryToggle() {
+  if (!DOM.summarySwitcher) return;
+
+  DOM.summarySwitcher.querySelectorAll("[data-range]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const range = Number(btn.dataset.range);
+
+      if (summaryState.openedRange === range) {
+        summaryState.openedRange = null;
+        updateSummaryToggleUI();
+        if (DOM.summaryPanel) {
+          DOM.summaryPanel.innerHTML = "";
+          DOM.summaryPanel.hidden = true;
+        }
+        return;
+      }
+
+      summaryState.openedRange = range;
+      updateSummaryToggleUI();
+      renderSummary(window.__sleepEntries || [], range);
+    });
+  });
+
+  updateSummaryToggleUI();
 }
 
 /* =========================
@@ -618,45 +655,6 @@ function setupSleepModal() {
   resetSleepForm();
 }
 
-function updateSummaryToggleUI() {
-  if (!DOM.summarySwitcher) return;
-
-  DOM.summarySwitcher.querySelectorAll("[data-range]").forEach((btn) => {
-    const range = Number(btn.dataset.range);
-    btn.classList.toggle("is-active", summaryState.openedRange === range);
-  });
-
-  if (DOM.summaryPanel) {
-    DOM.summaryPanel.hidden = summaryState.openedRange == null;
-  }
-}
-
-function setupSummaryToggle() {
-  if (!DOM.summarySwitcher) return;
-
-  DOM.summarySwitcher.querySelectorAll("[data-range]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const range = Number(btn.dataset.range);
-
-      if (summaryState.openedRange === range) {
-        summaryState.openedRange = null;
-        updateSummaryToggleUI();
-        if (DOM.summaryPanel) {
-          DOM.summaryPanel.innerHTML = "";
-          DOM.summaryPanel.hidden = true;
-        }
-        return;
-      }
-
-      summaryState.openedRange = range;
-      updateSummaryToggleUI();
-      renderSummary(window.__sleepEntries || [], range);
-    });
-  });
-
-  updateSummaryToggleUI();
-}
-
 /* =========================
    CONFIRM
 ========================= */
@@ -698,14 +696,13 @@ function setupConfirm() {
    RENDER
 ========================= */
 
-function window.__sleepEntries = entries || [];render(entries, loadError = null) {
-  if (!DOM.list || !DOM.stats) return;
+function render(entries, loadError = null) {
+  if (!DOM.list) return;
 
+  window.__sleepEntries = entries || [];
   DOM.list.innerHTML = "";
 
   if (loadError) {
-    DOM.stats.textContent = `Ошибка: ${loadError.message}`;
-
     const errorCard = document.createElement("div");
     errorCard.className = "card";
     errorCard.innerHTML = `
@@ -717,17 +714,17 @@ function window.__sleepEntries = entries || [];render(entries, loadError = null)
       </div>
     `;
     DOM.list.appendChild(errorCard);
+
     if (DOM.summaryPanel) {
-  DOM.summaryPanel.innerHTML = "";
-  DOM.summaryPanel.hidden = true;
-}
-updateSummaryToggleUI();
+      DOM.summaryPanel.innerHTML = "";
+      DOM.summaryPanel.hidden = true;
+    }
+
+    updateSummaryToggleUI();
     return;
   }
 
   if (!entries.length) {
-    DOM.stats.textContent = "Записей сна: 0";
-
     const emptyCard = document.createElement("div");
     emptyCard.className = "card";
     emptyCard.innerHTML = `
@@ -739,13 +736,15 @@ updateSummaryToggleUI();
       </div>
     `;
     DOM.list.appendChild(emptyCard);
+
     if (summaryState.openedRange != null) {
-  renderSummary(entries, summaryState.openedRange);
-} else if (DOM.summaryPanel) {
-  DOM.summaryPanel.innerHTML = "";
-  DOM.summaryPanel.hidden = true;
-}
-updateSummaryToggleUI();
+      renderSummary(entries, summaryState.openedRange);
+    } else if (DOM.summaryPanel) {
+      DOM.summaryPanel.innerHTML = "";
+      DOM.summaryPanel.hidden = true;
+    }
+
+    updateSummaryToggleUI();
     return;
   }
 
@@ -818,22 +817,15 @@ updateSummaryToggleUI();
     DOM.list.appendChild(wrapper);
   });
 
-  const avgSleep = (
-    entries.reduce((sum, e) => sum + clampHalf(e.sleep_rating), 0) / entries.length
-  ).toFixed(1);
-
-  const avgDuration = Math.round(
-    entries.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / entries.length
-  );
-
   if (summaryState.openedRange != null) {
-  renderSummary(entries, summaryState.openedRange);
-} else if (DOM.summaryPanel) {
-  DOM.summaryPanel.innerHTML = "";
-  DOM.summaryPanel.hidden = true;
-}
+    renderSummary(entries, summaryState.openedRange);
+  } else if (DOM.summaryPanel) {
+    DOM.summaryPanel.innerHTML = "";
+    DOM.summaryPanel.hidden = true;
+  }
 
-updateSummaryToggleUI();
+  updateSummaryToggleUI();
+}
 
 /* =========================
    SWIPE DELETE
