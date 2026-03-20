@@ -29,12 +29,19 @@ const DOM = {
   confirmText: document.getElementById("sleepConfirmText"),
   confirmCancel: document.getElementById("sleepConfirmCancel"),
   confirmDelete: document.getElementById("sleepConfirmDelete")
+  
+  summarySwitcher: document.getElementById("sleepSummarySwitcher"),
+  summaryPanel: document.getElementById("sleepSummaryPanel"),
 };
 
 const modalState = {
   onConfirm: null,
   mode: "create",
   editingId: null
+};
+
+const summaryState = {
+  openedRange: 7
 };
 
 /* =========================
@@ -285,6 +292,180 @@ function getDreamLabel(dreamTypeValue) {
   return "ничего такого";
 }
 
+function getStatusMeta(durationMinutes, sleepRating, moodRating) {
+  const status = getSleepStatus(durationMinutes, sleepRating, moodRating);
+
+  return {
+    label: status.label,
+    className: status.className
+  };
+}
+
+function getRangeEntries(entries, days) {
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(end);
+  start.setDate(start.getDate() - (days - 1));
+
+  return entries.filter((entry) => {
+    if (!entry.sleep_date) return false;
+    const date = new Date(`${entry.sleep_date}T00:00:00`);
+    return date >= start && date <= end;
+  });
+}
+
+function getWeekdayShort(dateStr) {
+  const date = new Date(`${dateStr}T00:00:00`);
+  return date.toLocaleDateString("ru-RU", { weekday: "short" });
+}
+
+function buildSummaryInsight(entries) {
+  if (!entries.length) return "Пока недостаточно данных для вывода";
+
+  const badCount = entries.filter((e) => {
+    const status = getStatusMeta(e.duration_minutes, clampHalf(e.sleep_rating), clampRating(e.mood_rating));
+    return status.className === "is-bad";
+  }).length;
+
+  const oversleepCount = entries.filter((e) => {
+    const status = getStatusMeta(e.duration_minutes, clampHalf(e.sleep_rating), clampRating(e.mood_rating));
+    return status.className === "is-oversleep";
+  }).length;
+
+  const wakeHeavyCount = entries.filter((e) => String(e.wake_count || "0") === "3" || String(e.wake_count || "0") === "4plus").length;
+  const nightmareCount = entries.filter((e) => String(e.dream_type || "neutral") === "nightmare").length;
+
+  if (wakeHeavyCount >= Math.max(2, Math.ceil(entries.length / 3))) {
+    return "Часто мешают пробуждения";
+  }
+
+  if (nightmareCount >= Math.max(2, Math.ceil(entries.length / 4))) {
+    return "Есть влияние кошмаров на качество сна";
+  }
+
+  if (oversleepCount >= Math.max(2, Math.ceil(entries.length / 3))) {
+    return "Часто встречается пересып";
+  }
+
+  if (badCount >= Math.max(2, Math.ceil(entries.length / 3))) {
+    return "Сон нестабильный, много слабых ночей";
+  }
+
+  return "В целом сон выглядит довольно стабильным";
+}
+
+function buildSummaryData(entries, days) {
+  const filtered = getRangeEntries(entries, days);
+
+  if (!filtered.length) {
+    return {
+      entries: [],
+      avgSleep: "0.0",
+      avgMood: "0.0",
+      avgDuration: "0ч 0м",
+      count: 0,
+      counts: {
+        bad: 0,
+        mid: 0,
+        good: 0,
+        great: 0,
+        oversleep: 0
+      },
+      insight: "Нет записей за выбранный период"
+    };
+  }
+
+  const counts = {
+    bad: 0,
+    mid: 0,
+    good: 0,
+    great: 0,
+    oversleep: 0
+  };
+
+  filtered.forEach((entry) => {
+    const status = getStatusMeta(entry.duration_minutes, clampHalf(entry.sleep_rating), clampRating(entry.mood_rating));
+
+    if (status.className === "is-bad") counts.bad += 1;
+    if (status.className === "is-mid") counts.mid += 1;
+    if (status.className === "is-good") counts.good += 1;
+    if (status.className === "is-great") counts.great += 1;
+    if (status.className === "is-oversleep") counts.oversleep += 1;
+  });
+
+  const avgSleep = (
+    filtered.reduce((sum, e) => sum + clampHalf(e.sleep_rating), 0) / filtered.length
+  ).toFixed(1);
+
+  const avgMood = (
+    filtered.reduce((sum, e) => sum + clampRating(e.mood_rating), 0) / filtered.length
+  ).toFixed(1);
+
+  const avgDurationMinutes = Math.round(
+    filtered.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / filtered.length
+  );
+
+  return {
+    entries: filtered,
+    avgSleep,
+    avgMood,
+    avgDuration: formatDuration(avgDurationMinutes),
+    count: filtered.length,
+    counts,
+    insight: buildSummaryInsight(filtered)
+  };
+}
+
+function renderSummary(entries, range) {
+  if (!DOM.summaryPanel) return;
+
+  const data = buildSummaryData(entries, range);
+  const title = range === 7 ? "Сводка за 7 дней" : "Сводка за 30 дней";
+
+  let stripHtml = "";
+
+  if (range === 7) {
+    stripHtml = `
+      <div class="sleep-summary-strip sleep-summary-strip--7">
+        ${data.entries.map((entry) => {
+          const status = getStatusMeta(entry.duration_minutes, clampHalf(entry.sleep_rating), clampRating(entry.mood_rating));
+          return `
+            <div class="sleep-summary-day">
+              <div class="sleep-summary-day__label">${escapeHtml(getWeekdayShort(entry.sleep_date))}</div>
+              <div class="sleep-summary-dot ${status.className}"></div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  } else {
+    stripHtml = `
+      <div class="sleep-summary-strip sleep-summary-strip--30">
+        ${data.entries.map((entry) => {
+          const status = getStatusMeta(entry.duration_minutes, clampHalf(entry.sleep_rating), clampRating(entry.mood_rating));
+          return `<div class="sleep-summary-dot ${status.className}"></div>`;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  DOM.summaryPanel.innerHTML = `
+    <div class="sleep-summary-panel__title">${title}</div>
+    ${stripHtml}
+    <div class="sleep-summary-metrics">
+      <div class="sleep-summary-line">
+        <strong>Сон ${data.avgSleep}/10</strong> • ${data.avgDuration} • ${data.count} записей
+      </div>
+      <div class="sleep-summary-line">
+        Настр. ${data.avgMood}/10 • Плохой ${data.counts.bad} • Хороший ${data.counts.good}
+      </div>
+    </div>
+    <div class="sleep-summary-insight">${escapeHtml(data.insight)}</div>
+  `;
+
+  DOM.summaryPanel.hidden = false;
+}
+
 /* =========================
    MODAL
 ========================= */
@@ -437,6 +618,45 @@ function setupSleepModal() {
   resetSleepForm();
 }
 
+function updateSummaryToggleUI() {
+  if (!DOM.summarySwitcher) return;
+
+  DOM.summarySwitcher.querySelectorAll("[data-range]").forEach((btn) => {
+    const range = Number(btn.dataset.range);
+    btn.classList.toggle("is-active", summaryState.openedRange === range);
+  });
+
+  if (DOM.summaryPanel) {
+    DOM.summaryPanel.hidden = summaryState.openedRange == null;
+  }
+}
+
+function setupSummaryToggle() {
+  if (!DOM.summarySwitcher) return;
+
+  DOM.summarySwitcher.querySelectorAll("[data-range]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const range = Number(btn.dataset.range);
+
+      if (summaryState.openedRange === range) {
+        summaryState.openedRange = null;
+        updateSummaryToggleUI();
+        if (DOM.summaryPanel) {
+          DOM.summaryPanel.innerHTML = "";
+          DOM.summaryPanel.hidden = true;
+        }
+        return;
+      }
+
+      summaryState.openedRange = range;
+      updateSummaryToggleUI();
+      renderSummary(window.__sleepEntries || [], range);
+    });
+  });
+
+  updateSummaryToggleUI();
+}
+
 /* =========================
    CONFIRM
 ========================= */
@@ -478,7 +698,7 @@ function setupConfirm() {
    RENDER
 ========================= */
 
-function render(entries, loadError = null) {
+function window.__sleepEntries = entries || [];render(entries, loadError = null) {
   if (!DOM.list || !DOM.stats) return;
 
   DOM.list.innerHTML = "";
@@ -497,6 +717,11 @@ function render(entries, loadError = null) {
       </div>
     `;
     DOM.list.appendChild(errorCard);
+    if (DOM.summaryPanel) {
+  DOM.summaryPanel.innerHTML = "";
+  DOM.summaryPanel.hidden = true;
+}
+updateSummaryToggleUI();
     return;
   }
 
@@ -514,6 +739,13 @@ function render(entries, loadError = null) {
       </div>
     `;
     DOM.list.appendChild(emptyCard);
+    if (summaryState.openedRange != null) {
+  renderSummary(entries, summaryState.openedRange);
+} else if (DOM.summaryPanel) {
+  DOM.summaryPanel.innerHTML = "";
+  DOM.summaryPanel.hidden = true;
+}
+updateSummaryToggleUI();
     return;
   }
 
@@ -594,8 +826,14 @@ function render(entries, loadError = null) {
     entries.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / entries.length
   );
 
-  DOM.stats.textContent = `Средний сон: ${avgSleep}/10 • ${formatDuration(avgDuration)} • Записей: ${entries.length}`;
+  if (summaryState.openedRange != null) {
+  renderSummary(entries, summaryState.openedRange);
+} else if (DOM.summaryPanel) {
+  DOM.summaryPanel.innerHTML = "";
+  DOM.summaryPanel.hidden = true;
 }
+
+updateSummaryToggleUI();
 
 /* =========================
    SWIPE DELETE
@@ -690,10 +928,6 @@ function setupNavigation() {
 ========================= */
 
 async function init() {
-  if (DOM.stats) {
-    DOM.stats.textContent = "Грузим записи сна...";
-  }
-
   const result = await fetchSleep();
   render(result.data, result.error);
 }
@@ -701,4 +935,5 @@ async function init() {
 setupNavigation();
 setupSleepModal();
 setupConfirm();
+setupSummaryToggle();
 init();
