@@ -648,7 +648,8 @@ button {
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 12px;
 
   border-radius: 22px;
 
@@ -739,6 +740,7 @@ button {
   width: 68px;
   height: 56px;
   flex: 0 0 68px;
+  margin-right: auto;
   pointer-events: none;
 }
 
@@ -747,6 +749,7 @@ button {
     width: 64px;
     height: 50px;
     flex-basis: 64px;
+    margin-right: auto;
   }
 }
 
