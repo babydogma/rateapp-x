@@ -467,6 +467,21 @@
     .sleep-metric-chip strong {
       font-size: 14px;
     }
+    
+    .sleep-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 0 0 calc(120px + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 420px) {
+  .sleep-list {
+    margin-top: 16px;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom));
+  }
+}
 
 </style>
 </head>
@@ -607,7 +622,7 @@
     </section>
   </section>
 
-  <section class="layout-grid" id="sleepList"></section>
+  <section class="sleep-list" id="sleepList"></section>
 </main>
 
 <nav class="bottom-nav" role="navigation" aria-label="Навигация">
