@@ -32,7 +32,9 @@ const DOM = {
 };
 
 const modalState = {
-  onConfirm: null
+  onConfirm: null,
+  mode: "create",
+  editingId: null
 };
 
 /* =========================
@@ -63,7 +65,17 @@ async function deleteSleepEntry(id) {
     console.error("deleteSleepEntry error:", error);
     throw error;
   }
-}
+  
+  async function updateSleepEntry(id, payload) {
+  const { error } = await supabaseClient
+    .from("sleep_entries")
+    .update(payload)
+    .eq("id", id);
+
+  if (error) {
+    console.error("updateSleepEntry error:", error);
+    throw error;
+  }
 
 /* =========================
    UTILS
@@ -297,10 +309,31 @@ function resetSleepForm() {
   syncSleepSliderUI();
 }
 
-function openSleepModal() {
+function openSleepModal(entry = null) {
   if (!DOM.modal) return;
 
-  resetSleepForm();
+  if (entry) {
+    modalState.mode = "edit";
+    modalState.editingId = entry.id;
+
+    if (DOM.dateInput) DOM.dateInput.value = String(entry.sleep_date || "");
+    if (DOM.bedInput) DOM.bedInput.value = String(entry.bed_time || "");
+    if (DOM.wakeInput) DOM.wakeInput.value = String(entry.wake_time || "");
+    if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
+    if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = String(entry.dream_type || "neutral");
+    if (DOM.moodRatingInput) DOM.moodRatingInput.value = String(clampRating(entry.mood_rating));
+    if (DOM.noteInput) DOM.noteInput.value = String(entry.note || "");
+
+    if (DOM.modalSave) DOM.modalSave.textContent = "Сохранить";
+  } else {
+    modalState.mode = "create";
+    modalState.editingId = null;
+    resetSleepForm();
+
+    if (DOM.modalSave) DOM.modalSave.textContent = "Сохранить";
+  }
+
+  syncSleepSliderUI();
   DOM.modal.classList.add("active");
 
   requestAnimationFrame(() => {
@@ -310,6 +343,8 @@ function openSleepModal() {
 
 function closeSleepModal() {
   DOM.modal?.classList.remove("active");
+  modalState.mode = "create";
+  modalState.editingId = null;
 }
 
 async function saveSleepEntry() {
@@ -342,33 +377,42 @@ async function saveSleepEntry() {
   const duration = calcDuration(bed, wake);
   const sleepRating = getAutoSleepRating(duration, wakeCount, dreamType);
 
+  const payload = {
+    sleep_date: date,
+    bed_time: bed,
+    wake_time: wake,
+    duration_minutes: duration,
+    sleep_rating: sleepRating,
+    mood_rating: moodRating,
+    wake_count: wakeCount,
+    dream_type: dreamType,
+    note
+  };
+
   if (DOM.modalSave) {
     DOM.modalSave.disabled = true;
   }
 
   try {
-    const { error } = await supabaseClient
-      .from("sleep_entries")
-      .insert({
-        sleep_date: date,
-        bed_time: bed,
-        wake_time: wake,
-        duration_minutes: duration,
-        sleep_rating: sleepRating,
-        mood_rating: moodRating,
-        wake_count: wakeCount,
-        dream_type: dreamType,
-        note
-      });
+    if (modalState.mode === "edit" && modalState.editingId) {
+      await updateSleepEntry(modalState.editingId, payload);
+    } else {
+      const { error } = await supabaseClient
+        .from("sleep_entries")
+        .insert(payload);
 
-    if (error) {
-      console.error("insertSleep error:", error);
-      alert(`Не удалось добавить запись: ${error.message}`);
-      return;
+      if (error) {
+        console.error("insertSleep error:", error);
+        alert(`Не удалось добавить запись: ${error.message}`);
+        return;
+      }
     }
 
     closeSleepModal();
     await init();
+  } catch (error) {
+    console.error(error);
+    alert(`Не удалось сохранить запись: ${error.message}`);
   } finally {
     if (DOM.modalSave) {
       DOM.modalSave.disabled = false;
@@ -491,43 +535,50 @@ function render(entries, loadError = null) {
     const dreamType = String(entry.dream_type || "neutral");
     const safeNote = String(entry.note || "").trim();
     const status = getSleepStatus(entry.duration_minutes, sleepRating, moodRating);
+    const noteClass = safeNote ? "" : "is-empty";
 
     el.innerHTML = `
-      <div class="card-content sleep-card-content">
-        <div class="card-right-column sleep-card-column">
-          <div class="sleep-card-head">
-            <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
-            <div class="sleep-status-chip ${status.className}">${escapeHtml(status.label)}</div>
-          </div>
+  <div class="card-content sleep-card-content">
+    <div class="card-right-column sleep-card-column">
+      <div class="sleep-card-head">
+        <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
+        <div class="sleep-status-chip ${status.className}">${escapeHtml(status.label)}</div>
+      </div>
 
-          <div class="sleep-chip-row">
-            <div class="sleep-info-chip">🌙 ${escapeHtml(entry.bed_time || "--:--")}</div>
-            <div class="sleep-info-chip">☀️ ${escapeHtml(entry.wake_time || "--:--")}</div>
-            <div class="sleep-info-chip">⏱ ${escapeHtml(formatDuration(entry.duration_minutes))}</div>
-          </div>
+      <div class="sleep-chip-row">
+        <div class="sleep-info-chip">🌙 ${escapeHtml(entry.bed_time || "--:--")}</div>
+        <div class="sleep-info-chip">☀️ ${escapeHtml(entry.wake_time || "--:--")}</div>
+        <div class="sleep-info-chip">⏱ ${escapeHtml(formatDuration(entry.duration_minutes))}</div>
+      </div>
 
-          <div class="sleep-chip-row">
-            <div class="sleep-info-chip">Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</div>
-            <div class="sleep-info-chip">Снилось: ${escapeHtml(getDreamLabel(dreamType))}</div>
-          </div>
+      <div class="sleep-chip-row">
+        <div class="sleep-info-chip">Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</div>
+        <div class="sleep-info-chip">Снилось: ${escapeHtml(getDreamLabel(dreamType))}</div>
+      </div>
 
-          <div class="sleep-chip-row sleep-chip-row--metrics">
-            <div class="sleep-metric-chip">
-              <span>Сон</span>
-              <strong>${formatAutoSleepRating(sleepRating)}</strong>
-            </div>
-            <div class="sleep-metric-chip">
-              <span>Настроение</span>
-              <strong>${moodRating}/10</strong>
-            </div>
-          </div>
-
-          <div class="sleep-note-block ${safeNote ? "" : "is-empty"}">
-            ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
-          </div>
+      <div class="sleep-chip-row sleep-chip-row--metrics">
+        <div class="sleep-metric-chip">
+          <span>Сон</span>
+          <strong>${formatAutoSleepRating(sleepRating)}</strong>
+        </div>
+        <div class="sleep-metric-chip">
+          <span>Настроение</span>
+          <strong>${moodRating}/10</strong>
         </div>
       </div>
-    `;
+
+      <div class="sleep-note-block ${noteClass}" data-role="sleep-note-edit">
+        ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
+      </div>
+    </div>
+  </div>
+`;
+
+const noteBlock = el.querySelector('[data-role="sleep-note-edit"]');
+noteBlock?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  openSleepModal(entry);
+});
 
     enableSleepSwipeDelete(wrapper, el, entry);
 
