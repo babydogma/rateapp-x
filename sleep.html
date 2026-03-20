@@ -469,41 +469,13 @@
     }
   }
   
-  .bottom-nav {
-  display: grid !important;
-  grid-template-columns: 56px 1fr 56px 56px !important;
-  align-items: center !important;
-  justify-content: stretch !important;
+  .bottom-nav .nav-emoji[data-page="sleep"] {
+  transform: translateX(-10px);
 }
 
-.nav-center-slot {
-  width: auto !important;
-  flex: none !important;
+.bottom-nav .nav-emoji[data-page="sleep"]:active {
+  transform: translateX(-10px) scale(0.96);
 }
-
-.bottom-nav .nav-emoji[data-page="home"] {
-  grid-column: 1;
-  justify-self: start;
-}
-
-.bottom-nav .nav-center-slot {
-  grid-column: 2;
-}
-
-.bottom-nav .nav-emoji[data-page="sleep"] {
-  grid-column: 3;
-  justify-self: end;
-}
-
-.bottom-nav .nav-emoji[data-page="categories"] {
-  grid-column: 4;
-  justify-self: end;
-}
-
-@media (max-width: 420px) {
-  .bottom-nav {
-    grid-template-columns: 50px 1fr 50px 50px !important;
-  }
 }
 
 </style>
