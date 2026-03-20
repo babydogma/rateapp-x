@@ -662,6 +662,185 @@
   }
 }
 
+.sleep-summary-switcher {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.sleep-summary-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
+  color: #e7e3dc;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  transition:
+    transform 0.16s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.sleep-summary-toggle:active {
+  transform: scale(0.98);
+}
+
+.sleep-summary-toggle.is-active {
+  border-color: rgba(200, 169, 90, 0.24);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.22),
+    0 0 14px rgba(200, 169, 90, 0.08);
+}
+
+.sleep-summary-toggle__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.sleep-summary-toggle__hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #9ca6b2;
+}
+
+.sleep-summary-panel {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg, rgba(18, 22, 27, 0.96), rgba(11, 14, 18, 0.98));
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.sleep-summary-panel[hidden] {
+  display: none !important;
+}
+
+.sleep-summary-panel__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 12px;
+}
+
+.sleep-summary-strip {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.sleep-summary-strip--7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.sleep-summary-strip--30 {
+  grid-template-columns: repeat(15, 1fr);
+}
+
+.sleep-summary-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.sleep-summary-day__label {
+  font-size: 11px;
+  color: #94a0ad;
+}
+
+.sleep-summary-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.sleep-summary-dot.is-bad {
+  background: rgba(166, 63, 63, 0.95);
+}
+
+.sleep-summary-dot.is-mid {
+  background: rgba(200, 169, 90, 0.95);
+}
+
+.sleep-summary-dot.is-good {
+  background: rgba(85, 140, 106, 0.95);
+}
+
+.sleep-summary-dot.is-great {
+  background: rgba(116, 162, 96, 0.98);
+}
+
+.sleep-summary-dot.is-oversleep {
+  background: rgba(124, 104, 168, 0.95);
+}
+
+.sleep-summary-metrics {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sleep-summary-line {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #d8dde4;
+}
+
+.sleep-summary-line strong {
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+.sleep-summary-insight {
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  color: #b8c1cc;
+}
+
+@media (max-width: 420px) {
+  .sleep-summary-switcher {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .sleep-summary-toggle {
+    padding: 11px 12px;
+    border-radius: 14px;
+  }
+
+  .sleep-summary-panel {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .sleep-summary-line,
+  .sleep-summary-insight {
+    font-size: 12px;
+  }
+
+  .sleep-summary-dot {
+    width: 11px;
+    height: 11px;
+  }
+}
+
 </style>
 </head>
 
