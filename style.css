@@ -336,7 +336,7 @@ button {
 .card__image {
   width: 140px;
   height: 140px;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   border-radius: 12px;
   flex-shrink: 0;
@@ -348,6 +348,7 @@ button {
     0 8px 20px rgba(0, 0, 0, 0.45);
   display: block;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .card-right-column {
@@ -832,8 +833,10 @@ button {
 .image-modal img {
   max-width: 90%;
   max-height: 85%;
-  border-radius: var(--radius-lg);
+  border-radius: 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  object-fit: cover;
+  display: block;
 }
 
 /* =========================================================
