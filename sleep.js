@@ -275,14 +275,20 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
    EFFICIENCY
 ========================= */
 
-function getSleepEfficiency(durationMinutes, wakeCountValue, dreamTypeValue, fallAsleepSpeedValue) {
+    function getSleepEfficiency(
+  durationMinutes,
+  wakeCountValue,
+  dreamTypeValue,
+  fallAsleepSpeedValue,
+  energyAfterSleep
+) {
   const hours = (Number(durationMinutes) || 0) / 60;
   let score = 100;
 
   if (hours < 5) score -= 35;
   else if (hours < 6) score -= 20;
   else if (hours < 7) score -= 10;
-  else if (hours > 8.5) score -= 8;
+  else if (hours > 8.5) score -= 4;
 
   const wakeValue = String(wakeCountValue || "0");
   if (wakeValue === "1") score -= 5;
@@ -298,6 +304,12 @@ function getSleepEfficiency(durationMinutes, wakeCountValue, dreamTypeValue, fal
   const dreamValue = String(dreamTypeValue || "neutral");
   if (dreamValue === "good") score += 3;
   else if (dreamValue === "nightmare") score -= 8;
+
+  const energy = Number(energyAfterSleep) || 0;
+  if (energy <= 3) score -= 8;
+  else if (energy <= 5) score -= 4;
+  else if (energy <= 8) score += 0;
+  else score += 2;
 
   return Math.max(35, Math.min(99, Math.round(score)));
 }
@@ -703,11 +715,12 @@ async function saveSleepEntry() {
   );
 
   const sleepEfficiency = getSleepEfficiency(
-    sleepDurationMinutes,
-    wakeCount,
-    dreamType,
-    fallAsleepSpeed
-  );
+  sleepDurationMinutes,
+  wakeCount,
+  dreamType,
+  fallAsleepSpeed,
+  energyAfterSleep
+);
 
   const payload = {
     sleep_date: date,
