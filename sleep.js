@@ -19,8 +19,8 @@ const DOM = {
   dreamTypeInput: document.getElementById("dreamTypeInput"),
   fallAsleepSpeedInput: document.getElementById("fallAsleepSpeedInput"),
 
-  moodRatingInput: document.getElementById("moodRatingInput"),
-  moodRatingValue: document.getElementById("moodRatingValue"),
+  energyAfterSleepInput: document.getElementById("energyAfterSleepInput"),
+  energyAfterSleepValue: document.getElementById("energyAfterSleepValue"),
 
   noteInput: document.getElementById("sleepNoteInput"),
 
@@ -116,6 +116,12 @@ function clampHalf(value) {
   return Math.max(0, Math.min(10, rounded));
 }
 
+function clampPercent(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return 0;
+  return Math.max(0, Math.min(100, Math.round(num)));
+}
+
 function calcDuration(bed, wake) {
   const [bh, bm] = bed.split(":").map(Number);
   const [wh, wm] = wake.split(":").map(Number);
@@ -129,7 +135,7 @@ function calcDuration(bed, wake) {
 }
 
 function formatDuration(minutes) {
-  const safe = Number(minutes) || 0;
+  const safe = Math.max(0, Number(minutes) || 0);
   const h = Math.floor(safe / 60);
   const m = safe % 60;
   return `${h}ч ${m}м`;
@@ -148,6 +154,15 @@ function formatRatingValue(value) {
 function formatAutoSleepRating(value) {
   const safe = clampHalf(value);
   return Number.isInteger(safe) ? `${safe}/10` : `${safe.toFixed(1)}/10`;
+}
+
+function formatPercent(value) {
+  return `${clampPercent(value)}%`;
+}
+
+function formatApproxMinutes(value) {
+  const safe = Math.max(0, Math.round(Number(value) || 0));
+  return `~${safe} мин`;
 }
 
 function setSliderProgress(slider) {
@@ -170,6 +185,32 @@ function getTodayDateString() {
 }
 
 /* =========================
+   FALL ASLEEP / CALCULATIONS
+========================= */
+
+function getFallAsleepMinutes(fallAsleepSpeedValue) {
+  const value = String(fallAsleepSpeedValue || "medium");
+
+  if (value === "fast") return 10;
+  if (value === "slow") return 40;
+  if (value === "very_slow") return 70;
+  return 20;
+}
+
+function getSleepDurationMinutes(baseDurationMinutes, sleepLatencyMinutes) {
+  const base = Math.max(0, Number(baseDurationMinutes) || 0);
+  const latency = Math.max(0, Number(sleepLatencyMinutes) || 0);
+  return Math.max(base - latency, 0);
+}
+
+function getSleepEfficiency(sleepDurationMinutes, baseDurationMinutes) {
+  const base = Math.max(0, Number(baseDurationMinutes) || 0);
+  const sleep = Math.max(0, Number(sleepDurationMinutes) || 0);
+  if (!base) return 0;
+  return clampPercent((sleep / base) * 100);
+}
+
+/* =========================
    AUTO SLEEP RATING
 ========================= */
 
@@ -177,9 +218,9 @@ function getBaseSleepRating(durationMinutes) {
   const hours = (Number(durationMinutes) || 0) / 60;
 
   if (hours < 5) return 2;
-  if (hours <= 6) return 4;
-  if (hours <= 7) return 6;
-  if (hours <= 8) return 8;
+  if (hours < 6) return 4;
+  if (hours < 7) return 6;
+  if (hours < 8) return 8;
   if (hours <= 9) return 9;
   return 7;
 }
@@ -224,62 +265,41 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
    STATUS / LABELS
 ========================= */
 
-function getMoodEmoji(moodRating) {
-  const mood = clampRating(moodRating);
-
-  if (mood <= 2) return "😢";
-  if (mood <= 5) return "🙂";
-  if (mood <= 8) return "😌";
-  return "🥹";
-}
-
-function getSleepStatus(durationMinutes, sleepRating, moodRating) {
+function getSleepStatus(durationMinutes, sleepRating) {
   const hours = (Number(durationMinutes) || 0) / 60;
   const rating = clampHalf(sleepRating);
-  const moodEmoji = getMoodEmoji(moodRating);
 
-  let level = 0;
-
-  if (hours < 5) {
-    level = 0;
-  } else if (hours <= 6.5) {
-    level = 1;
-  } else if (hours <= 7.5) {
-    level = 2;
-  } else if (hours <= 8.5) {
-    level = 3;
-  } else {
-    level = 4;
+  if (hours > 8.5 && rating >= 6) {
+    return {
+      label: "Пересып",
+      className: "is-oversleep"
+    };
   }
 
   if (rating < 4) {
-    level = Math.min(level, 0);
-  } else if (rating < 6) {
-    level = Math.min(level, 1);
-  } else if (rating < 8) {
-    level = Math.min(level, 2);
-  } else if (rating < 9) {
-    level = Math.min(level, 3);
+    return {
+      label: "Плохой сон",
+      className: "is-bad"
+    };
   }
 
-  if (hours > 8.5) {
-    level = 4;
+  if (rating < 6) {
+    return {
+      label: "Нормально",
+      className: "is-mid"
+    };
   }
 
-  const statuses = [
-    { label: "Плохой сон", className: "is-bad" },
-    { label: "Нормально", className: "is-mid" },
-    { label: "Хороший сон", className: "is-good" },
-    { label: "Отличный сон", className: "is-great" },
-    { label: "Пересып", className: "is-oversleep" }
-  ];
-
-  const base = statuses[level];
+  if (rating < 8) {
+    return {
+      label: "Хороший сон",
+      className: "is-good"
+    };
+  }
 
   return {
-    label: `${base.label} ${moodEmoji}`,
-    className: base.className,
-    moodEmoji
+    label: "Отличный сон",
+    className: "is-great"
   };
 }
 
@@ -310,8 +330,8 @@ function getFallAsleepLabel(fallAsleepSpeedValue) {
    SUMMARY
 ========================= */
 
-function getStatusMeta(durationMinutes, sleepRating, moodRating) {
-  return getSleepStatus(durationMinutes, sleepRating, moodRating);
+function getStatusMeta(durationMinutes, sleepRating) {
+  return getSleepStatus(durationMinutes, sleepRating);
 }
 
 function getRangeEntries(entries, days) {
@@ -356,30 +376,33 @@ function getWeekdayShort(dateStr) {
   return date.toLocaleDateString("ru-RU", { weekday: "short" });
 }
 
-function buildSummaryInsight(entries) {
+function buildSummaryInsight(entries, stats) {
   if (!entries.length) return "Нет записей за выбранный период";
 
-  const wakeHeavyCount = entries.filter((e) => ["3", "4plus"].includes(String(e.wake_count || "0"))).length;
-  const nightmareCount = entries.filter((e) => String(e.dream_type || "neutral") === "nightmare").length;
-  const avgDuration = entries.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / entries.length;
+  const wakeHeavyCount = entries.filter((e) => ["2", "3", "4plus"].includes(String(e.wake_count || "0"))).length;
+  const wakeHeavyShare = wakeHeavyCount / entries.length;
 
-  if (wakeHeavyCount >= Math.max(2, Math.ceil(entries.length / 3))) {
-    return "Часто мешают пробуждения";
-  }
-
-  if (nightmareCount >= Math.max(2, Math.ceil(entries.length / 4))) {
-    return "Кошмары заметно режут качество сна";
-  }
-
-  if (avgDuration < 6 * 60) {
+  if (stats.avgSleepDurationMinutes < 6 * 60) {
     return "Основная проблема — недосып";
   }
 
-  if (avgDuration > 8.5 * 60) {
-    return "Есть склонность к пересыпу";
+  if (stats.avgSleepLatencyMinutes > 30) {
+    return "Основная проблема — долгое засыпание";
   }
 
-  return "В целом сон выглядит довольно стабильным";
+  if (stats.avgSleepEfficiency < 85) {
+    return "Сон неэффективный: слишком много времени уходит не на сам сон";
+  }
+
+  if (wakeHeavyShare >= 0.3) {
+    return "Сон часто рвётся из-за пробуждений";
+  }
+
+  if (stats.avgSleepScore >= 6 && stats.avgEnergy <= 4.5) {
+    return "Сон выглядит нормальным, но восстановление по ощущениям слабое";
+  }
+
+  return "Сон в целом выглядит довольно стабильным";
 }
 
 function buildSummaryData(entries, days) {
@@ -393,13 +416,27 @@ function buildSummaryData(entries, days) {
     oversleep: 0
   };
 
-  let fallAsleepScoreSum = 0;
+  if (!filtered.length) {
+    return {
+      entries: [],
+      count: 0,
+      counts,
+      avgSleepScore: "0.0",
+      avgEnergy: "0.0",
+      avgDuration: "0ч 0м",
+      avgEfficiency: "0%",
+      avgLatency: "~0 мин",
+      avgSleepDurationMinutes: 0,
+      avgSleepLatencyMinutes: 0,
+      avgSleepEfficiency: 0,
+      insight: "Нет записей за выбранный период"
+    };
+  }
 
   filtered.forEach((entry) => {
     const status = getStatusMeta(
-      entry.duration_minutes,
-      clampHalf(entry.sleep_rating),
-      clampRating(entry.mood_rating)
+      Number(entry.sleep_duration_minutes) || 0,
+      clampHalf(entry.sleep_score)
     );
 
     if (status.className === "is-bad") counts.bad += 1;
@@ -407,56 +444,49 @@ function buildSummaryData(entries, days) {
     if (status.className === "is-good") counts.good += 1;
     if (status.className === "is-great") counts.great += 1;
     if (status.className === "is-oversleep") counts.oversleep += 1;
-
-    const fallAsleepValue = String(entry.fall_asleep_speed || "medium");
-    if (fallAsleepValue === "fast") fallAsleepScoreSum += 1;
-    else if (fallAsleepValue === "medium") fallAsleepScoreSum += 2;
-    else if (fallAsleepValue === "slow") fallAsleepScoreSum += 3;
-    else fallAsleepScoreSum += 4;
   });
 
-  if (!filtered.length) {
-    return {
-      entries: [],
-      avgSleep: "0.0",
-      avgMood: "0.0",
-      avgDuration: "0ч 0м",
-      count: 0,
-      counts,
-      avgFallAsleepLabel: "средне",
-      insight: "Нет записей за выбранный период"
-    };
-  }
+  const avgSleepScoreRaw =
+    filtered.reduce((sum, e) => sum + clampHalf(e.sleep_score), 0) / filtered.length;
 
-  const avgSleep = (
-    filtered.reduce((sum, e) => sum + clampHalf(e.sleep_rating), 0) / filtered.length
-  ).toFixed(1);
+  const avgEnergyRaw =
+    filtered.reduce((sum, e) => sum + clampRating(e.energy_after_sleep), 0) / filtered.length;
 
-  const avgMood = (
-    filtered.reduce((sum, e) => sum + clampRating(e.mood_rating), 0) / filtered.length
-  ).toFixed(1);
-
-  const avgDurationMinutes = Math.round(
-    filtered.reduce((sum, e) => sum + (Number(e.duration_minutes) || 0), 0) / filtered.length
+  const avgSleepDurationMinutes = Math.round(
+    filtered.reduce((sum, e) => sum + (Number(e.sleep_duration_minutes) || 0), 0) / filtered.length
   );
 
-  const avgFallAsleepScore = fallAsleepScoreSum / filtered.length;
+  const avgSleepLatencyMinutes = Math.round(
+    filtered.reduce((sum, e) => sum + (Number(e.sleep_latency_minutes) || 0), 0) / filtered.length
+  );
 
-  let avgFallAsleepLabel = "средне";
-  if (avgFallAsleepScore <= 1.5) avgFallAsleepLabel = "быстро";
-  else if (avgFallAsleepScore <= 2.5) avgFallAsleepLabel = "средне";
-  else if (avgFallAsleepScore <= 3.2) avgFallAsleepLabel = "долго";
-  else avgFallAsleepLabel = "очень долго";
+  const avgSleepEfficiency = Math.round(
+    filtered.reduce((sum, e) => sum + clampPercent(e.sleep_efficiency), 0) / filtered.length
+  );
+
+  const stats = {
+    avgSleepScore: avgSleepScoreRaw.toFixed(1),
+    avgEnergy: avgEnergyRaw.toFixed(1),
+    avgDuration: formatDuration(avgSleepDurationMinutes),
+    avgEfficiency: formatPercent(avgSleepEfficiency),
+    avgLatency: formatApproxMinutes(avgSleepLatencyMinutes),
+    avgSleepDurationMinutes,
+    avgSleepLatencyMinutes,
+    avgSleepEfficiency
+  };
 
   return {
     entries: filtered,
-    avgSleep,
-    avgMood,
-    avgDuration: formatDuration(avgDurationMinutes),
     count: filtered.length,
     counts,
-    avgFallAsleepLabel,
-    insight: buildSummaryInsight(filtered)
+    ...stats,
+    insight: buildSummaryInsight(filtered, {
+      avgSleepScore: avgSleepScoreRaw,
+      avgEnergy: avgEnergyRaw,
+      avgSleepDurationMinutes,
+      avgSleepLatencyMinutes,
+      avgSleepEfficiency
+    })
   };
 }
 
@@ -473,9 +503,8 @@ function renderSummary(entries, range) {
       <div class="sleep-summary-strip sleep-summary-strip--7">
         ${data.entries.map((entry) => {
           const status = getStatusMeta(
-            entry.duration_minutes,
-            clampHalf(entry.sleep_rating),
-            clampRating(entry.mood_rating)
+            Number(entry.sleep_duration_minutes) || 0,
+            clampHalf(entry.sleep_score)
           );
 
           return `
@@ -492,9 +521,8 @@ function renderSummary(entries, range) {
       <div class="sleep-summary-strip sleep-summary-strip--30">
         ${data.entries.map((entry) => {
           const status = getStatusMeta(
-            entry.duration_minutes,
-            clampHalf(entry.sleep_rating),
-            clampRating(entry.mood_rating)
+            Number(entry.sleep_duration_minutes) || 0,
+            clampHalf(entry.sleep_score)
           );
           return `<div class="sleep-summary-dot ${status.className}"></div>`;
         }).join("")}
@@ -507,10 +535,10 @@ function renderSummary(entries, range) {
     ${stripHtml}
     <div class="sleep-summary-metrics">
       <div class="sleep-summary-line">
-        <strong>Сон ${data.avgSleep}/10</strong> • ${data.avgDuration} • ${data.count} записей
+        <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
       </div>
       <div class="sleep-summary-line">
-        Настр. ${data.avgMood}/10 • Засыпание: ${escapeHtml(data.avgFallAsleepLabel)} • Плохой ${data.counts.bad}
+        Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Плохих ночей: ${data.counts.bad}
       </div>
     </div>
     <div class="sleep-summary-insight">${escapeHtml(data.insight)}</div>
@@ -563,9 +591,9 @@ function setupSummaryToggle() {
 ========================= */
 
 function syncSleepSliderUI() {
-  if (DOM.moodRatingInput && DOM.moodRatingValue) {
-    DOM.moodRatingValue.textContent = formatRatingValue(DOM.moodRatingInput.value);
-    setSliderProgress(DOM.moodRatingInput);
+  if (DOM.energyAfterSleepInput && DOM.energyAfterSleepValue) {
+    DOM.energyAfterSleepValue.textContent = formatRatingValue(DOM.energyAfterSleepInput.value);
+    setSliderProgress(DOM.energyAfterSleepInput);
   }
 }
 
@@ -576,7 +604,7 @@ function resetSleepForm() {
   if (DOM.wakeCountInput) DOM.wakeCountInput.value = "0";
   if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = "neutral";
   if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = "medium";
-  if (DOM.moodRatingInput) DOM.moodRatingInput.value = "0";
+  if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = "0";
   if (DOM.noteInput) DOM.noteInput.value = "";
 
   syncSleepSliderUI();
@@ -595,7 +623,7 @@ function openSleepModal(entry = null) {
     if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
     if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = String(entry.dream_type || "neutral");
     if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = String(entry.fall_asleep_speed || "medium");
-    if (DOM.moodRatingInput) DOM.moodRatingInput.value = String(clampRating(entry.mood_rating));
+    if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = String(clampRating(entry.energy_after_sleep));
     if (DOM.noteInput) DOM.noteInput.value = String(entry.note || "");
   } else {
     modalState.mode = "create";
@@ -628,7 +656,7 @@ async function saveSleepEntry() {
   const wakeCount = String(DOM.wakeCountInput?.value || "0").trim();
   const dreamType = String(DOM.dreamTypeInput?.value || "neutral").trim();
   const fallAsleepSpeed = String(DOM.fallAsleepSpeedInput?.value || "medium").trim();
-  const moodRating = clampRating(DOM.moodRatingInput?.value);
+  const energyAfterSleep = clampRating(DOM.energyAfterSleepInput?.value);
   const note = String(DOM.noteInput?.value || "").trim();
 
   if (!date) {
@@ -649,19 +677,24 @@ async function saveSleepEntry() {
     return;
   }
 
-  const duration = calcDuration(bed, wake);
-  const sleepRating = getAutoSleepRating(duration, wakeCount, dreamType, fallAsleepSpeed);
+  const baseDuration = calcDuration(bed, wake);
+  const sleepLatencyMinutes = getFallAsleepMinutes(fallAsleepSpeed);
+  const sleepDurationMinutes = getSleepDurationMinutes(baseDuration, sleepLatencyMinutes);
+  const sleepEfficiency = getSleepEfficiency(sleepDurationMinutes, baseDuration);
+  const sleepScore = getAutoSleepRating(sleepDurationMinutes, wakeCount, dreamType, fallAsleepSpeed);
 
   const payload = {
     sleep_date: date,
     bed_time: bed,
     wake_time: wake,
-    duration_minutes: duration,
-    sleep_rating: sleepRating,
-    mood_rating: moodRating,
     wake_count: wakeCount,
     dream_type: dreamType,
     fall_asleep_speed: fallAsleepSpeed,
+    sleep_latency_minutes: sleepLatencyMinutes,
+    sleep_duration_minutes: sleepDurationMinutes,
+    sleep_efficiency: sleepEfficiency,
+    sleep_score: sleepScore,
+    energy_after_sleep: energyAfterSleep,
     note
   };
 
@@ -709,7 +742,7 @@ function setupSleepModal() {
     }
   });
 
-  DOM.moodRatingInput?.addEventListener("input", syncSleepSliderUI);
+  DOM.energyAfterSleepInput?.addEventListener("input", syncSleepSliderUI);
 
   resetSleepForm();
 }
@@ -818,13 +851,17 @@ function render(entries, loadError = null) {
     const el = document.createElement("div");
     el.className = "card sleep-entry-card";
 
-    const sleepRating = clampHalf(entry.sleep_rating);
-    const moodRating = clampRating(entry.mood_rating);
+    const sleepScore = clampHalf(entry.sleep_score);
+    const energyAfterSleep = clampRating(entry.energy_after_sleep);
+    const sleepDurationMinutes = Number(entry.sleep_duration_minutes) || 0;
+    const sleepEfficiency = clampPercent(entry.sleep_efficiency);
+    const sleepLatencyMinutes = Number(entry.sleep_latency_minutes) || getFallAsleepMinutes(entry.fall_asleep_speed);
+
     const wakeCount = String(entry.wake_count || "0");
     const dreamType = String(entry.dream_type || "neutral");
     const fallAsleepSpeed = String(entry.fall_asleep_speed || "medium");
     const safeNote = String(entry.note || "").trim();
-    const status = getSleepStatus(entry.duration_minutes, sleepRating, moodRating);
+    const status = getSleepStatus(sleepDurationMinutes, sleepScore);
     const noteClass = safeNote ? "" : "is-empty";
 
     el.innerHTML = `
@@ -838,23 +875,30 @@ function render(entries, loadError = null) {
           <div class="sleep-chip-row">
             <div class="sleep-info-chip">🌙 ${escapeHtml(entry.bed_time || "--:--")}</div>
             <div class="sleep-info-chip">☀️ ${escapeHtml(entry.wake_time || "--:--")}</div>
-            <div class="sleep-info-chip">⏱ ${escapeHtml(formatDuration(entry.duration_minutes))}</div>
+            <div class="sleep-info-chip">😴 ${escapeHtml(formatDuration(sleepDurationMinutes))}</div>
           </div>
 
           <div class="sleep-chip-row">
             <div class="sleep-info-chip">Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</div>
             <div class="sleep-info-chip">Снилось: ${escapeHtml(getDreamLabel(dreamType))}</div>
-            <div class="sleep-info-chip">Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))}</div>
+            <div class="sleep-info-chip">Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})</div>
           </div>
 
           <div class="sleep-chip-row sleep-chip-row--metrics">
             <div class="sleep-metric-chip">
               <span>Сон</span>
-              <strong>${formatAutoSleepRating(sleepRating)}</strong>
+              <strong>${formatAutoSleepRating(sleepScore)}</strong>
             </div>
             <div class="sleep-metric-chip">
-              <span>Настроение</span>
-              <strong>${moodRating}/10</strong>
+              <span>Энергия</span>
+              <strong>${energyAfterSleep}/10</strong>
+            </div>
+          </div>
+
+          <div class="sleep-chip-row sleep-chip-row--metrics">
+            <div class="sleep-metric-chip">
+              <span>Эффективность</span>
+              <strong>${formatPercent(sleepEfficiency)}</strong>
             </div>
           </div>
 
@@ -865,12 +909,7 @@ function render(entries, loadError = null) {
       </div>
     `;
 
-    const noteBlock = el.querySelector('[data-role="sleep-note-edit"]');
-    noteBlock?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openSleepModal(entry);
-    });
-
+    el.addEventListener("click", () => openSleepModal(entry));
     enableSleepSwipeDelete(wrapper, el, entry);
 
     wrapper.appendChild(deleteBg);
