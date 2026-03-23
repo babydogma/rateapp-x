@@ -631,6 +631,30 @@ function resetRequiredItemForm() {
   if (DOM.requiredPaymentItemDueDayInput) DOM.requiredPaymentItemDueDayInput.value = "";
 }
 
+function setGroupModalFieldsVisibility(template) {
+  const amountLabel = document.querySelector('label[for="requiredPaymentAmountInput"]');
+  const frequencyLabel = document.querySelector('label[for="requiredPaymentFrequencyInput"]');
+  const endDateLabel = document.querySelector('label[for="requiredPaymentEndDateInput"]');
+  const activeToggle = DOM.requiredPaymentActiveInput?.closest(".finance-switch");
+
+  const isGroup = template.kind === "group";
+
+  if (amountLabel) amountLabel.style.display = isGroup ? "none" : "";
+  if (DOM.requiredPaymentAmountInput) DOM.requiredPaymentAmountInput.style.display = isGroup ? "none" : "";
+
+  if (frequencyLabel) frequencyLabel.style.display = "";
+  if (DOM.requiredPaymentFrequencyInput) DOM.requiredPaymentFrequencyInput.style.display = "";
+
+  if (endDateLabel) endDateLabel.style.display = isGroup ? "none" : "";
+  if (DOM.requiredPaymentEndDateInput) DOM.requiredPaymentEndDateInput.style.display = isGroup ? "none" : "";
+
+  if (activeToggle) activeToggle.style.display = isGroup ? "none" : "";
+
+  if (DOM.requiredPaymentModalPay) {
+    DOM.requiredPaymentModalPay.style.display = isGroup ? "none" : "";
+  }
+}
+
 function setSingleFieldsVisible(visible) {
   if (DOM.requiredPaymentSingleFields) {
     DOM.requiredPaymentSingleFields.style.display = visible ? "" : "none";
@@ -777,6 +801,7 @@ function openRequiredTemplateModal(id) {
   const isPaid = isTemplatePaidForCurrentPeriod(template);
 
   state.editingRequiredTemplateId = template.id;
+  setGroupModalFieldsVisibility(template);
 
   if (DOM.requiredPaymentModalTitle) {
     DOM.requiredPaymentModalTitle.textContent = template.title;
