@@ -487,27 +487,34 @@ function updateFilterButtons() {
 
 function renderStats() {
   const monthEntries = getCurrentMonthEntries(state.entries);
+  const todayIso = getTodayISO();
 
-  const income = monthEntries
+  const monthIncome = monthEntries
     .filter((entry) => entry.type === "income")
     .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
 
-  const expense = monthEntries
+  const monthExpense = monthEntries
     .filter((entry) => entry.type === "expense")
     .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
 
-  const balance = income - expense;
+  const totalIncome = state.entries
+    .filter((entry) => entry.type === "income")
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
 
-  const now = new Date();
-  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const currentDay = now.getDate();
-  const daysLeft = Math.max(lastDayOfMonth - currentDay + 1, 1);
-  const daily = balance / daysLeft;
+  const totalExpense = state.entries
+    .filter((entry) => entry.type === "expense")
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
 
-  DOM.summaryIncome.textContent = formatMoney(income);
-  DOM.summaryExpense.textContent = formatMoney(expense);
-  DOM.summaryBalance.textContent = formatMoney(balance);
-  DOM.summaryDaily.textContent = formatMoney(daily);
+  const totalBalance = totalIncome - totalExpense;
+
+  const todayExpense = state.entries
+    .filter((entry) => entry.type === "expense" && entry.entry_date === todayIso)
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+
+  DOM.summaryIncome.textContent = formatMoney(monthIncome);
+  DOM.summaryExpense.textContent = formatMoney(monthExpense);
+  DOM.summaryBalance.textContent = formatMoney(totalBalance);
+  DOM.summaryDaily.textContent = formatMoney(todayExpense);
 
   const visibleEntries = getVisibleEntries();
   DOM.financeStats.textContent = `Операций: ${visibleEntries.length}`;
