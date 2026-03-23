@@ -191,45 +191,58 @@
         </div>
       </header>
 
-      <section class="stats" id="financeStats">
-        Загрузка финансов...
-      </section>
-            <section class="finance-required">
- <div class="finance-required__accordion" id="financeRequiredAccordion">
-    <button type="button" class="finance-required__summary" id="financeRequiredToggle">
-      <div>
-        <div class="finance-required__title">Обязательные платежи</div>
-        <div class="finance-required__hint">Нажми на карточку, чтобы изменить сумму</div>
-      </div>
-      <span class="finance-required__chevron">▾</span>
-    </button>
+            <section class="stats finance-stats-head" id="financeStats">
+        <div class="finance-stats-head__left">
+          <span id="financeStatsLabel">Загрузка финансов...</span>
+        </div>
 
-    <div class="finance-required__content" id="financeRequiredContent">
-      <div class="finance-required__list" id="financeRequiredList"></div>
-    </div>
-  </div>
-</section>
+        <div class="finance-month-filter-wrap">
+          <button id="financeMonthFilterBtn" class="finance-month-filter-btn" type="button">
+            Месяц
+          </button>
+          <div id="financeMonthFilterMenu" class="finance-month-filter-menu" hidden></div>
+        </div>
+      </section>
+
+      <section class="finance-required">
+        <div class="finance-required__accordion is-open" id="financeRequiredAccordion">
+          <button type="button" class="finance-required__summary" id="financeRequiredToggle">
+            <div>
+              <div class="finance-required__title">Обязательные платежи</div>
+              <div class="finance-required__hint">Нажми на карточку, чтобы изменить сумму</div>
+            </div>
+            <span class="finance-required__chevron">▾</span>
+          </button>
+
+          <div class="finance-required__content" id="financeRequiredContent">
+            <div class="finance-required__list" id="financeRequiredList"></div>
+          </div>
+        </div>
+      </section>
 
       <section class="finance-summary" id="financeSummary">
         <div class="finance-summary-card">
-          <span class="finance-summary-card__label">Доходы</span>
+          <span class="finance-summary-card__label">Доходы за месяц</span>
           <strong id="summaryIncome">0 ₽</strong>
         </div>
 
         <div class="finance-summary-card">
-          <span class="finance-summary-card__label">Расходы</span>
+          <span class="finance-summary-card__label">Расходы за месяц</span>
           <strong id="summaryExpense">0 ₽</strong>
         </div>
 
         <div class="finance-summary-card">
-          <span class="finance-summary-card__label">Остаток</span>
+          <span class="finance-summary-card__label">Общий остаток</span>
           <strong id="summaryBalance">0 ₽</strong>
         </div>
 
         <div class="finance-summary-card">
           <span class="finance-summary-card__label">За сегодня</span>
-<strong id="summaryDaily">0 ₽</strong>
+          <strong id="summaryDaily">0 ₽</strong>
+        </div>
       </section>
+
+      <section class="finance-category-summary" id="financeCategorySummary"></section>
 
       <section class="rating-filters finance-filters">
         <button id="financeFilterAll" class="rating-filter active" type="button">Все</button>
