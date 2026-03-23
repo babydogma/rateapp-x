@@ -245,12 +245,6 @@ function getRequiredMeta(template) {
     return `${base} • до ${formatMonthYear(template.end_date)}`;
   }
 
-  return base;
-}
-
-  return base;
-}
-
 function updateFilterButtons() {
   DOM.filterAll?.classList.toggle("active", state.filter === "all");
   DOM.filterExpense?.classList.toggle("active", state.filter === "expense");
