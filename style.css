@@ -1620,3 +1620,131 @@ button {
     padding: 0 14px;
   }
 }
+
+.finance-required {
+  padding: 8px 18px 6px;
+}
+
+.finance-required__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.finance-required__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.finance-required__hint {
+  font-size: 12px;
+  color: #97a2ae;
+}
+
+.finance-required__list {
+  display: grid;
+  gap: 12px;
+}
+
+.finance-required-card {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  transition:
+    transform 0.16s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.finance-required-card:hover {
+  border-color: rgba(200, 169, 90, 0.18);
+}
+
+.finance-required-card:active {
+  transform: scale(0.985);
+}
+
+.finance-required-card__left {
+  min-width: 0;
+  flex: 1;
+}
+
+.finance-required-card__right {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.finance-required-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.finance-required-card__meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #97a2ae;
+}
+
+.finance-required-card__amount {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+.finance-required-empty {
+  padding: 16px;
+  border-radius: 16px;
+  text-align: center;
+  color: #9ca6b2;
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.finance-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.finance-switch input {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 420px) {
+  .finance-required {
+    padding: 8px 14px 4px;
+  }
+
+  .finance-required-card {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .finance-required-card__title {
+    font-size: 15px;
+  }
+
+  .finance-required-card__amount {
+    font-size: 16px;
+  }
+}
