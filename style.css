@@ -1997,3 +1997,9 @@ button {
   display: flex;
   justify-content: flex-end;
 }
+
+.finance-pay-btn--danger {
+  background: linear-gradient(180deg, rgba(157, 59, 59, 0.96), rgba(120, 39, 39, 0.96));
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(157, 59, 59, 0.18);
+}
