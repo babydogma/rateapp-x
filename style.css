@@ -1862,3 +1862,20 @@ button {
     padding: 0 14px 14px;
   }
 }
+
+.finance-required-card.is-paid {
+  border-color: rgba(92, 150, 110, 0.24);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.18),
+    0 0 14px rgba(92, 150, 110, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.finance-required-card.is-paid .finance-required-card__amount {
+  color: #8fd4a3;
+}
+
+.finance-pay-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
