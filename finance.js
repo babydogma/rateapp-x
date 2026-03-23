@@ -1,0 +1,411 @@
+/* =========================================================
+   RATEAPP X — FINANCE
+========================================================= */
+
+const SUPABASE_URL = "https://qlogmylywwdbczxolidl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nVqkHQmgMKoA_F_ft7yfXQ_OWjYq7f4";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const state = {
+  entries: [],
+  filter: "all",
+  pendingDeleteId: null
+};
+
+const DOM = {
+  financeList: document.getElementById("financeList"),
+  financeStats: document.getElementById("financeStats"),
+
+  summaryIncome: document.getElementById("summaryIncome"),
+  summaryExpense: document.getElementById("summaryExpense"),
+  summaryBalance: document.getElementById("summaryBalance"),
+  summaryDaily: document.getElementById("summaryDaily"),
+
+  filterAll: document.getElementById("financeFilterAll"),
+  filterExpense: document.getElementById("financeFilterExpense"),
+  filterIncome: document.getElementById("financeFilterIncome"),
+
+  modal: document.getElementById("financeModal"),
+  modalCancel: document.getElementById("financeModalCancel"),
+  modalSave: document.getElementById("financeModalSave"),
+
+  confirmModal: document.getElementById("financeConfirmModal"),
+  confirmCancel: document.getElementById("financeConfirmCancel"),
+  confirmDelete: document.getElementById("financeConfirmDelete"),
+
+  typeInput: document.getElementById("financeTypeInput"),
+  amountInput: document.getElementById("financeAmountInput"),
+  categoryInput: document.getElementById("financeCategoryInput"),
+  dateInput: document.getElementById("financeDateInput"),
+  commentInput: document.getElementById("financeCommentInput"),
+
+  addFinanceBtn: document.getElementById("addFinanceBtn")
+};
+
+const API = {
+  async fetchEntries() {
+    const { data, error } = await supabaseClient
+      .from("finance_entries")
+      .select("*")
+      .order("entry_date", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("fetchEntries error:", error);
+      return [];
+    }
+
+    return data || [];
+  },
+
+  async insertEntry(entry) {
+    const { data, error } = await supabaseClient
+      .from("finance_entries")
+      .insert(entry)
+      .select();
+
+    if (error) {
+      console.error("insertEntry error:", error);
+      throw error;
+    }
+
+    return data?.[0] || null;
+  },
+
+  async deleteEntry(id) {
+    const { error } = await supabaseClient
+      .from("finance_entries")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("deleteEntry error:", error);
+      throw error;
+    }
+  }
+};
+
+function formatMoney(value = 0) {
+  return `${Number(value || 0).toLocaleString("ru-RU", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  })} ₽`;
+}
+
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2);
+  return `${day}.${month}.${year}`;
+}
+
+function getTodayISO() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentMonthEntries(entries) {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  return entries.filter((entry) => {
+    const date = new Date(entry.entry_date);
+    return date.getFullYear() === currentYear && date.getMonth() === currentMonth;
+  });
+}
+
+function getVisibleEntries() {
+  if (state.filter === "expense") {
+    return state.entries.filter((entry) => entry.type === "expense");
+  }
+
+  if (state.filter === "income") {
+    return state.entries.filter((entry) => entry.type === "income");
+  }
+
+  return [...state.entries];
+}
+
+function updateFilterButtons() {
+  DOM.filterAll?.classList.toggle("active", state.filter === "all");
+  DOM.filterExpense?.classList.toggle("active", state.filter === "expense");
+  DOM.filterIncome?.classList.toggle("active", state.filter === "income");
+}
+
+function renderStats() {
+  const monthEntries = getCurrentMonthEntries(state.entries);
+
+  const income = monthEntries
+    .filter((entry) => entry.type === "income")
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+
+  const expense = monthEntries
+    .filter((entry) => entry.type === "expense")
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+
+  const balance = income - expense;
+
+  const now = new Date();
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const currentDay = now.getDate();
+  const daysLeft = Math.max(lastDayOfMonth - currentDay + 1, 1);
+  const daily = balance / daysLeft;
+
+  DOM.summaryIncome.textContent = formatMoney(income);
+  DOM.summaryExpense.textContent = formatMoney(expense);
+  DOM.summaryBalance.textContent = formatMoney(balance);
+  DOM.summaryDaily.textContent = formatMoney(daily);
+
+  const visibleEntries = getVisibleEntries();
+  DOM.financeStats.textContent = `Операций: ${visibleEntries.length}`;
+}
+
+function buildEntryCard(entry) {
+  const el = document.createElement("article");
+  const isExpense = entry.type === "expense";
+
+  el.className = `finance-entry ${isExpense ? "is-expense" : "is-income"}`;
+
+  const amountPrefix = isExpense ? "−" : "+";
+  const safeCategory = escapeHtml(entry.category || "Прочее");
+  const safeComment = escapeHtml(entry.comment || "");
+  const safeDate = formatDate(entry.entry_date);
+
+  el.innerHTML = `
+    <div class="finance-entry__main">
+      <div class="finance-entry__left">
+        <div class="finance-entry__category">${safeCategory}</div>
+        <div class="finance-entry__comment ${safeComment ? "" : "is-empty"}">
+          ${safeComment || "Без комментария"}
+        </div>
+      </div>
+
+      <div class="finance-entry__right">
+        <div class="finance-entry__amount">${amountPrefix}${formatMoney(entry.amount)}</div>
+        <div class="finance-entry__date">${safeDate}</div>
+      </div>
+    </div>
+
+    <div class="finance-entry__footer">
+      <span class="finance-entry__badge">${isExpense ? "Расход" : "Доход"}</span>
+      <button class="finance-entry__delete" type="button">Удалить</button>
+    </div>
+  `;
+
+  const deleteBtn = el.querySelector(".finance-entry__delete");
+  deleteBtn.addEventListener("click", () => openDeleteModal(entry.id));
+
+  return el;
+}
+
+function renderEntries() {
+  if (!DOM.financeList) return;
+
+  const entries = getVisibleEntries();
+  DOM.financeList.innerHTML = "";
+
+  if (!entries.length) {
+    DOM.financeList.innerHTML = `
+      <div class="finance-empty">
+        Пока пусто. Нажми + и добавь первую операцию.
+      </div>
+    `;
+    updateFilterButtons();
+    return;
+  }
+
+  entries.forEach((entry) => {
+    DOM.financeList.appendChild(buildEntryCard(entry));
+  });
+
+  updateFilterButtons();
+}
+
+function openModal() {
+  DOM.modal?.classList.add("active");
+}
+
+function closeModal() {
+  DOM.modal?.classList.remove("active");
+}
+
+function resetModalFields() {
+  DOM.typeInput.value = "expense";
+  DOM.amountInput.value = "";
+  DOM.categoryInput.value = "Прочее";
+  DOM.dateInput.value = getTodayISO();
+  DOM.commentInput.value = "";
+}
+
+function openDeleteModal(id) {
+  state.pendingDeleteId = id;
+  DOM.confirmModal?.classList.add("active");
+}
+
+function closeDeleteModal() {
+  state.pendingDeleteId = null;
+  DOM.confirmModal?.classList.remove("active");
+}
+
+async function saveEntry() {
+  const type = DOM.typeInput.value;
+  const amount = Number(DOM.amountInput.value);
+  const category = DOM.categoryInput.value.trim() || "Прочее";
+  const entryDate = DOM.dateInput.value || getTodayISO();
+  const comment = DOM.commentInput.value.trim();
+
+  if (!amount || amount <= 0) {
+    alert("Введите нормальную сумму");
+    return;
+  }
+
+  try {
+    DOM.modalSave.disabled = true;
+
+    const newEntry = await API.insertEntry({
+      type,
+      amount,
+      category,
+      entry_date: entryDate,
+      comment
+    });
+
+    if (newEntry) {
+      state.entries.unshift(newEntry);
+      renderEntries();
+      renderStats();
+      closeModal();
+      resetModalFields();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось сохранить операцию");
+  } finally {
+    DOM.modalSave.disabled = false;
+  }
+}
+
+async function confirmDelete() {
+  if (!state.pendingDeleteId) return;
+
+  const id = state.pendingDeleteId;
+
+  try {
+    DOM.confirmDelete.disabled = true;
+    await API.deleteEntry(id);
+
+    state.entries = state.entries.filter((entry) => entry.id !== id);
+    renderEntries();
+    renderStats();
+    closeDeleteModal();
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось удалить операцию");
+  } finally {
+    DOM.confirmDelete.disabled = false;
+  }
+}
+
+function setupFilters() {
+  DOM.filterAll?.addEventListener("click", () => {
+    state.filter = "all";
+    renderEntries();
+    renderStats();
+  });
+
+  DOM.filterExpense?.addEventListener("click", () => {
+    state.filter = "expense";
+    renderEntries();
+    renderStats();
+  });
+
+  DOM.filterIncome?.addEventListener("click", () => {
+    state.filter = "income";
+    renderEntries();
+    renderStats();
+  });
+}
+
+function setupModal() {
+  DOM.addFinanceBtn?.addEventListener("click", () => {
+    resetModalFields();
+    openModal();
+  });
+
+  DOM.modalCancel?.addEventListener("click", closeModal);
+  DOM.modalSave?.addEventListener("click", saveEntry);
+
+  DOM.modal?.addEventListener("click", (e) => {
+    if (e.target === DOM.modal) {
+      closeModal();
+    }
+  });
+
+  DOM.confirmCancel?.addEventListener("click", closeDeleteModal);
+  DOM.confirmDelete?.addEventListener("click", confirmDelete);
+
+  DOM.confirmModal?.addEventListener("click", (e) => {
+    if (e.target === DOM.confirmModal) {
+      closeDeleteModal();
+    }
+  });
+}
+
+function setupNavigation() {
+  document.querySelectorAll(".nav-emoji").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const page = btn.dataset.page;
+
+      if (page === "home") {
+        localStorage.removeItem("activeCategory");
+        window.location.href = "index.html";
+      }
+
+      if (page === "finance") {
+        window.location.href = "finance.html";
+      }
+
+      if (page === "sleep") {
+        window.location.href = "sleep.html";
+      }
+
+      if (page === "categories") {
+        window.location.href = "categories.html";
+      }
+    });
+  });
+}
+
+async function init() {
+  setupNavigation();
+  setupFilters();
+  setupModal();
+  resetModalFields();
+
+  const entries = await API.fetchEntries();
+  state.entries = entries;
+
+  renderEntries();
+  renderStats();
+}
+
+init();
