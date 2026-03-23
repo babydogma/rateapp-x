@@ -980,10 +980,11 @@ function renderRequiredItemsInsideModal() {
           state.requiredItemMarks.unshift(newMark);
         }
 
-        renderRequiredItemsInsideModal();
+       renderRequiredItemsInsideModal();
         renderRequiredTemplates();
         renderEntries();
         renderStats();
+        renderCategorySummary();
       } catch (error) {
         console.error(error);
         alert("Не удалось отметить оплату");
@@ -1174,6 +1175,7 @@ async function cancelRequiredTemplatePayment() {
     renderRequiredTemplates();
     renderEntries();
     renderStats();
+    renderCategorySummary();
     closeRequiredTemplateModal();
   } catch (error) {
     console.error(error);
@@ -1240,6 +1242,7 @@ async function payRequiredTemplate() {
     renderRequiredTemplates();
     renderEntries();
     renderStats();
+    renderCategorySummary();
     closeRequiredTemplateModal();
   } catch (error) {
     console.error(error);
@@ -1278,6 +1281,7 @@ async function saveEntry() {
       state.entries.unshift(newEntry);
       renderEntries();
       renderStats();
+      renderCategorySummary();
       closeModal();
       resetModalFields();
     }
@@ -1301,6 +1305,7 @@ async function confirmDelete() {
     state.entries = state.entries.filter((entry) => entry.id !== id);
     renderEntries();
     renderStats();
+    renderCategorySummary();
     closeDeleteModal();
   } catch (error) {
     console.error(error);
