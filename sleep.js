@@ -184,6 +184,87 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function getNormalizedSleepDate(dateStr, bedTime, wakeTime) {
+  if (!dateStr) return "";
+
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [bh, bm] = bedTime.split(":").map(Number);
+  const [wh, wm] = wakeTime.split(":").map(Number);
+
+  const bedMinutes = bh * 60 + bm;
+  const wakeMinutes = wh * 60 + wm;
+
+  const baseDate = new Date(year, month - 1, day);
+
+  // Если проснулся "раньше", чем лег по времени,
+  // значит сон перешел через полночь -> дата записи = следующий день
+  if (wakeMinutes <= bedMinutes) {
+    baseDate.setDate(baseDate.getDate() + 1);
+  }
+
+  const yyyy = baseDate.getFullYear();
+  const mm = String(baseDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(baseDate.getDate()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getAnchorDate(entries) {
+  const today = new Date();
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const latestEntryDate = entries.reduce((latest, entry) => {
+    if (!entry.sleep_date) return latest;
+    const entryDate = new Date(`${entry.sleep_date}T12:00:00`);
+    return entryDate > latest ? entryDate : latest;
+  }, todayOnly);
+
+  return latestEntryDate > todayOnly ? latestEntryDate : todayOnly;
+}
+
+function buildTimelineDays(entries, days) {
+  const anchorDate = getAnchorDate(entries);
+  const byDate = new Map();
+
+  entries.forEach((entry) => {
+    if (!entry.sleep_date) return;
+
+    // если вдруг в один день есть несколько записей,
+    // оставляем последнюю по списку
+    byDate.set(entry.sleep_date, entry);
+  });
+
+  const result = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(
+      anchorDate.getFullYear(),
+      anchorDate.getMonth(),
+      anchorDate.getDate()
+    );
+    date.setDate(date.getDate() - i);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const key = `${yyyy}-${mm}-${dd}`;
+
+    result.push({
+      date: key,
+      entry: byDate.get(key) || null
+    });
+  }
+
+  return result;
+}
+
+function getDayShortLabel(dateStr) {
+  const date = new Date(`${dateStr}T12:00:00`);
+  const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" });
+  const day = String(date.getDate());
+  return `${weekday} ${day}`;
+}
+
 /* =========================
    FALL ASLEEP / LABELS
 ========================= */
@@ -524,25 +605,32 @@ function renderSummary(entries, range) {
 
   let stripHtml = "";
 
-  if (range === 7) {
-    stripHtml = `
-      <div class="sleep-summary-strip sleep-summary-strip--7">
-        ${data.entries.map((entry) => {
-          const status = getStatusMeta(
-            Number(entry.sleep_duration_minutes) || 0,
-            clampHalf(entry.sleep_score)
-          );
+    if (range === 7) {
+  const timeline = buildTimelineDays(entries, 7);
 
-          return `
-            <div class="sleep-summary-day">
-              <div class="sleep-summary-day__label">${escapeHtml(getWeekdayShort(entry.sleep_date))}</div>
-              <div class="sleep-summary-dot ${status.className}"></div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  } else {
+  stripHtml = `
+    <div class="sleep-summary-strip sleep-summary-strip--7">
+      ${timeline.map((day) => {
+        let statusClass = "is-empty";
+
+        if (day.entry) {
+          const status = getStatusMeta(
+            Number(day.entry.sleep_duration_minutes) || 0,
+            clampHalf(day.entry.sleep_score)
+          );
+          statusClass = status.className;
+        }
+
+        return `
+          <div class="sleep-summary-day">
+            <div class="sleep-summary-day__label">${escapeHtml(getDayShortLabel(day.date))}</div>
+            <div class="sleep-summary-dot ${statusClass}"></div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+} else {
     stripHtml = `
       <div class="sleep-summary-strip sleep-summary-strip--30">
         ${data.entries.map((entry) => {
@@ -676,34 +764,35 @@ function closeSleepModal() {
 }
 
 async function saveSleepEntry() {
-  const date = String(DOM.dateInput?.value || "").trim();
-  const bed = String(DOM.bedInput?.value || "").trim();
-  const wake = String(DOM.wakeInput?.value || "").trim();
+  const selectedDate = String(DOM.dateInput?.value || "").trim();
+  const bedTime = String(DOM.bedInput?.value || "").trim();
+  const wakeTime = String(DOM.wakeInput?.value || "").trim();
   const wakeCount = String(DOM.wakeCountInput?.value || "0").trim();
   const dreamType = String(DOM.dreamTypeInput?.value || "neutral").trim();
   const fallAsleepSpeed = String(DOM.fallAsleepSpeedInput?.value || "medium").trim();
   const energyAfterSleep = clampRating(DOM.energyAfterSleepInput?.value);
   const note = String(DOM.noteInput?.value || "").trim();
 
-  if (!date) {
-    alert("Выбери дату");
-    DOM.dateInput?.focus();
-    return;
-  }
+      if (!selectedDate) {
+  alert("Выбери дату");
+  DOM.dateInput?.focus();
+  return;
+}
 
-  if (!isValidTime(bed)) {
-    alert("Выбери корректное время, когда лёг");
-    DOM.bedInput?.focus();
-    return;
-  }
+if (!isValidTime(bedTime)) {
+  alert("Выбери корректное время, когда лёг");
+  DOM.bedInput?.focus();
+  return;
+}
 
-  if (!isValidTime(wake)) {
-    alert("Выбери корректное время, когда встал");
-    DOM.wakeInput?.focus();
-    return;
-  }
+if (!isValidTime(wakeTime)) {
+  alert("Выбери корректное время, когда встал");
+  DOM.wakeInput?.focus();
+  return;
+}
 
-  const baseDuration = calcDuration(bed, wake);
+  const normalizedSleepDate = getNormalizedSleepDate(selectedDate, bedTime, wakeTime);
+  const baseDuration = calcDuration(bedTime, wakeTime);
   const sleepLatencyMinutes = getFallAsleepMinutes(fallAsleepSpeed);
   const sleepDurationMinutes = Math.max(baseDuration - sleepLatencyMinutes, 0);
 
@@ -723,9 +812,9 @@ async function saveSleepEntry() {
 );
 
   const payload = {
-    sleep_date: date,
-    bed_time: bed,
-    wake_time: wake,
+    sleep_date: normalizedSleepDate,
+    bed_time: bedTime,
+    wake_time: wakeTime,
     wake_count: wakeCount,
     dream_type: dreamType,
     fall_asleep_speed: fallAsleepSpeed,
