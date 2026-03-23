@@ -899,6 +899,10 @@ function setupNavigation() {
         window.location.href = "index.html";
       }
 
+      if (page === "finance") {
+        window.location.href = "finance.html";
+      }
+
       if (page === "sleep") {
         window.location.href = "sleep.html";
       }
