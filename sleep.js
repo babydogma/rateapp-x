@@ -31,7 +31,7 @@ const DOM = {
   confirmDelete: document.getElementById("sleepConfirmDelete"),
 
   summarySwitcher: document.getElementById("sleepSummarySwitcher"),
-  summaryPanel: document.getElementById("sleepSummaryPanel")
+  summaryPanel: document.getElementById("sleepSummaryPanel"),
   
   monthFilterWrap: document.getElementById("sleepMonthFilterWrap"),
   monthFilterBtn: document.getElementById("sleepMonthFilterBtn"),
@@ -399,68 +399,6 @@ function setupMonthFilter(entries) {
       renderSummary(window.__sleepEntries || [], 30);
     });
   });
-}
-  
-  function getAnchorDate(entries) {
-    const today = new Date();
-    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  
-    const latestEntryDate = entries.reduce((latest, entry) => {
-      if (!entry.sleep_date) return latest;
-      const entryDate = new Date(`${entry.sleep_date}T12:00:00`);
-      return entryDate > latest ? entryDate : latest;
-    }, todayOnly);
-  
-  return latestEntryDate > todayOnly ? latestEntryDate : todayOnly;
-}
-
-function buildTimelineDays(entries, days) {
-  const anchorDate = getAnchorDate(entries);
-  const byDate = new Map();
-
-  entries.forEach((entry) => {
-    if (!entry.sleep_date) return;
-
-    // если вдруг в один день есть несколько записей,
-    // оставляем последнюю по списку
-    byDate.set(entry.sleep_date, entry);
-  });
-
-  const result = [];
-
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(
-      anchorDate.getFullYear(),
-      anchorDate.getMonth(),
-      anchorDate.getDate()
-    );
-    date.setDate(date.getDate() - i);
-
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    const key = `${yyyy}-${mm}-${dd}`;
-
-    result.push({
-      date: key,
-      entry: byDate.get(key) || null
-    });
-  }
-
-  return result;
-}
-
-function getDaySummaryParts(dateStr) {
-  const date = new Date(`${dateStr}T12:00:00`);
-
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" });
-
-  return {
-    dateLabel: `${day}.${month}`,
-    weekdayLabel: weekday.charAt(0).toUpperCase() + weekday.slice(1)
-  };
 }
 
 /* =========================
