@@ -154,13 +154,20 @@
         Загрузка финансов...
       </section>
             <section class="finance-required">
-        <div class="finance-required__head">
-          <div class="finance-required__title">Обязательные платежи</div>
-          <div class="finance-required__hint">Нажми на карточку, чтобы изменить сумму</div>
-        </div>
+  <details class="finance-required__accordion" open>
+    <summary class="finance-required__summary">
+      <div>
+        <div class="finance-required__title">Обязательные платежи</div>
+        <div class="finance-required__hint">Нажми на карточку, чтобы изменить сумму</div>
+      </div>
+      <span class="finance-required__chevron">▾</span>
+    </summary>
 
-        <div class="finance-required__list" id="financeRequiredList"></div>
-      </section>
+    <div class="finance-required__content">
+      <div class="finance-required__list" id="financeRequiredList"></div>
+    </div>
+  </details>
+</section>
 
       <section class="finance-summary" id="financeSummary">
         <div class="finance-summary-card">
