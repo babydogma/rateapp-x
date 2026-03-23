@@ -504,15 +504,13 @@ function closeDeleteModal() {
 }
 
 function openRequiredTemplateModal(id) {
-  const isPaid = isTemplatePaidForCurrentPeriod(template);
+  const template = state.requiredTemplates.find(
+    (item) => Number(item.id) === Number(id)
+  );
 
-if (DOM.requiredPaymentModalPay) {
-  DOM.requiredPaymentModalPay.textContent = isPaid ? "Уже оплачено" : "Оплачено";
-  DOM.requiredPaymentModalPay.disabled = isPaid;
-}
-
-  const template = state.requiredTemplates.find((item) => Number(item.id) === Number(id));
   if (!template) return;
+
+  const isPaid = isTemplatePaidForCurrentPeriod(template);
 
   state.editingRequiredTemplateId = template.id;
 
@@ -521,6 +519,11 @@ if (DOM.requiredPaymentModalPay) {
   DOM.requiredPaymentFrequencyInput.value = template.frequency || "monthly";
   DOM.requiredPaymentEndDateInput.value = template.end_date || "";
   DOM.requiredPaymentActiveInput.checked = Boolean(template.is_active);
+
+  if (DOM.requiredPaymentModalPay) {
+    DOM.requiredPaymentModalPay.textContent = isPaid ? "Уже оплачено" : "Оплачено";
+    DOM.requiredPaymentModalPay.disabled = isPaid;
+  }
 
   DOM.requiredPaymentModal?.classList.add("active");
 }
