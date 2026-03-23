@@ -195,13 +195,34 @@ function getVisibleEntries() {
   return [...state.entries];
 }
 
+function getRequiredTemplateState(template) {
+  const today = new Date(getTodayISO());
+  const endDate = template.end_date ? new Date(template.end_date) : null;
+
+  const isDisabled = !template.is_active;
+  const isEnded = Boolean(endDate && endDate < today);
+
+  return {
+    isDisabled,
+    isEnded,
+    isArchived: isDisabled || isEnded
+  };
+}
+
 function getVisibleRequiredTemplates() {
-  return state.requiredTemplates
-    .filter((item) => item.is_active)
-    .filter((item) => {
-      if (!item.end_date) return true;
-      return new Date(item.end_date) >= new Date(getTodayISO());
-    });
+  return [...state.requiredTemplates].sort((a, b) => {
+    const stateA = getRequiredTemplateState(a);
+    const stateB = getRequiredTemplateState(b);
+
+    const rankA = stateA.isDisabled ? 2 : stateA.isEnded ? 1 : 0;
+    const rankB = stateB.isDisabled ? 2 : stateB.isEnded ? 1 : 0;
+
+    if (rankA !== rankB) {
+      return rankA - rankB;
+    }
+
+    return Number(a.sort_order || 0) - Number(b.sort_order || 0);
+  });
 }
 
 function getFrequencyLabel(value) {
@@ -210,10 +231,22 @@ function getFrequencyLabel(value) {
 
 function getRequiredMeta(template) {
   const base = getFrequencyLabel(template.frequency);
+  const { isDisabled, isEnded } = getRequiredTemplateState(template);
+
+  if (isDisabled) {
+    return `${base} • отключен`;
+  }
+
+  if (isEnded) {
+    return `${base} • завершен`;
+  }
 
   if (template.end_date) {
     return `${base} • до ${formatMonthYear(template.end_date)}`;
   }
+
+  return base;
+}
 
   return base;
 }
@@ -322,24 +355,36 @@ function renderRequiredTemplates() {
   if (!items.length) {
     DOM.financeRequiredList.innerHTML = `
       <div class="finance-required-empty">
-        Нет активных обязательных платежей
+        Нет обязательных платежей
       </div>
     `;
     return;
   }
 
   items.forEach((template) => {
+    const { isDisabled, isEnded, isArchived } = getRequiredTemplateState(template);
+
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "finance-required-card";
+    card.className = `finance-required-card
+      ${isEnded ? " is-ended" : ""}
+      ${isDisabled ? " is-disabled" : ""}
+      ${isArchived ? " is-archived" : ""}`;
+
     card.innerHTML = `
       <div class="finance-required-card__left">
-        <div class="finance-required-card__title">${escapeHtml(template.title)}</div>
-        <div class="finance-required-card__meta">${escapeHtml(getRequiredMeta(template))}</div>
+        <div class="finance-required-card__title">
+          ${escapeHtml(template.title)}
+        </div>
+        <div class="finance-required-card__meta">
+          ${escapeHtml(getRequiredMeta(template))}
+        </div>
       </div>
 
       <div class="finance-required-card__right">
-        <div class="finance-required-card__amount">${formatMoney(template.amount)}</div>
+        <div class="finance-required-card__amount">
+          ${formatMoney(template.amount)}
+        </div>
       </div>
     `;
 
