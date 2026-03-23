@@ -125,6 +125,51 @@
         <input id="requiredPaymentActiveInput" type="checkbox" checked>
         <span>Платеж активен</span>
       </label>
+      
+      <div id="requiredPaymentItemsSection" class="required-items-section">
+  <div class="required-items-section__head">
+    <div class="required-items-section__title">Вложенные платежи</div>
+    <button id="requiredPaymentAddItemBtn" type="button" class="required-items-section__add-btn">
+      Добавить
+    </button>
+  </div>
+
+  <div id="requiredPaymentItemsList" class="required-items-list"></div>
+
+  <div id="requiredPaymentItemForm" class="required-item-form">
+    <input
+      id="requiredPaymentItemTitleInput"
+      class="category-modal__input"
+      type="text"
+      placeholder="Название"
+    >
+
+    <input
+      id="requiredPaymentItemAmountInput"
+      class="category-modal__input"
+      type="number"
+      min="0"
+      step="0.01"
+      placeholder="Сумма"
+    >
+
+    <input
+      id="requiredPaymentItemDueDayInput"
+      class="category-modal__input"
+      type="number"
+      min="1"
+      max="31"
+      step="1"
+      placeholder="День платежа"
+    >
+
+    <div class="required-item-form__actions">
+      <button id="requiredPaymentItemSaveBtn" type="button" class="category-modal__btn category-modal__btn--primary">
+        Сохранить
+      </button>
+    </div>
+  </div>
+</div>
 
       <div class="category-modal__actions">
   <button id="requiredPaymentModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
