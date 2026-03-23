@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Финансы — RateApp X</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0e0e0f" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <section class="top-panel">
+      <header class="header">
+        <div class="app-title">
+          <div class="logo-text">Финансы</div>
+        </div>
+      </header>
+
+      <section class="stats">
+        Финансовый блок скоро будет здесь
+      </section>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-emoji" data-page="home" aria-label="Главная">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 10.5L12 3l9 7.5"></path>
+        <path d="M5.5 9.5V20h13V9.5"></path>
+        <path d="M9.5 20v-5.5h5V20"></path>
+      </svg>
+    </button>
+
+    <button class="nav-emoji nav-ruble is-current" data-page="finance" aria-label="Финансы">
+      <span class="nav-ruble__icon">₽</span>
+    </button>
+
+    <div class="nav-center-slot" aria-hidden="true"></div>
+
+    <button class="nav-emoji" data-page="sleep" aria-label="Сон">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M18.5 14.5A6.5 6.5 0 0 1 9.5 5.5a7.5 7.5 0 1 0 9 9z"></path>
+      </svg>
+    </button>
+
+    <button class="nav-emoji" data-page="categories" aria-label="Категории">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h4l2 2h6A2.5 2.5 0 0 1 20.5 9.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"></path>
+        <path d="M3.5 9h17"></path>
+      </svg>
+    </button>
+
+    <button id="addBtn" class="add-btn" type="button">+</button>
+  </nav>
+
+  <script>
+    document.querySelectorAll(".nav-emoji").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const page = btn.dataset.page;
+
+        if (page === "home") window.location.href = "index.html";
+        if (page === "finance") window.location.href = "finance.html";
+        if (page === "sleep") window.location.href = "sleep.html";
+        if (page === "categories") window.location.href = "categories.html";
+      });
+    });
+
+    document.getElementById("addBtn")?.addEventListener("click", () => {
+      alert("Для финансового блока действие добавления пока не подключено");
+    });
+  </script>
+</body>
+</html>
