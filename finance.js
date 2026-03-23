@@ -15,6 +15,9 @@ const state = {
   filter: "all",
   pendingDeleteId: null,
 
+  selectedMonth: null,
+  selectedYear: null,
+
   requiredTemplates: [],
   requiredMarks: [],
 
@@ -27,6 +30,10 @@ const state = {
 const DOM = {
   financeList: document.getElementById("financeList"),
   financeStats: document.getElementById("financeStats"),
+    financeStatsLabel: document.getElementById("financeStatsLabel"),
+  financeMonthFilterBtn: document.getElementById("financeMonthFilterBtn"),
+  financeMonthFilterMenu: document.getElementById("financeMonthFilterMenu"),
+  financeCategorySummary: document.getElementById("financeCategorySummary"),
 
   summaryIncome: document.getElementById("summaryIncome"),
   summaryExpense: document.getElementById("summaryExpense"),
@@ -321,6 +328,171 @@ function getTodayISO() {
   return `${year}-${month}-${day}`;
 }
 
+function getMonthNameRu(month) {
+  const names = [
+    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+  ];
+  return names[month - 1] || "";
+}
+
+function getMonthLabel(month, year) {
+  return `${getMonthNameRu(month)} ${year}`;
+}
+
+function getAvailableFinanceMonths(entries) {
+  const seen = new Set();
+  const result = [];
+
+  entries.forEach((entry) => {
+    if (!entry.entry_date) return;
+
+    const [year, month] = entry.entry_date.split("-").map(Number);
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    result.push({ year, month, key });
+  });
+
+  result.sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    return b.month - a.month;
+  });
+
+  return result;
+}
+
+function ensureSelectedFinanceMonth() {
+  const months = getAvailableFinanceMonths(state.entries);
+
+  if (!months.length) {
+    const today = new Date();
+    state.selectedMonth = today.getMonth() + 1;
+    state.selectedYear = today.getFullYear();
+    return;
+  }
+
+  const hasSelected = months.some(
+    (item) =>
+      item.month === state.selectedMonth &&
+      item.year === state.selectedYear
+  );
+
+  if (!hasSelected) {
+    state.selectedMonth = months[0].month;
+    state.selectedYear = months[0].year;
+  }
+}
+
+function getEntriesForSelectedMonth(entries) {
+  ensureSelectedFinanceMonth();
+
+  return entries.filter((entry) => {
+    if (!entry.entry_date) return false;
+    const [year, month] = entry.entry_date.split("-").map(Number);
+    return year === state.selectedYear && month === state.selectedMonth;
+  });
+}
+
+function renderFinanceMonthFilter() {
+  if (!DOM.financeMonthFilterBtn || !DOM.financeMonthFilterMenu) return;
+
+  ensureSelectedFinanceMonth();
+  const months = getAvailableFinanceMonths(state.entries);
+
+  DOM.financeMonthFilterBtn.textContent = getMonthLabel(
+    state.selectedMonth,
+    state.selectedYear
+  );
+
+  DOM.financeMonthFilterMenu.innerHTML = months.map((item) => {
+    const active =
+      item.month === state.selectedMonth &&
+      item.year === state.selectedYear;
+
+    return `
+      <button
+        type="button"
+        class="finance-month-filter-option ${active ? "is-active" : ""}"
+        data-month="${item.month}"
+        data-year="${item.year}"
+      >
+        ${escapeHtml(getMonthLabel(item.month, item.year))}
+      </button>
+    `;
+  }).join("");
+
+  DOM.financeMonthFilterMenu.querySelectorAll("[data-month][data-year]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.selectedMonth = Number(btn.dataset.month);
+      state.selectedYear = Number(btn.dataset.year);
+      DOM.financeMonthFilterMenu.hidden = true;
+      renderEntries();
+      renderStats();
+      renderCategorySummary();
+      renderFinanceMonthFilter();
+    });
+  });
+}
+
+function handleFinanceMonthFilterOutsideClick(e) {
+  if (!DOM.financeMonthFilterBtn || !DOM.financeMonthFilterMenu) return;
+  if (DOM.financeMonthFilterBtn.contains(e.target)) return;
+  if (DOM.financeMonthFilterMenu.contains(e.target)) return;
+  DOM.financeMonthFilterMenu.hidden = true;
+}
+
+function setupFinanceMonthFilter() {
+  if (!DOM.financeMonthFilterBtn || !DOM.financeMonthFilterMenu) return;
+
+  DOM.financeMonthFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    DOM.financeMonthFilterMenu.hidden = !DOM.financeMonthFilterMenu.hidden;
+  });
+
+  document.addEventListener("click", handleFinanceMonthFilterOutsideClick);
+}
+
+function renderCategorySummary() {
+  if (!DOM.financeCategorySummary) return;
+
+  const monthEntries = getEntriesForSelectedMonth(state.entries);
+  const expenseEntries = monthEntries.filter((entry) => entry.type === "expense");
+
+  if (!expenseEntries.length) {
+    DOM.financeCategorySummary.innerHTML = `
+      <div class="finance-category-summary__title">Категории месяца</div>
+      <div class="finance-category-summary__empty">Пока нет расходов за выбранный месяц</div>
+    `;
+    return;
+  }
+
+  const totals = new Map();
+
+  expenseEntries.forEach((entry) => {
+    const category = entry.category || "Прочее";
+    const amount = Number(entry.amount || 0);
+    totals.set(category, (totals.get(category) || 0) + amount);
+  });
+
+  const sorted = [...totals.entries()]
+    .sort((a, b) => b[1] - a[1]);
+
+  DOM.financeCategorySummary.innerHTML = `
+    <div class="finance-category-summary__title">Категории месяца</div>
+    <div class="finance-category-summary__list">
+      ${sorted.map(([name, amount]) => `
+        <div class="finance-category-summary__item">
+          <span class="finance-category-summary__name">${escapeHtml(name)}</span>
+          <strong class="finance-category-summary__amount">${formatMoney(amount)}</strong>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function getCurrentMonthPeriodKey() {
   const today = new Date();
   const year = today.getFullYear();
@@ -363,15 +535,17 @@ function getCurrentMonthEntries(entries) {
 }
 
 function getVisibleEntries() {
+  const monthEntries = getEntriesForSelectedMonth(state.entries);
+
   if (state.filter === "expense") {
-    return state.entries.filter((entry) => entry.type === "expense");
+    return monthEntries.filter((entry) => entry.type === "expense");
   }
 
   if (state.filter === "income") {
-    return state.entries.filter((entry) => entry.type === "income");
+    return monthEntries.filter((entry) => entry.type === "income");
   }
 
-  return [...state.entries];
+  return [...monthEntries];
 }
 
 function getRequiredTemplateState(template) {
@@ -486,7 +660,7 @@ function updateFilterButtons() {
 }
 
 function renderStats() {
-  const monthEntries = getCurrentMonthEntries(state.entries);
+  const monthEntries = getEntriesForSelectedMonth(state.entries);
   const todayIso = getTodayISO();
 
   const monthIncome = monthEntries
@@ -517,7 +691,12 @@ function renderStats() {
   DOM.summaryDaily.textContent = formatMoney(todayExpense);
 
   const visibleEntries = getVisibleEntries();
-  DOM.financeStats.textContent = `Операций: ${visibleEntries.length}`;
+
+  if (DOM.financeStatsLabel) {
+    DOM.financeStatsLabel.textContent = `Операций за месяц: ${visibleEntries.length}`;
+  } else if (DOM.financeStats) {
+    DOM.financeStats.textContent = `Операций за месяц: ${visibleEntries.length}`;
+  }
 }
 
 function buildEntryCard(entry) {
@@ -1303,6 +1482,7 @@ async function init() {
   setupFilters();
   setupModal();
   setupRequiredAccordion();
+  setupFinanceMonthFilter();
   resetModalFields();
 
   const [entries, requiredTemplates, requiredMarks, requiredItems, requiredItemMarks] = await Promise.all([
@@ -1319,9 +1499,12 @@ async function init() {
   state.requiredItems = requiredItems;
   state.requiredItemMarks = requiredItemMarks;
 
+  ensureSelectedFinanceMonth();
+  renderFinanceMonthFilter();
   renderRequiredTemplates();
   renderEntries();
   renderStats();
+  renderCategorySummary();
 }
 
 init();
