@@ -58,7 +58,10 @@ const DOM = {
   requiredPaymentActiveInput: document.getElementById("requiredPaymentActiveInput"),
   requiredPaymentModalCancel: document.getElementById("requiredPaymentModalCancel"),
   requiredPaymentModalPay: document.getElementById("requiredPaymentModalPay"),
-  requiredPaymentModalSave: document.getElementById("requiredPaymentModalSave")
+  requiredPaymentModalSave: document.getElementById("requiredPaymentModalSave"),
+  
+  financeRequiredAccordion: document.getElementById("financeRequiredAccordion"),
+financeRequiredToggle: document.getElementById("financeRequiredToggle")
 };
 
 const API = {
@@ -327,6 +330,12 @@ function updateFilterButtons() {
   DOM.filterAll?.classList.toggle("active", state.filter === "all");
   DOM.filterExpense?.classList.toggle("active", state.filter === "expense");
   DOM.filterIncome?.classList.toggle("active", state.filter === "income");
+}
+
+function setupRequiredAccordion() {
+  DOM.financeRequiredToggle?.addEventListener("click", () => {
+    DOM.financeRequiredAccordion?.classList.toggle("is-open");
+  });
 }
 
 function renderStats() {
@@ -707,6 +716,7 @@ async function init() {
   setupNavigation();
   setupFilters();
   setupModal();
+  setupRequiredAccordion();
   resetModalFields();
 
   const [entries, requiredTemplates, requiredMarks] = await Promise.all([
