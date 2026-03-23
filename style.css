@@ -1816,21 +1816,18 @@ button {
   overflow: hidden;
 }
 
-.finance-required__accordion summary {
-  list-style: none;
-}
-
-.finance-required__accordion summary::-webkit-details-marker {
-  display: none;
-}
-
 .finance-required__summary {
+  width: 100%;
+  border: none;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
   cursor: pointer;
+  text-align: left;
+  color: inherit;
 }
 
 .finance-required__summary:active {
@@ -1839,17 +1836,14 @@ button {
 
 .finance-required__content {
   padding: 0 16px 16px;
+  display: none;
 }
 
-.finance-required__chevron {
-  flex-shrink: 0;
-  color: var(--color-gold);
-  font-size: 18px;
-  line-height: 1;
-  transition: transform 0.18s ease;
+.finance-required__accordion.is-open .finance-required__content {
+  display: block;
 }
 
-.finance-required__accordion[open] .finance-required__chevron {
+.finance-required__accordion.is-open .finance-required__chevron {
   transform: rotate(180deg);
 }
 
