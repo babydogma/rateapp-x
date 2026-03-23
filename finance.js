@@ -13,7 +13,9 @@ const supabaseClient = supabase.createClient(
 const state = {
   entries: [],
   filter: "all",
-  pendingDeleteId: null
+  pendingDeleteId: null,
+  requiredTemplates: [],
+  editingRequiredTemplateId: null
 };
 
 const DOM = {
@@ -43,7 +45,18 @@ const DOM = {
   dateInput: document.getElementById("financeDateInput"),
   commentInput: document.getElementById("financeCommentInput"),
 
-  addFinanceBtn: document.getElementById("addFinanceBtn")
+  addFinanceBtn: document.getElementById("addFinanceBtn"),
+
+  financeRequiredList: document.getElementById("financeRequiredList"),
+
+  requiredPaymentModal: document.getElementById("requiredPaymentModal"),
+  requiredPaymentModalTitle: document.getElementById("requiredPaymentModalTitle"),
+  requiredPaymentAmountInput: document.getElementById("requiredPaymentAmountInput"),
+  requiredPaymentFrequencyInput: document.getElementById("requiredPaymentFrequencyInput"),
+  requiredPaymentEndDateInput: document.getElementById("requiredPaymentEndDateInput"),
+  requiredPaymentActiveInput: document.getElementById("requiredPaymentActiveInput"),
+  requiredPaymentModalCancel: document.getElementById("requiredPaymentModalCancel"),
+  requiredPaymentModalSave: document.getElementById("requiredPaymentModalSave")
 };
 
 const API = {
@@ -86,6 +99,35 @@ const API = {
       console.error("deleteEntry error:", error);
       throw error;
     }
+  },
+
+  async fetchRequiredTemplates() {
+    const { data, error } = await supabaseClient
+      .from("finance_required_templates")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("fetchRequiredTemplates error:", error);
+      return [];
+    }
+
+    return data || [];
+  },
+
+  async updateRequiredTemplate(id, updates) {
+    const { data, error } = await supabaseClient
+      .from("finance_required_templates")
+      .update(updates)
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      console.error("updateRequiredTemplate error:", error);
+      throw error;
+    }
+
+    return data?.[0] || null;
   }
 };
 
@@ -112,6 +154,14 @@ function formatDate(dateStr) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = String(date.getFullYear()).slice(-2);
   return `${day}.${month}.${year}`;
+}
+
+function formatMonthYear(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}.${year}`;
 }
 
 function getTodayISO() {
@@ -143,6 +193,29 @@ function getVisibleEntries() {
   }
 
   return [...state.entries];
+}
+
+function getVisibleRequiredTemplates() {
+  return state.requiredTemplates
+    .filter((item) => item.is_active)
+    .filter((item) => {
+      if (!item.end_date) return true;
+      return new Date(item.end_date) >= new Date(getTodayISO());
+    });
+}
+
+function getFrequencyLabel(value) {
+  return value === "weekly" ? "Еженедельно" : "Ежемесячно";
+}
+
+function getRequiredMeta(template) {
+  const base = getFrequencyLabel(template.frequency);
+
+  if (template.end_date) {
+    return `${base} • до ${formatMonthYear(template.end_date)}`;
+  }
+
+  return base;
 }
 
 function updateFilterButtons() {
@@ -240,6 +313,42 @@ function renderEntries() {
   updateFilterButtons();
 }
 
+function renderRequiredTemplates() {
+  if (!DOM.financeRequiredList) return;
+
+  const items = getVisibleRequiredTemplates();
+  DOM.financeRequiredList.innerHTML = "";
+
+  if (!items.length) {
+    DOM.financeRequiredList.innerHTML = `
+      <div class="finance-required-empty">
+        Нет активных обязательных платежей
+      </div>
+    `;
+    return;
+  }
+
+  items.forEach((template) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "finance-required-card";
+    card.innerHTML = `
+      <div class="finance-required-card__left">
+        <div class="finance-required-card__title">${escapeHtml(template.title)}</div>
+        <div class="finance-required-card__meta">${escapeHtml(getRequiredMeta(template))}</div>
+      </div>
+
+      <div class="finance-required-card__right">
+        <div class="finance-required-card__amount">${formatMoney(template.amount)}</div>
+      </div>
+    `;
+
+    card.addEventListener("click", () => openRequiredTemplateModal(template.id));
+
+    DOM.financeRequiredList.appendChild(card);
+  });
+}
+
 function openModal() {
   DOM.modal?.classList.add("active");
 }
@@ -264,6 +373,69 @@ function openDeleteModal(id) {
 function closeDeleteModal() {
   state.pendingDeleteId = null;
   DOM.confirmModal?.classList.remove("active");
+}
+
+function openRequiredTemplateModal(id) {
+  const template = state.requiredTemplates.find((item) => Number(item.id) === Number(id));
+  if (!template) return;
+
+  state.editingRequiredTemplateId = template.id;
+
+  DOM.requiredPaymentModalTitle.textContent = template.title;
+  DOM.requiredPaymentAmountInput.value = Number(template.amount || 0);
+  DOM.requiredPaymentFrequencyInput.value = template.frequency || "monthly";
+  DOM.requiredPaymentEndDateInput.value = template.end_date || "";
+  DOM.requiredPaymentActiveInput.checked = Boolean(template.is_active);
+
+  DOM.requiredPaymentModal?.classList.add("active");
+}
+
+function closeRequiredTemplateModal() {
+  state.editingRequiredTemplateId = null;
+  DOM.requiredPaymentModal?.classList.remove("active");
+}
+
+async function saveRequiredTemplate() {
+  if (!state.editingRequiredTemplateId) return;
+
+  const amount = Number(DOM.requiredPaymentAmountInput.value);
+  const frequency = DOM.requiredPaymentFrequencyInput.value;
+  const endDate = DOM.requiredPaymentEndDateInput.value || null;
+  const isActive = DOM.requiredPaymentActiveInput.checked;
+
+  if (amount < 0) {
+    alert("Сумма не может быть меньше нуля");
+    return;
+  }
+
+  try {
+    DOM.requiredPaymentModalSave.disabled = true;
+
+    const updated = await API.updateRequiredTemplate(state.editingRequiredTemplateId, {
+      amount,
+      frequency,
+      end_date: endDate,
+      is_active: isActive
+    });
+
+    if (updated) {
+      const index = state.requiredTemplates.findIndex(
+        (item) => Number(item.id) === Number(updated.id)
+      );
+
+      if (index !== -1) {
+        state.requiredTemplates[index] = updated;
+      }
+
+      renderRequiredTemplates();
+      closeRequiredTemplateModal();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось сохранить обязательный платеж");
+  } finally {
+    DOM.requiredPaymentModalSave.disabled = false;
+  }
 }
 
 async function saveEntry() {
@@ -368,6 +540,15 @@ function setupModal() {
       closeDeleteModal();
     }
   });
+
+  DOM.requiredPaymentModalCancel?.addEventListener("click", closeRequiredTemplateModal);
+  DOM.requiredPaymentModalSave?.addEventListener("click", saveRequiredTemplate);
+
+  DOM.requiredPaymentModal?.addEventListener("click", (e) => {
+    if (e.target === DOM.requiredPaymentModal) {
+      closeRequiredTemplateModal();
+    }
+  });
 }
 
 function setupNavigation() {
@@ -401,9 +582,15 @@ async function init() {
   setupModal();
   resetModalFields();
 
-  const entries = await API.fetchEntries();
-  state.entries = entries;
+  const [entries, requiredTemplates] = await Promise.all([
+    API.fetchEntries(),
+    API.fetchRequiredTemplates()
+  ]);
 
+  state.entries = entries;
+  state.requiredTemplates = requiredTemplates;
+
+  renderRequiredTemplates();
   renderEntries();
   renderStats();
 }
