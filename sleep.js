@@ -258,11 +258,17 @@ function buildTimelineDays(entries, days) {
   return result;
 }
 
-function getDayShortLabel(dateStr) {
+function getDaySummaryParts(dateStr) {
   const date = new Date(`${dateStr}T12:00:00`);
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" });
-  const day = String(date.getDate());
-  return `${weekday} ${day}`;
+
+  return {
+    dateLabel: `${day}.${month}`,
+    weekdayLabel: weekday.charAt(0).toUpperCase() + weekday.slice(1)
+  };
 }
 
 /* =========================
@@ -621,27 +627,47 @@ function renderSummary(entries, range) {
           statusClass = status.className;
         }
 
+        const labels = getDaySummaryParts(day.date);
+
+return `
+  <div class="sleep-summary-day">
+    <div class="sleep-summary-day__date">${escapeHtml(labels.dateLabel)}</div>
+    <div class="sleep-summary-dot ${statusClass}"></div>
+    <div class="sleep-summary-day__weekday">${escapeHtml(labels.weekdayLabel)}</div>
+  </div>
+`;
+      }).join("")}
+    </div>
+  `;
+} else {
+  const timeline = buildTimelineDays(entries, 30);
+
+  stripHtml = `
+    <div class="sleep-summary-strip sleep-summary-strip--30">
+      ${timeline.map((day, index) => {
+        let statusClass = "is-empty";
+
+        if (day.entry) {
+          const status = getStatusMeta(
+            Number(day.entry.sleep_duration_minutes) || 0,
+            clampHalf(day.entry.sleep_score)
+          );
+          statusClass = status.className;
+        }
+
+        const labels = getDaySummaryParts(day.date);
+        const showLabel = index % 5 === 0 || index === timeline.length - 1;
+
         return `
-          <div class="sleep-summary-day">
-            <div class="sleep-summary-day__label">${escapeHtml(getDayShortLabel(day.date))}</div>
+          <div class="sleep-summary-day sleep-summary-day--mini">
+            ${showLabel ? `<div class="sleep-summary-day__date sleep-summary-day__date--mini">${escapeHtml(labels.dateLabel)}</div>` : `<div class="sleep-summary-day__date sleep-summary-day__date--mini is-hidden">00.00</div>`}
             <div class="sleep-summary-dot ${statusClass}"></div>
+            ${showLabel ? `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini">${escapeHtml(labels.weekdayLabel)}</div>` : `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini is-hidden">---</div>`}
           </div>
         `;
       }).join("")}
     </div>
   `;
-} else {
-    stripHtml = `
-      <div class="sleep-summary-strip sleep-summary-strip--30">
-        ${data.entries.map((entry) => {
-          const status = getStatusMeta(
-            Number(entry.sleep_duration_minutes) || 0,
-            clampHalf(entry.sleep_score)
-          );
-          return `<div class="sleep-summary-dot ${status.className}"></div>`;
-        }).join("")}
-      </div>
-    `;
   }
 
   DOM.summaryPanel.innerHTML = `
