@@ -737,6 +737,20 @@ button {
   z-index: 1;
 }
 
+.nav-ruble__icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: currentColor;
+}
+
 .nav-center-slot {
   width: 68px;
   height: 56px;
