@@ -824,73 +824,72 @@ function buildSummaryData(entries, days) {
       </div>
     `;
   } else {
-    ensureSelectedMonth(entries);
+  ensureSelectedMonth(entries);
 
-    const monthEntries = getMonthEntries(
-      entries,
-      summaryState.selectedYear,
-      summaryState.selectedMonth
-    );
+  const monthEntries = getMonthEntries(
+    entries,
+    summaryState.selectedYear,
+    summaryState.selectedMonth
+  );
 
-    data = buildSummaryData(monthEntries, 9999);
-    title = "Сводка за месяц";
+  data = buildSummaryData(monthEntries, 9999);
+  title = "Сводка за месяц";
 
-    const timeline = buildMonthTimeline(
-      monthEntries,
-      summaryState.selectedYear,
-      summaryState.selectedMonth
-    );
+  const monthWeeks = getMonthWeeks(
+    monthEntries,
+    summaryState.selectedYear,
+    summaryState.selectedMonth
+  );
 
-    monthFilterHtml = `
-      <div class="sleep-month-filter-wrap" id="sleepMonthFilterWrap">
-        <button
-          type="button"
-          class="sleep-month-filter-btn"
-          id="sleepMonthFilterBtn"
-        >
-          ${escapeHtml(getMonthLabel(summaryState.selectedMonth, summaryState.selectedYear))}
-        </button>
-        <div class="sleep-month-filter-menu" id="sleepMonthFilterMenu" hidden></div>
-      </div>
-    `;
+  monthFilterHtml = `
+    <div class="sleep-month-filter-wrap" id="sleepMonthFilterWrap">
+      <button
+        type="button"
+        class="sleep-month-filter-btn"
+        id="sleepMonthFilterBtn"
+      >
+        ${escapeHtml(getMonthLabel(summaryState.selectedMonth, summaryState.selectedYear))}
+      </button>
+      <div class="sleep-month-filter-menu" id="sleepMonthFilterMenu" hidden></div>
+    </div>
+  `;
 
-    stripHtml = `
-      
-      <div class="sleep-summary-month-weeks">
-    ${monthWeeks.map((week) => {
-      return `
-        <div class="sleep-summary-week-block">
-          <div class="sleep-summary-week-range">
-            ${escapeHtml(getWeekRangeLabel(week.startDate, week.endDate))}
-          </div>
+  stripHtml = `
+    <div class="sleep-summary-month-weeks">
+      ${monthWeeks.map((week) => {
+        return `
+          <div class="sleep-summary-week-block">
+            <div class="sleep-summary-week-range">
+              ${escapeHtml(getWeekRangeLabel(week.startDate, week.endDate))}
+            </div>
 
-          <div class="sleep-summary-week-days">
-            ${week.days.map((day) => {
-              let statusClass = "is-empty";
+            <div class="sleep-summary-week-days">
+              ${week.days.map((day) => {
+                let statusClass = "is-empty";
 
-              if (day.entry) {
-                const status = getStatusMeta(
-                  Number(day.entry.sleep_duration_minutes) || 0,
-                  clampHalf(day.entry.sleep_score)
-                );
-                statusClass = status.className;
-              }
+                if (day.entry) {
+                  const status = getStatusMeta(
+                    Number(day.entry.sleep_duration_minutes) || 0,
+                    clampHalf(day.entry.sleep_score)
+                  );
+                  statusClass = status.className;
+                }
 
-              return `
-                <div class="sleep-summary-week-day">
-                  <div class="sleep-summary-dot ${statusClass}"></div>
-                  <div class="sleep-summary-weekday-label">
-                    ${escapeHtml(day.dayLabel)}
+                return `
+                  <div class="sleep-summary-week-day">
+                    <div class="sleep-summary-dot ${statusClass}"></div>
+                    <div class="sleep-summary-weekday-label">
+                      ${escapeHtml(day.dayLabel)}
+                    </div>
                   </div>
-                </div>
-              `;
-            }).join("")}
+                `;
+              }).join("")}
+            </div>
           </div>
-        </div>
-      `;
-    }).join("")}
-  </div>
-`;
+        `;
+      }).join("")}
+    </div>
+  `;
 }
 
   DOM.summaryPanel.innerHTML = `
