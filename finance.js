@@ -74,7 +74,6 @@ const DOM = {
   requiredPaymentItemDueDayInput: document.getElementById("requiredPaymentItemDueDayInput"),
   requiredPaymentItemSaveBtn: document.getElementById("requiredPaymentItemSaveBtn"),
 
-  requiredPaymentSingleFields: document.getElementById("requiredPaymentSingleFields")
 };
 
 const API = {
@@ -863,7 +862,7 @@ function openRequiredTemplateModal(id) {
   } else {
     setSingleFieldsVisible(true);
 
-        if (DOM.requiredPaymentModalPay) {
+    if (DOM.requiredPaymentModalPay) {
       DOM.requiredPaymentModalPay.style.display = "";
       DOM.requiredPaymentModalPay.disabled = false;
 
@@ -875,8 +874,10 @@ function openRequiredTemplateModal(id) {
         DOM.requiredPaymentModalPay.classList.remove("finance-pay-btn--danger");
       }
     }
+  }
 
   resetRequiredItemForm();
+
   if (DOM.requiredPaymentItemForm) {
     DOM.requiredPaymentItemForm.classList.remove("is-open");
   }
@@ -918,7 +919,10 @@ async function saveRequiredTemplate() {
       DOM.requiredPaymentModalSave.disabled = true;
     }
 
-    const updated = await API.updateRequiredTemplate(state.editingRequiredTemplateId, updates);
+    const updated = await API.updateRequiredTemplate(
+      state.editingRequiredTemplateId,
+      updates
+    );
 
     if (updated) {
       const index = state.requiredTemplates.findIndex(
@@ -942,20 +946,7 @@ async function saveRequiredTemplate() {
   }
 }
 
-async function payRequiredTemplate() {
-  if (!state.editingRequiredTemplateId) return;
-
-  const template = getCurrentEditingTemplate();
-  if (!template) return;
-
-  const amount = Number(template.amount || 0);
-
-  if (!amount || amount <= 0) {
-    alert("Сначала укажи сумму обязательного платежа");
-    return;
-  }
-  
-  async function cancelRequiredTemplatePayment() {
+async function cancelRequiredTemplatePayment() {
   if (!state.editingRequiredTemplateId) return;
 
   const template = getCurrentEditingTemplate();
@@ -978,7 +969,10 @@ async function payRequiredTemplate() {
         )
     );
 
-    const linkedEntry = await API.findEntryForRequiredPayment(template.title, periodKey);
+    const linkedEntry = await API.findEntryForRequiredPayment(
+      template.title,
+      periodKey
+    );
 
     if (linkedEntry) {
       await API.deleteEntry(linkedEntry.id);
@@ -1000,6 +994,19 @@ async function payRequiredTemplate() {
     }
   }
 }
+
+async function payRequiredTemplate() {
+  if (!state.editingRequiredTemplateId) return;
+
+  const template = getCurrentEditingTemplate();
+  if (!template) return;
+
+  const amount = Number(template.amount || 0);
+
+  if (!amount || amount <= 0) {
+    alert("Сначала укажи сумму обязательного платежа");
+    return;
+  }
 
   const periodKey = getTemplatePeriodKey(template);
 
