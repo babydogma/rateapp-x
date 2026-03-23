@@ -1805,3 +1805,60 @@ button {
 .finance-pay-btn:active {
   transform: scale(0.97);
 }
+
+.finance-required__accordion {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.72), rgba(12, 15, 18, 0.72));
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.finance-required__accordion summary {
+  list-style: none;
+}
+
+.finance-required__accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.finance-required__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.finance-required__summary:active {
+  transform: scale(0.995);
+}
+
+.finance-required__content {
+  padding: 0 16px 16px;
+}
+
+.finance-required__chevron {
+  flex-shrink: 0;
+  color: var(--color-gold);
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+
+.finance-required__accordion[open] .finance-required__chevron {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 420px) {
+  .finance-required__summary {
+    padding: 12px 14px;
+  }
+
+  .finance-required__content {
+    padding: 0 14px 14px;
+  }
+}
