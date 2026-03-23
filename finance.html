@@ -4,15 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Финансы — RateApp X</title>
+
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0e0e0f" />
+
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  <div id="financeModal" class="category-modal">
+    <div class="category-modal__box finance-modal-box">
+      <div class="category-modal__title">Новая операция</div>
+
+      <label class="category-modal__label" for="financeTypeInput">Тип</label>
+      <select id="financeTypeInput" class="category-modal__input finance-select">
+        <option value="expense">Расход</option>
+        <option value="income">Доход</option>
+      </select>
+
+      <label class="category-modal__label" for="financeAmountInput">Сумма</label>
+      <input
+        id="financeAmountInput"
+        class="category-modal__input"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Например, 850"
+      >
+
+      <label class="category-modal__label" for="financeCategoryInput">Категория</label>
+      <select id="financeCategoryInput" class="category-modal__input finance-select">
+        <option value="Еда">Еда</option>
+        <option value="Дом">Дом</option>
+        <option value="Транспорт">Транспорт</option>
+        <option value="Подписки">Подписки</option>
+        <option value="Семья">Семья</option>
+        <option value="Развлечения">Развлечения</option>
+        <option value="Здоровье">Здоровье</option>
+        <option value="Одежда">Одежда</option>
+        <option value="Зарплата">Зарплата</option>
+        <option value="Подработка">Подработка</option>
+        <option value="Прочее" selected>Прочее</option>
+      </select>
+
+      <label class="category-modal__label" for="financeDateInput">Дата</label>
+      <input
+        id="financeDateInput"
+        class="category-modal__input"
+        type="date"
+      >
+
+      <label class="category-modal__label" for="financeCommentInput">Комментарий</label>
+      <textarea
+        id="financeCommentInput"
+        class="category-modal__input finance-note-input"
+        placeholder="Кратко: что это было"
+      ></textarea>
+
+      <div class="category-modal__actions">
+        <button id="financeModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
+          Отмена
+        </button>
+        <button id="financeModalSave" type="button" class="category-modal__btn category-modal__btn--primary">
+          Сохранить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="financeConfirmModal" class="confirm-modal">
+    <div class="confirm-modal__box">
+      <div class="confirm-modal__title">Удаление</div>
+      <div class="confirm-modal__text">Удалить эту операцию?</div>
+
+      <div class="confirm-modal__actions">
+        <button id="financeConfirmCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
+          Отмена
+        </button>
+        <button id="financeConfirmDelete" type="button" class="category-modal__btn category-modal__btn--danger">
+          Удалить
+        </button>
+      </div>
+    </div>
+  </div>
+
   <main class="app">
     <section class="top-panel">
       <header class="header">
@@ -21,10 +101,40 @@
         </div>
       </header>
 
-      <section class="stats">
-        Финансовый блок скоро будет здесь
+      <section class="stats" id="financeStats">
+        Загрузка финансов...
+      </section>
+
+      <section class="finance-summary" id="financeSummary">
+        <div class="finance-summary-card">
+          <span class="finance-summary-card__label">Доходы</span>
+          <strong id="summaryIncome">0 ₽</strong>
+        </div>
+
+        <div class="finance-summary-card">
+          <span class="finance-summary-card__label">Расходы</span>
+          <strong id="summaryExpense">0 ₽</strong>
+        </div>
+
+        <div class="finance-summary-card">
+          <span class="finance-summary-card__label">Остаток</span>
+          <strong id="summaryBalance">0 ₽</strong>
+        </div>
+
+        <div class="finance-summary-card">
+          <span class="finance-summary-card__label">В день</span>
+          <strong id="summaryDaily">0 ₽</strong>
+        </div>
+      </section>
+
+      <section class="rating-filters finance-filters">
+        <button id="financeFilterAll" class="rating-filter active" type="button">Все</button>
+        <button id="financeFilterExpense" class="rating-filter" type="button">Расходы</button>
+        <button id="financeFilterIncome" class="rating-filter" type="button">Доходы</button>
       </section>
     </section>
+
+    <section class="finance-list" id="financeList"></section>
   </main>
 
   <nav class="bottom-nav">
@@ -55,24 +165,9 @@
       </svg>
     </button>
 
-    <button id="addBtn" class="add-btn" type="button">+</button>
+    <button id="addFinanceBtn" class="add-btn" type="button" aria-label="Добавить операцию">+</button>
   </nav>
 
-  <script>
-    document.querySelectorAll(".nav-emoji").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const page = btn.dataset.page;
-
-        if (page === "home") window.location.href = "index.html";
-        if (page === "finance") window.location.href = "finance.html";
-        if (page === "sleep") window.location.href = "sleep.html";
-        if (page === "categories") window.location.href = "categories.html";
-      });
-    });
-
-    document.getElementById("addBtn")?.addEventListener("click", () => {
-      alert("Для финансового блока действие добавления пока не подключено");
-    });
-  </script>
+  <script src="finance.js"></script>
 </body>
 </html>
