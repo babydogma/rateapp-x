@@ -175,6 +175,37 @@ const API = {
 
     return data?.[0] || null;
   },
+  
+    async deleteRequiredMark(templateId, periodKey) {
+    const { error } = await supabaseClient
+      .from("finance_required_marks")
+      .delete()
+      .eq("template_id", templateId)
+      .eq("period_key", periodKey);
+
+    if (error) {
+      console.error("deleteRequiredMark error:", error);
+      throw error;
+    }
+  },
+
+  async findEntryForRequiredPayment(category, periodKey) {
+    const { data, error } = await supabaseClient
+      .from("finance_entries")
+      .select("*")
+      .eq("type", "expense")
+      .eq("category", category)
+      .eq("comment", `Обязательный платеж|${periodKey}`)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error("findEntryForRequiredPayment error:", error);
+      return null;
+    }
+
+    return data?.[0] || null;
+  },
 
   async fetchRequiredItems() {
     const { data, error } = await supabaseClient
@@ -832,12 +863,18 @@ function openRequiredTemplateModal(id) {
   } else {
     setSingleFieldsVisible(true);
 
-    if (DOM.requiredPaymentModalPay) {
+        if (DOM.requiredPaymentModalPay) {
       DOM.requiredPaymentModalPay.style.display = "";
-      DOM.requiredPaymentModalPay.textContent = isPaid ? "Уже оплачено" : "Оплачено";
-      DOM.requiredPaymentModalPay.disabled = isPaid;
+      DOM.requiredPaymentModalPay.disabled = false;
+
+      if (isPaid) {
+        DOM.requiredPaymentModalPay.textContent = "Отменить оплату";
+        DOM.requiredPaymentModalPay.classList.add("finance-pay-btn--danger");
+      } else {
+        DOM.requiredPaymentModalPay.textContent = "Оплачено";
+        DOM.requiredPaymentModalPay.classList.remove("finance-pay-btn--danger");
+      }
     }
-  }
 
   resetRequiredItemForm();
   if (DOM.requiredPaymentItemForm) {
@@ -917,6 +954,52 @@ async function payRequiredTemplate() {
     alert("Сначала укажи сумму обязательного платежа");
     return;
   }
+  
+  async function cancelRequiredTemplatePayment() {
+  if (!state.editingRequiredTemplateId) return;
+
+  const template = getCurrentEditingTemplate();
+  if (!template) return;
+
+  const periodKey = getTemplatePeriodKey(template);
+
+  try {
+    if (DOM.requiredPaymentModalPay) {
+      DOM.requiredPaymentModalPay.disabled = true;
+    }
+
+    await API.deleteRequiredMark(template.id, periodKey);
+
+    state.requiredMarks = state.requiredMarks.filter(
+      (mark) =>
+        !(
+          Number(mark.template_id) === Number(template.id) &&
+          mark.period_key === periodKey
+        )
+    );
+
+    const linkedEntry = await API.findEntryForRequiredPayment(template.title, periodKey);
+
+    if (linkedEntry) {
+      await API.deleteEntry(linkedEntry.id);
+      state.entries = state.entries.filter(
+        (entry) => Number(entry.id) !== Number(linkedEntry.id)
+      );
+    }
+
+    renderRequiredTemplates();
+    renderEntries();
+    renderStats();
+    closeRequiredTemplateModal();
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось отменить оплату");
+  } finally {
+    if (DOM.requiredPaymentModalPay) {
+      DOM.requiredPaymentModalPay.disabled = false;
+    }
+  }
+}
 
   const periodKey = getTemplatePeriodKey(template);
 
@@ -941,7 +1024,7 @@ async function payRequiredTemplate() {
       amount,
       category: template.title,
       entry_date: getTodayISO(),
-      comment: "Обязательный платеж"
+      comment: `Обязательный платеж|${periodKey}`
     });
 
     const newMark = await API.insertRequiredMark({
@@ -1075,7 +1158,18 @@ function setupModal() {
   });
 
   DOM.requiredPaymentModalCancel?.addEventListener("click", closeRequiredTemplateModal);
-  DOM.requiredPaymentModalPay?.addEventListener("click", payRequiredTemplate);
+    DOM.requiredPaymentModalPay?.addEventListener("click", async () => {
+    const template = getCurrentEditingTemplate();
+    if (!template) return;
+
+    const isPaid = isTemplatePaidForCurrentPeriod(template);
+
+    if (isPaid) {
+      await cancelRequiredTemplatePayment();
+    } else {
+      await payRequiredTemplate();
+    }
+  });
   DOM.requiredPaymentModalSave?.addEventListener("click", saveRequiredTemplate);
 
   DOM.requiredPaymentModal?.addEventListener("click", (e) => {
