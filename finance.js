@@ -244,6 +244,8 @@ function getRequiredMeta(template) {
   if (template.end_date) {
     return `${base} • до ${formatMonthYear(template.end_date)}`;
   }
+    return base;
+}
 
 function updateFilterButtons() {
   DOM.filterAll?.classList.toggle("active", state.filter === "all");
