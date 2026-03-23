@@ -704,7 +704,7 @@ function renderRequiredItemsInsideModal() {
       <div class="required-item-row__top">
         <div class="required-item-row__left">
           <div class="required-item-row__title">${escapeHtml(item.title)}</div>
-          <div class="required-item-row__meta">Платеж: ${item.due_day} число</div>
+          <div class="required-item-row__meta">Платеж: ${escapeHtml(item.due_date_label || `${String(item.due_day).padStart(2, "0")}.--`)}</div>
         </div>
 
         <div class="required-item-row__amount">${formatMoney(item.amount)}</div>
@@ -1094,7 +1094,7 @@ function setupModal() {
 
     const title = DOM.requiredPaymentItemTitleInput?.value.trim() || "";
     const amount = Number(DOM.requiredPaymentItemAmountInput?.value || 0);
-    const dueDay = Number(DOM.requiredPaymentItemDueDayInput?.value || 0);
+    const dueDateValue = DOM.requiredPaymentItemDueDayInput?.value || "";
 
     if (!title) {
       alert("Введите название");
@@ -1106,22 +1106,28 @@ function setupModal() {
       return;
     }
 
-    if (!dueDay || dueDay < 1 || dueDay > 31) {
-      alert("Введите день платежа от 1 до 31");
-      return;
-    }
+    if (!dueDateValue) {
+  alert("Выбери дату платежа");
+  return;
+}
+
+const pickedDate = new Date(dueDateValue);
+const dueDay = pickedDate.getDate();
+const dueMonth = String(pickedDate.getMonth() + 1).padStart(2, "0");
+const dueDateLabel = `${String(dueDay).padStart(2, "0")}.${dueMonth}`;
 
     try {
       const sortOrder = getRequiredItemsForTemplate(template.id).length + 1;
 
       const newItem = await API.insertRequiredItem({
-        template_id: template.id,
-        title,
-        amount,
-        due_day: dueDay,
-        is_active: true,
-        sort_order: sortOrder
-      });
+  template_id: template.id,
+  title,
+  amount,
+  due_day: dueDay,
+  due_date_label: dueDateLabel,
+  is_active: true,
+  sort_order: sortOrder
+});
 
       if (newItem) {
         state.requiredItems.push(newItem);
