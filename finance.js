@@ -52,6 +52,10 @@ const DOM = {
   commentInput: document.getElementById("financeCommentInput"),
 
   addFinanceBtn: document.getElementById("addFinanceBtn"),
+  
+  financeRequiredAccordion: document.getElementById("financeRequiredAccordion"),
+  financeRequiredToggle: document.getElementById("financeRequiredToggle"),
+  financeRequiredContent: document.getElementById("financeRequiredContent"),
 
   financeRequiredList: document.getElementById("financeRequiredList"),
 
@@ -1244,6 +1248,24 @@ const dueDateLabel = `${String(dueDay).padStart(2, "0")}.${dueMonth}`;
   });
 }
 
+function setupRequiredAccordion() {
+  if (!DOM.financeRequiredAccordion || !DOM.financeRequiredToggle || !DOM.financeRequiredContent) {
+    return;
+  }
+
+  const syncAccordionUI = () => {
+    const isOpen = DOM.financeRequiredAccordion.classList.contains("is-open");
+    DOM.financeRequiredContent.hidden = !isOpen;
+  };
+
+  DOM.financeRequiredToggle.addEventListener("click", () => {
+    DOM.financeRequiredAccordion.classList.toggle("is-open");
+    syncAccordionUI();
+  });
+
+  syncAccordionUI();
+}
+
 function setupNavigation() {
   document.querySelectorAll(".nav-emoji").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -1273,6 +1295,7 @@ async function init() {
   setupNavigation();
   setupFilters();
   setupModal();
+  setupRequiredAccordion();
   resetModalFields();
 
   const [entries, requiredTemplates, requiredMarks, requiredItems, requiredItemMarks] = await Promise.all([
