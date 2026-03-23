@@ -92,6 +92,49 @@
       </div>
     </div>
   </div>
+  
+    <div id="requiredPaymentModal" class="category-modal">
+    <div class="category-modal__box finance-modal-box">
+      <div class="category-modal__title" id="requiredPaymentModalTitle">Обязательный платеж</div>
+
+      <label class="category-modal__label" for="requiredPaymentAmountInput">Сумма</label>
+      <input
+        id="requiredPaymentAmountInput"
+        class="category-modal__input"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Например, 25000"
+      >
+
+      <label class="category-modal__label" for="requiredPaymentFrequencyInput">Тип</label>
+      <select id="requiredPaymentFrequencyInput" class="category-modal__input finance-select">
+        <option value="monthly">Ежемесячно</option>
+        <option value="weekly">Еженедельно</option>
+      </select>
+
+      <label class="category-modal__label" for="requiredPaymentEndDateInput">Дата окончания</label>
+      <input
+        id="requiredPaymentEndDateInput"
+        class="category-modal__input"
+        type="date"
+      >
+
+      <label class="finance-switch">
+        <input id="requiredPaymentActiveInput" type="checkbox" checked>
+        <span>Платеж активен</span>
+      </label>
+
+      <div class="category-modal__actions">
+        <button id="requiredPaymentModalCancel" type="button" class="category-modal__btn category-modal__btn--ghost">
+          Отмена
+        </button>
+        <button id="requiredPaymentModalSave" type="button" class="category-modal__btn category-modal__btn--primary">
+          Сохранить
+        </button>
+      </div>
+    </div>
+  </div>
 
   <main class="app">
     <section class="top-panel">
@@ -103,6 +146,14 @@
 
       <section class="stats" id="financeStats">
         Загрузка финансов...
+      </section>
+            <section class="finance-required">
+        <div class="finance-required__head">
+          <div class="finance-required__title">Обязательные платежи</div>
+          <div class="finance-required__hint">Нажми на карточку, чтобы изменить сумму</div>
+        </div>
+
+        <div class="finance-required__list" id="financeRequiredList"></div>
       </section>
 
       <section class="finance-summary" id="financeSummary">
