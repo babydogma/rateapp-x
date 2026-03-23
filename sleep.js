@@ -1403,6 +1403,10 @@ function setupNavigation() {
         localStorage.removeItem("activeCategory");
         location.href = "index.html";
       }
+      
+      if (page === "finance") {
+  window.location.href = "finance.html";
+}
 
       if (page === "sleep") {
         location.href = "sleep.html";
