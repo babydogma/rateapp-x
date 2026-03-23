@@ -745,10 +745,13 @@ button {
   justify-content: center;
   width: 24px;
   height: 24px;
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 500;
   line-height: 1;
   color: currentColor;
+  transform: translateY(-1px);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .nav-center-slot {
