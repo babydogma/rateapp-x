@@ -1873,3 +1873,127 @@ button {
   opacity: 0.65;
   cursor: default;
 }
+
+.required-items-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.required-items-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.required-items-section__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.required-items-section__add-btn {
+  border: none;
+  background: transparent;
+  color: var(--color-gold);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.required-items-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.required-item-row {
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.required-item-row.is-paid {
+  border-color: rgba(92, 150, 110, 0.24);
+  box-shadow:
+    0 0 12px rgba(92, 150, 110, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.required-item-row__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.required-item-row__left {
+  min-width: 0;
+  flex: 1;
+}
+
+.required-item-row__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.required-item-row__meta {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #97a2ae;
+}
+
+.required-item-row__amount {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+.required-item-row__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.required-item-row__btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.required-item-row__btn--pay {
+  color: #8fd4a3;
+}
+
+.required-item-row__btn--delete {
+  color: #c98d8d;
+}
+
+.required-item-row__btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.required-item-form {
+  display: none;
+  gap: 10px;
+}
+
+.required-item-form.is-open {
+  display: grid;
+}
+
+.required-item-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
