@@ -32,6 +32,10 @@ const DOM = {
 
   summarySwitcher: document.getElementById("sleepSummarySwitcher"),
   summaryPanel: document.getElementById("sleepSummaryPanel")
+  
+  monthFilterWrap: document.getElementById("sleepMonthFilterWrap"),
+  monthFilterBtn: document.getElementById("sleepMonthFilterBtn"),
+  monthFilterMenu: document.getElementById("sleepMonthFilterMenu"),
 };
 
 const modalState = {
@@ -41,7 +45,9 @@ const modalState = {
 };
 
 const summaryState = {
-  openedRange: 7
+  openedRange: 7,
+  selectedMonth: null,
+  selectedYear: null
 };
 
 /* =========================
@@ -184,7 +190,7 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
-function getNormalizedSleepDate(dateStr, bedTime, wakeTime) {
+    function getNormalizedSleepDate(dateStr, bedTime, wakeTime) {
   if (!dateStr) return "";
 
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -196,8 +202,6 @@ function getNormalizedSleepDate(dateStr, bedTime, wakeTime) {
 
   const baseDate = new Date(year, month - 1, day);
 
-  // Если проснулся "раньше", чем лег по времени,
-  // значит сон перешел через полночь -> дата записи = следующий день
   if (wakeMinutes <= bedMinutes) {
     baseDate.setDate(baseDate.getDate() + 1);
   }
@@ -219,6 +223,194 @@ function getAnchorDate(entries) {
     return entryDate > latest ? entryDate : latest;
   }, todayOnly);
 
+  return latestEntryDate > todayOnly ? latestEntryDate : todayOnly;
+}
+
+function buildTimelineDays(entries, days) {
+  const anchorDate = getAnchorDate(entries);
+  const byDate = new Map();
+
+  entries.forEach((entry) => {
+    if (!entry.sleep_date) return;
+    byDate.set(entry.sleep_date, entry);
+  });
+
+  const result = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(
+      anchorDate.getFullYear(),
+      anchorDate.getMonth(),
+      anchorDate.getDate()
+    );
+    date.setDate(date.getDate() - i);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const key = `${yyyy}-${mm}-${dd}`;
+
+    result.push({
+      date: key,
+      entry: byDate.get(key) || null
+    });
+  }
+
+  return result;
+}
+
+function getDaySummaryParts(dateStr) {
+  const date = new Date(`${dateStr}T12:00:00`);
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" });
+
+  return {
+    dateLabel: `${day}.${month}`,
+    weekdayLabel: weekday.charAt(0).toUpperCase() + weekday.slice(1)
+  };
+}
+
+function getMonthNameRu(month) {
+  const names = [
+    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+  ];
+  return names[month - 1] || "";
+}
+
+function getMonthLabel(month, year) {
+  return `${getMonthNameRu(month)} ${year}`;
+}
+
+function getAvailableMonths(entries) {
+  const seen = new Set();
+  const result = [];
+
+  entries.forEach((entry) => {
+    if (!entry.sleep_date) return;
+
+    const [year, month] = entry.sleep_date.split("-").map(Number);
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    result.push({ year, month, key });
+  });
+
+  result.sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    return b.month - a.month;
+  });
+
+  return result;
+}
+
+function ensureSelectedMonth(entries) {
+  const months = getAvailableMonths(entries);
+
+  if (!months.length) {
+    const today = new Date();
+    summaryState.selectedMonth = today.getMonth() + 1;
+    summaryState.selectedYear = today.getFullYear();
+    return;
+  }
+
+  const hasSelected = months.some(
+    (item) =>
+      item.month === summaryState.selectedMonth &&
+      item.year === summaryState.selectedYear
+  );
+
+  if (!hasSelected) {
+    summaryState.selectedMonth = months[0].month;
+    summaryState.selectedYear = months[0].year;
+  }
+}
+
+function getMonthEntries(entries, year, month) {
+  return entries
+    .filter((entry) => {
+      if (!entry.sleep_date) return false;
+      const [entryYear, entryMonth] = entry.sleep_date.split("-").map(Number);
+      return entryYear === year && entryMonth === month;
+    })
+    .sort((a, b) => new Date(`${a.sleep_date}T12:00:00`) - new Date(`${b.sleep_date}T12:00:00`));
+}
+
+function buildMonthTimeline(entries, year, month) {
+  const byDate = new Map();
+
+  entries.forEach((entry) => {
+    if (entry.sleep_date) {
+      byDate.set(entry.sleep_date, entry);
+    }
+  });
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const result = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    result.push({
+      date: key,
+      entry: byDate.get(key) || null
+    });
+  }
+
+  return result;
+}
+
+function setupMonthFilter(entries) {
+  if (!DOM.monthFilterBtn || !DOM.monthFilterMenu) return;
+
+  ensureSelectedMonth(entries);
+  const months = getAvailableMonths(entries);
+
+  DOM.monthFilterBtn.textContent = getMonthLabel(
+    summaryState.selectedMonth,
+    summaryState.selectedYear
+  );
+
+  DOM.monthFilterMenu.innerHTML = months.map((item) => {
+    const active =
+      item.month === summaryState.selectedMonth &&
+      item.year === summaryState.selectedYear;
+
+    return `
+      <button
+        type="button"
+        class="sleep-month-filter-option ${active ? "is-active" : ""}"
+        data-month="${item.month}"
+        data-year="${item.year}"
+      >
+        ${escapeHtml(getMonthLabel(item.month, item.year))}
+      </button>
+    `;
+  }).join("");
+
+  DOM.monthFilterMenu.querySelectorAll("[data-month][data-year]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      summaryState.selectedMonth = Number(btn.dataset.month);
+      summaryState.selectedYear = Number(btn.dataset.year);
+      DOM.monthFilterMenu.hidden = true;
+      renderSummary(window.__sleepEntries || [], 30);
+    });
+  });
+}
+  
+  function getAnchorDate(entries) {
+    const today = new Date();
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  
+    const latestEntryDate = entries.reduce((latest, entry) => {
+      if (!entry.sleep_date) return latest;
+      const entryDate = new Date(`${entry.sleep_date}T12:00:00`);
+      return entryDate > latest ? entryDate : latest;
+    }, todayOnly);
+  
   return latestEntryDate > todayOnly ? latestEntryDate : todayOnly;
 }
 
@@ -523,7 +715,7 @@ function buildSummaryInsight(entries, stats) {
 }
 
 function buildSummaryData(entries, days) {
-  const filtered = getRangeEntries(entries, days);
+  const filtered = days >= 9999 ? [...entries] : getRangeEntries(entries, days);
 
   const counts = {
     bad: 0,
@@ -603,75 +795,113 @@ function buildSummaryData(entries, days) {
   };
 }
 
-function renderSummary(entries, range) {
+  function renderSummary(entries, range) {
   if (!DOM.summaryPanel) return;
 
-  const data = buildSummaryData(entries, range);
-  const title = range === 7 ? "Сводка за 7 дней" : "Сводка за 30 дней";
-
+  let data;
+  let title;
   let stripHtml = "";
+  let monthFilterHtml = "";
 
-    if (range === 7) {
-  const timeline = buildTimelineDays(entries, 7);
+  if (range === 7) {
+    data = buildSummaryData(entries, 7);
+    title = "Сводка за 7 дней";
 
-  stripHtml = `
-    <div class="sleep-summary-strip sleep-summary-strip--7">
-      ${timeline.map((day) => {
-        let statusClass = "is-empty";
+    const timeline = buildTimelineDays(entries, 7);
 
-        if (day.entry) {
-          const status = getStatusMeta(
-            Number(day.entry.sleep_duration_minutes) || 0,
-            clampHalf(day.entry.sleep_score)
-          );
-          statusClass = status.className;
-        }
+    stripHtml = `
+      <div class="sleep-summary-strip sleep-summary-strip--7">
+        ${timeline.map((day) => {
+          let statusClass = "is-empty";
 
-        const labels = getDaySummaryParts(day.date);
+          if (day.entry) {
+            const status = getStatusMeta(
+              Number(day.entry.sleep_duration_minutes) || 0,
+              clampHalf(day.entry.sleep_score)
+            );
+            statusClass = status.className;
+          }
 
-return `
-  <div class="sleep-summary-day">
-    <div class="sleep-summary-day__date">${escapeHtml(labels.dateLabel)}</div>
-    <div class="sleep-summary-dot ${statusClass}"></div>
-    <div class="sleep-summary-day__weekday">${escapeHtml(labels.weekdayLabel)}</div>
-  </div>
-`;
-      }).join("")}
-    </div>
-  `;
-} else {
-  const timeline = buildTimelineDays(entries, 30);
+          const labels = getDaySummaryParts(day.date);
 
-  stripHtml = `
-    <div class="sleep-summary-strip sleep-summary-strip--30">
-      ${timeline.map((day, index) => {
-        let statusClass = "is-empty";
+          return `
+            <div class="sleep-summary-day">
+              <div class="sleep-summary-day__date">${escapeHtml(labels.dateLabel)}</div>
+              <div class="sleep-summary-dot ${statusClass}"></div>
+              <div class="sleep-summary-day__weekday">${escapeHtml(labels.weekdayLabel)}</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  } else {
+    ensureSelectedMonth(entries);
 
-        if (day.entry) {
-          const status = getStatusMeta(
-            Number(day.entry.sleep_duration_minutes) || 0,
-            clampHalf(day.entry.sleep_score)
-          );
-          statusClass = status.className;
-        }
+    const monthEntries = getMonthEntries(
+      entries,
+      summaryState.selectedYear,
+      summaryState.selectedMonth
+    );
 
-        const labels = getDaySummaryParts(day.date);
-        const showLabel = index % 5 === 0 || index === timeline.length - 1;
+    data = buildSummaryData(monthEntries, 9999);
+    title = "Сводка за месяц";
 
-        return `
-          <div class="sleep-summary-day sleep-summary-day--mini">
-            ${showLabel ? `<div class="sleep-summary-day__date sleep-summary-day__date--mini">${escapeHtml(labels.dateLabel)}</div>` : `<div class="sleep-summary-day__date sleep-summary-day__date--mini is-hidden">00.00</div>`}
-            <div class="sleep-summary-dot ${statusClass}"></div>
-            ${showLabel ? `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini">${escapeHtml(labels.weekdayLabel)}</div>` : `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini is-hidden">---</div>`}
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
+    const timeline = buildMonthTimeline(
+      monthEntries,
+      summaryState.selectedYear,
+      summaryState.selectedMonth
+    );
+
+    monthFilterHtml = `
+      <div class="sleep-month-filter-wrap" id="sleepMonthFilterWrap">
+        <button
+          type="button"
+          class="sleep-month-filter-btn"
+          id="sleepMonthFilterBtn"
+        >
+          ${escapeHtml(getMonthLabel(summaryState.selectedMonth, summaryState.selectedYear))}
+        </button>
+        <div class="sleep-month-filter-menu" id="sleepMonthFilterMenu" hidden></div>
+      </div>
+    `;
+
+    stripHtml = `
+      <div class="sleep-summary-strip sleep-summary-strip--30">
+        ${timeline.map((day, index) => {
+          let statusClass = "is-empty";
+
+          if (day.entry) {
+            const status = getStatusMeta(
+              Number(day.entry.sleep_duration_minutes) || 0,
+              clampHalf(day.entry.sleep_score)
+            );
+            statusClass = status.className;
+          }
+
+          const labels = getDaySummaryParts(day.date);
+          const showLabel = index === 0 || index % 5 === 0 || index === timeline.length - 1;
+
+          return `
+            <div class="sleep-summary-day sleep-summary-day--mini">
+              ${showLabel
+                ? `<div class="sleep-summary-day__date sleep-summary-day__date--mini">${escapeHtml(labels.dateLabel)}</div>`
+                : `<div class="sleep-summary-day__date sleep-summary-day__date--mini is-hidden">00.00</div>`}
+              <div class="sleep-summary-dot ${statusClass}"></div>
+              ${showLabel
+                ? `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini">${escapeHtml(labels.weekdayLabel)}</div>`
+                : `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini is-hidden">---</div>`}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
   }
 
   DOM.summaryPanel.innerHTML = `
-    <div class="sleep-summary-panel__title">${title}</div>
+    <div class="sleep-summary-head">
+      <div class="sleep-summary-panel__title">${title}</div>
+      ${monthFilterHtml}
+    </div>
     ${stripHtml}
     <div class="sleep-summary-metrics">
       <div class="sleep-summary-line">
@@ -685,6 +915,27 @@ return `
   `;
 
   DOM.summaryPanel.hidden = false;
+
+  if (range === 30) {
+    DOM.monthFilterWrap = document.getElementById("sleepMonthFilterWrap");
+    DOM.monthFilterBtn = document.getElementById("sleepMonthFilterBtn");
+    DOM.monthFilterMenu = document.getElementById("sleepMonthFilterMenu");
+
+    setupMonthFilter(entries);
+
+    DOM.monthFilterBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      DOM.monthFilterMenu.hidden = !DOM.monthFilterMenu.hidden;
+    });
+
+    document.addEventListener("click", handleMonthFilterOutsideClick, { once: true });
+  }
+}
+
+function handleMonthFilterOutsideClick(e) {
+  if (!DOM.monthFilterWrap || !DOM.monthFilterMenu) return;
+  if (DOM.monthFilterWrap.contains(e.target)) return;
+  DOM.monthFilterMenu.hidden = true;
 }
 
 function updateSummaryToggleUI() {
