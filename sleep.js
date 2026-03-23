@@ -401,6 +401,57 @@ function setupMonthFilter(entries) {
   });
 }
 
+function getWeekdayShortRu(dateStr) {
+  const date = new Date(`${dateStr}T12:00:00`);
+  const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" });
+  return weekday.charAt(0).toUpperCase() + weekday.slice(1);
+}
+
+function getMonthWeeks(entries, year, month) {
+  const byDate = new Map();
+
+  entries.forEach((entry) => {
+    if (entry.sleep_date) {
+      byDate.set(entry.sleep_date, entry);
+    }
+  });
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const weeks = [];
+  let currentWeek = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    currentWeek.push({
+      date: key,
+      dayLabel: getWeekdayShortRu(key),
+      entry: byDate.get(key) || null
+    });
+
+    if (currentWeek.length === 7 || day === daysInMonth) {
+      weeks.push({
+        startDate: currentWeek[0].date,
+        endDate: currentWeek[currentWeek.length - 1].date,
+        days: currentWeek
+      });
+      currentWeek = [];
+    }
+  }
+
+  return weeks;
+}
+
+function getDateShortLabel(dateStr) {
+  const date = new Date(`${dateStr}T12:00:00`);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}.${month}`;
+}
+
+function getWeekRangeLabel(startDateStr, endDateStr) {
+  return `${getDateShortLabel(startDateStr)} — ${getDateShortLabel(endDateStr)}`;
+}
 /* =========================
    FALL ASLEEP / LABELS
 ========================= */
@@ -804,36 +855,43 @@ function buildSummaryData(entries, days) {
     `;
 
     stripHtml = `
-      <div class="sleep-summary-strip sleep-summary-strip--30">
-        ${timeline.map((day, index) => {
-          let statusClass = "is-empty";
+      
+      <div class="sleep-summary-month-weeks">
+    ${monthWeeks.map((week) => {
+      return `
+        <div class="sleep-summary-week-block">
+          <div class="sleep-summary-week-range">
+            ${escapeHtml(getWeekRangeLabel(week.startDate, week.endDate))}
+          </div>
 
-          if (day.entry) {
-            const status = getStatusMeta(
-              Number(day.entry.sleep_duration_minutes) || 0,
-              clampHalf(day.entry.sleep_score)
-            );
-            statusClass = status.className;
-          }
+          <div class="sleep-summary-week-days">
+            ${week.days.map((day) => {
+              let statusClass = "is-empty";
 
-          const labels = getDaySummaryParts(day.date);
-          const showLabel = index === 0 || index % 5 === 0 || index === timeline.length - 1;
+              if (day.entry) {
+                const status = getStatusMeta(
+                  Number(day.entry.sleep_duration_minutes) || 0,
+                  clampHalf(day.entry.sleep_score)
+                );
+                statusClass = status.className;
+              }
 
-          return `
-            <div class="sleep-summary-day sleep-summary-day--mini">
-              ${showLabel
-                ? `<div class="sleep-summary-day__date sleep-summary-day__date--mini">${escapeHtml(labels.dateLabel)}</div>`
-                : `<div class="sleep-summary-day__date sleep-summary-day__date--mini is-hidden">00.00</div>`}
-              <div class="sleep-summary-dot ${statusClass}"></div>
-              ${showLabel
-                ? `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini">${escapeHtml(labels.weekdayLabel)}</div>`
-                : `<div class="sleep-summary-day__weekday sleep-summary-day__weekday--mini is-hidden">---</div>`}
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
+              return `
+                <div class="sleep-summary-week-day">
+                  <div class="sleep-summary-dot ${statusClass}"></div>
+                  <div class="sleep-summary-weekday-label">
+                    ${escapeHtml(day.dayLabel)}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }).join("")}
+  </div>
+`;
+}
 
   DOM.summaryPanel.innerHTML = `
     <div class="sleep-summary-head">
