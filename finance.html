@@ -154,19 +154,19 @@
         Загрузка финансов...
       </section>
             <section class="finance-required">
-  <details class="finance-required__accordion" open>
-    <summary class="finance-required__summary">
+  <div class="finance-required__accordion is-open" id="financeRequiredAccordion">
+    <button type="button" class="finance-required__summary" id="financeRequiredToggle">
       <div>
         <div class="finance-required__title">Обязательные платежи</div>
         <div class="finance-required__hint">Нажми на карточку, чтобы изменить сумму</div>
       </div>
       <span class="finance-required__chevron">▾</span>
-    </summary>
+    </button>
 
-    <div class="finance-required__content">
+    <div class="finance-required__content" id="financeRequiredContent">
       <div class="finance-required__list" id="financeRequiredList"></div>
     </div>
-  </details>
+  </div>
 </section>
 
       <section class="finance-summary" id="financeSummary">
