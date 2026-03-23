@@ -56,6 +56,7 @@ const DOM = {
   requiredPaymentEndDateInput: document.getElementById("requiredPaymentEndDateInput"),
   requiredPaymentActiveInput: document.getElementById("requiredPaymentActiveInput"),
   requiredPaymentModalCancel: document.getElementById("requiredPaymentModalCancel"),
+  requiredPaymentModalPay: document.getElementById("requiredPaymentModalPay"),
   requiredPaymentModalSave: document.getElementById("requiredPaymentModalSave")
 };
 
@@ -583,6 +584,7 @@ function setupModal() {
   });
 
   DOM.requiredPaymentModalCancel?.addEventListener("click", closeRequiredTemplateModal);
+  DOM.requiredPaymentModalPay?.addEventListener("click", payRequiredTemplate);
   DOM.requiredPaymentModalSave?.addEventListener("click", saveRequiredTemplate);
 
   DOM.requiredPaymentModal?.addEventListener("click", (e) => {
@@ -637,3 +639,44 @@ async function init() {
 }
 
 init();
+
+async function payRequiredTemplate() {
+  if (!state.editingRequiredTemplateId) return;
+
+  const template = state.requiredTemplates.find(
+    (item) => Number(item.id) === Number(state.editingRequiredTemplateId)
+  );
+
+  if (!template) return;
+
+  const amount = Number(template.amount || 0);
+
+  if (!amount || amount <= 0) {
+    alert("Сначала укажи сумму обязательного платежа");
+    return;
+  }
+
+  try {
+    DOM.requiredPaymentModalPay.disabled = true;
+
+    const newEntry = await API.insertEntry({
+      type: "expense",
+      amount,
+      category: template.title,
+      entry_date: getTodayISO(),
+      comment: "Обязательный платеж"
+    });
+
+    if (newEntry) {
+      state.entries.unshift(newEntry);
+      renderEntries();
+      renderStats();
+      closeRequiredTemplateModal();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось зафиксировать оплату");
+  } finally {
+    DOM.requiredPaymentModalPay.disabled = false;
+  }
+}
