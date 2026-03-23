@@ -15,6 +15,7 @@ const state = {
   filter: "all",
   pendingDeleteId: null,
   requiredTemplates: [],
+  requiredMarks: [],
   editingRequiredTemplateId: null
 };
 
@@ -75,6 +76,34 @@ const API = {
 
     return data || [];
   },
+
+async fetchRequiredMarks() {
+  const { data, error } = await supabaseClient
+    .from("finance_required_marks")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("fetchRequiredMarks error:", error);
+    return [];
+  }
+
+  return data || [];
+},
+
+async insertRequiredMark(mark) {
+  const { data, error } = await supabaseClient
+    .from("finance_required_marks")
+    .insert(mark)
+    .select();
+
+  if (error) {
+    console.error("insertRequiredMark error:", error);
+    throw error;
+  }
+
+  return data?.[0] || null;
+},
 
   async insertEntry(entry) {
     const { data, error } = await supabaseClient
@@ -173,6 +202,36 @@ function getTodayISO() {
   return `${year}-${month}-${day}`;
 }
 
+function getCurrentMonthPeriodKey() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+function getWeekStart(date = new Date()) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday, 1 = Monday
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getCurrentWeekPeriodKey() {
+  const weekStart = getWeekStart(new Date());
+  const year = weekStart.getFullYear();
+  const month = String(weekStart.getMonth() + 1).padStart(2, "0");
+  const day = String(weekStart.getDate()).padStart(2, "0");
+  return `${year}-W-${month}-${day}`;
+}
+
+function getTemplatePeriodKey(template) {
+  return template.frequency === "weekly"
+    ? getCurrentWeekPeriodKey()
+    : getCurrentMonthPeriodKey();
+}
+
 function getCurrentMonthEntries(entries) {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -233,6 +292,7 @@ function getFrequencyLabel(value) {
 function getRequiredMeta(template) {
   const base = getFrequencyLabel(template.frequency);
   const { isDisabled, isEnded } = getRequiredTemplateState(template);
+  const isPaid = isTemplatePaidForCurrentPeriod(template);
 
   if (isDisabled) {
     return `${base} • отключен`;
@@ -242,10 +302,25 @@ function getRequiredMeta(template) {
     return `${base} • завершен`;
   }
 
+  if (isPaid) {
+    return `${base} • оплачено`;
+  }
+
   if (template.end_date) {
     return `${base} • до ${formatMonthYear(template.end_date)}`;
   }
-    return base;
+
+  return base;
+}
+
+function isTemplatePaidForCurrentPeriod(template) {
+  const periodKey = getTemplatePeriodKey(template);
+
+  return state.requiredMarks.some(
+    (mark) =>
+      Number(mark.template_id) === Number(template.id) &&
+      mark.period_key === periodKey
+  );
 }
 
 function updateFilterButtons() {
@@ -360,14 +435,16 @@ function renderRequiredTemplates() {
 
   items.forEach((template) => {
     const { isDisabled, isEnded, isArchived } = getRequiredTemplateState(template);
+    const isPaid = isTemplatePaidForCurrentPeriod(template);
 
     const card = document.createElement("button");
     card.type = "button";
     card.className = `finance-required-card
-      ${isEnded ? " is-ended" : ""}
-      ${isDisabled ? " is-disabled" : ""}
-      ${isArchived ? " is-archived" : ""}`;
-
+  ${isPaid ? " is-paid" : ""}
+  ${isEnded ? " is-ended" : ""}
+  ${isDisabled ? " is-disabled" : ""}
+  ${isArchived ? " is-archived" : ""}`;
+  
     card.innerHTML = `
       <div class="finance-required-card__left">
         <div class="finance-required-card__title">
@@ -418,6 +495,13 @@ function closeDeleteModal() {
 }
 
 function openRequiredTemplateModal(id) {
+  const isPaid = isTemplatePaidForCurrentPeriod(template);
+
+if (DOM.requiredPaymentModalPay) {
+  DOM.requiredPaymentModalPay.textContent = isPaid ? "Уже оплачено" : "Оплачено";
+  DOM.requiredPaymentModalPay.disabled = isPaid;
+}
+
   const template = state.requiredTemplates.find((item) => Number(item.id) === Number(id));
   if (!template) return;
 
@@ -625,13 +709,15 @@ async function init() {
   setupModal();
   resetModalFields();
 
-  const [entries, requiredTemplates] = await Promise.all([
-    API.fetchEntries(),
-    API.fetchRequiredTemplates()
-  ]);
+  const [entries, requiredTemplates, requiredMarks] = await Promise.all([
+  API.fetchEntries(),
+  API.fetchRequiredTemplates(),
+  API.fetchRequiredMarks()
+]);
 
-  state.entries = entries;
-  state.requiredTemplates = requiredTemplates;
+state.entries = entries;
+state.requiredTemplates = requiredTemplates;
+state.requiredMarks = requiredMarks;
 
   renderRequiredTemplates();
   renderEntries();
@@ -656,6 +742,19 @@ async function payRequiredTemplate() {
     return;
   }
 
+  const periodKey = getTemplatePeriodKey(template);
+
+  const alreadyPaid = state.requiredMarks.some(
+    (mark) =>
+      Number(mark.template_id) === Number(template.id) &&
+      mark.period_key === periodKey
+  );
+
+  if (alreadyPaid) {
+    alert("Этот платеж уже отмечен как оплаченный в текущем периоде");
+    return;
+  }
+
   try {
     DOM.requiredPaymentModalPay.disabled = true;
 
@@ -667,12 +766,23 @@ async function payRequiredTemplate() {
       comment: "Обязательный платеж"
     });
 
+    const newMark = await API.insertRequiredMark({
+      template_id: template.id,
+      period_key: periodKey
+    });
+
     if (newEntry) {
       state.entries.unshift(newEntry);
-      renderEntries();
-      renderStats();
-      closeRequiredTemplateModal();
     }
+
+    if (newMark) {
+      state.requiredMarks.unshift(newMark);
+    }
+
+    renderRequiredTemplates();
+    renderEntries();
+    renderStats();
+    closeRequiredTemplateModal();
   } catch (error) {
     console.error(error);
     alert("Не удалось зафиксировать оплату");
