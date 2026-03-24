@@ -1,1 +1,73 @@
+/* =========================================================
+   1. DESIGN TOKENS
+   ========================================================= */
 
+:root {
+  --color-gold: #c8a95a;
+  --color-gold-soft: rgba(200, 169, 90, 0.16);
+  --color-gold-border: rgba(200, 169, 90, 0.10);
+
+  --color-bg-primary: #0b0d10;
+  --color-bg-secondary: #111418;
+  --color-bg-elevated: #171b20;
+
+  --color-text-primary: #ece7df;
+  --color-text-secondary: #a5adb8;
+
+  --color-steel-soft: rgba(118, 132, 154, 0.14);
+  --color-steel-border: rgba(118, 132, 154, 0.12);
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 20px;
+
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 18px;
+  --space-lg: 25px;
+
+  --z-base: 1;
+  --z-nav: 50;
+  --z-fab: 60;
+  --z-modal: 100;
+}
+
+/* =========================================================
+   2. RESET / BASE
+   ========================================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html {
+  height: 100%;
+  background: #000;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top center, rgba(200, 169, 90, 0.06), transparent 30%),
+    radial-gradient(circle at 18% 0%, rgba(90, 108, 132, 0.10), transparent 34%),
+    linear-gradient(180deg, #050607 0%, #0b0d10 28%, #111418 100%);
+  color: var(--color-text-primary);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
