@@ -659,6 +659,54 @@ function getSleepStatus(durationMinutes, sleepRating) {
   };
 }
 
+function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed }) {
+  const hours = (Number(durationMinutes) || 0) / 60;
+  const energyVal = Number(energy) || 0;
+  const wakeRaw = String(wakeCount || "0");
+  const wakeVal = wakeRaw === "4plus" ? 4 : Number(wakeRaw) || 0;
+  const fallValue = String(fallAsleepSpeed || "medium");
+
+  if (hours < 6) {
+    return {
+      insight: "Сна было мало — восстановление слабое.",
+      advice: "Сегодня лучше лечь пораньше."
+    };
+  }
+
+  if (wakeVal >= 3) {
+    return {
+      insight: "Сон был прерывистым, это снижает глубину восстановления.",
+      advice: "Стоит понаблюдать, что может мешать спать спокойнее."
+    };
+  }
+
+  if (fallValue === "slow" || fallValue === "very_slow") {
+    return {
+      insight: "Засыпание было долгим — сон начался менее плавно.",
+      advice: "Попробуй сделать вечерний режим спокойнее."
+    };
+  }
+
+  if (energyVal <= 4) {
+    return {
+      insight: "По самочувствию восстановление получилось слабым.",
+      advice: ""
+    };
+  }
+
+  if (wakeVal >= 2) {
+    return {
+      insight: "Сон прерывался несколько раз — это мешает глубокому восстановлению.",
+      advice: ""
+    };
+  }
+
+  return {
+    insight: "Сон прошёл стабильно — организм восстановился.",
+    advice: ""
+  };
+}
+
 /* =========================
    SUMMARY
 ========================= */
@@ -1306,6 +1354,12 @@ function render(entries, loadError = null) {
     const safeNote = String(entry.note || "").trim();
     const status = getSleepStatus(sleepDurationMinutes, sleepScore);
     const noteClass = safeNote ? "" : "is-empty";
+        const insightData = getSleepInsightData({
+      durationMinutes: sleepDurationMinutes,
+      wakeCount: wakeCount,
+      energy: energyAfterSleep,
+      fallAsleepSpeed: fallAsleepSpeed
+    });
 
     el.innerHTML = `
       <div class="card-content sleep-card-content">
@@ -1345,12 +1399,22 @@ function render(entries, loadError = null) {
             </div>
           </div>
 
-          <div class="sleep-note-block">
-            ${escapeHtml(getSleepSummaryComment({
-              durationMinutes: sleepDurationMinutes,
-              wakeCount: wakeCount,
-              energy: energyAfterSleep
-            }))}
+                    <div class="sleep-chip-row sleep-chip-row--metrics">
+            <div class="sleep-metric-chip">
+              <span>Эффективность</span>
+              <strong>${formatPercent(sleepEfficiency)}</strong>
+            </div>
+          </div>
+
+          <div class="sleep-ai-block">
+            <div class="sleep-ai-text">
+              ${escapeHtml(insightData.insight)}
+            </div>
+            ${
+              insightData.advice
+                ? `<div class="sleep-ai-advice">${escapeHtml(insightData.advice)}</div>`
+                : ""
+            }
           </div>
 
           <div class="sleep-note-block ${noteClass}" data-role="sleep-note-edit">
