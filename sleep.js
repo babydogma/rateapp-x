@@ -1338,11 +1338,19 @@ function render(entries, loadError = null) {
             </div>
           </div>
 
-          <div class="sleep-chip-row sleep-chip-row--metrics">
+                    <div class="sleep-chip-row sleep-chip-row--metrics">
             <div class="sleep-metric-chip">
               <span>Эффективность</span>
               <strong>${formatPercent(sleepEfficiency)}</strong>
             </div>
+          </div>
+
+          <div class="sleep-note-block">
+            ${escapeHtml(getSleepSummaryComment({
+              durationMinutes: sleepDurationMinutes,
+              wakeCount: wakeCount,
+              energy: energyAfterSleep
+            }))}
           </div>
 
           <div class="sleep-note-block ${noteClass}" data-role="sleep-note-edit">
