@@ -1,0 +1,542 @@
+/* =========================
+   CARDS UI
+========================= */
+
+function ensureUndoToast() {
+  let toast = document.getElementById("undoToast");
+
+  if (toast) {
+    return {
+      toast,
+      text: toast.querySelector(".undo-toast__text"),
+      button: toast.querySelector(".undo-toast__button")
+    };
+  }
+
+  toast = document.createElement("div");
+  toast.id = "undoToast";
+  toast.className = "undo-toast";
+  toast.innerHTML = `
+    <div class="undo-toast__text">Карточка удалена</div>
+    <button type="button" class="undo-toast__button">Отменить</button>
+  `;
+
+  document.body.appendChild(toast);
+
+  return {
+    toast,
+    text: toast.querySelector(".undo-toast__text"),
+    button: toast.querySelector(".undo-toast__button")
+  };
+}
+
+function hideUndoToast() {
+  const toast = document.getElementById("undoToast");
+  if (toast) {
+    toast.classList.remove("active");
+  }
+}
+
+function showUndoToast(message, onUndo) {
+  const { toast, text, button } = ensureUndoToast();
+
+  text.textContent = message;
+
+  const newButton = button.cloneNode(true);
+  button.replaceWith(newButton);
+
+  newButton.addEventListener("click", () => {
+    onUndo();
+  });
+
+  toast.classList.add("active");
+}
+
+async function finalizePendingDelete(cardId) {
+  const pending = state.pendingDelete;
+
+  if (!pending || pending.card.id !== cardId) return;
+
+  try {
+    await API.deleteCard(cardId);
+  } catch (error) {
+    console.error(error);
+    state.cards.splice(pending.index, 0, pending.card);
+    renderCards();
+    renderStats();
+    alert("Не удалось удалить карточку");
+  } finally {
+    if (state.pendingDelete && state.pendingDelete.card.id === cardId) {
+      state.pendingDelete = null;
+    }
+    hideUndoToast();
+  }
+}
+
+function scheduleCardDelete(card) {
+  if (state.pendingDelete) {
+    clearTimeout(state.pendingDelete.timerId);
+    finalizePendingDelete(state.pendingDelete.card.id);
+  }
+
+  const index = state.cards.findIndex((c) => c.id === card.id);
+  if (index === -1) return;
+
+  const removedCard = state.cards[index];
+  state.cards.splice(index, 1);
+
+  renderCards();
+  renderStats();
+
+  const timerId = setTimeout(() => {
+    finalizePendingDelete(card.id);
+  }, DELETE_UNDO_MS);
+
+  state.pendingDelete = {
+    card: removedCard,
+    index,
+    timerId
+  };
+
+  showUndoToast("Карточка удалена", () => {
+    if (!state.pendingDelete || state.pendingDelete.card.id !== card.id) return;
+
+    clearTimeout(state.pendingDelete.timerId);
+    state.cards.splice(state.pendingDelete.index, 0, state.pendingDelete.card);
+    state.pendingDelete = null;
+
+    hideUndoToast();
+    renderCards();
+    renderStats();
+  });
+}
+
+function getHue(rating = 0) {
+  return (rating / 10) * 60;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2);
+
+  return `${day}.${month}.${year}`;
+}
+
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function setSliderProgress(slider) {
+  const min = Number(slider.min || 0);
+  const max = Number(slider.max || 10);
+  const value = Number(slider.value || 0);
+  const progress = ((value - min) / (max - min)) * 100;
+  slider.style.setProperty("--progress", `${progress}%`);
+}
+
+function updateFilterButtons() {
+  const map = [
+    { el: DOM.filterGood, value: "good" },
+    { el: DOM.filterMid, value: "mid" },
+    { el: DOM.filterBad, value: "bad" }
+  ];
+
+  map.forEach(({ el, value }) => {
+    if (!el) return;
+    el.classList.toggle("active", state.ratingFilter === value);
+  });
+}
+
+function getCategoryOptions(selectedValue) {
+  const values = getCategoryNames(selectedValue);
+
+  return values
+    .map((name) => {
+      const safe = escapeHtml(name);
+      const selected = name === selectedValue ? "selected" : "";
+      return `<option value="${safe}" ${selected}>${safe}</option>`;
+    })
+    .join("");
+}
+
+function getVisibleCards() {
+  let cards = [...state.cards];
+
+  if (state.activeCategory) {
+    cards = cards.filter(
+      (c) => (c.category || "Разное") === state.activeCategory
+    );
+  }
+
+  if (state.ratingFilter === "good") {
+    cards = cards.filter((c) => Number(c.rating) >= 8);
+  }
+
+  if (state.ratingFilter === "mid") {
+    cards = cards.filter((c) => Number(c.rating) >= 5 && Number(c.rating) < 8);
+  }
+
+  if (state.ratingFilter === "bad") {
+    cards = cards.filter((c) => Number(c.rating) < 5);
+  }
+
+  return cards;
+}
+
+function getDescriptionPreview(description) {
+  const trimmed = String(description || "").trim();
+  if (!trimmed) {
+    return {
+      text: "Описание пока не добавлено",
+      empty: true
+    };
+  }
+
+  const normalized = trimmed.replace(/\s+/g, " ");
+  const shortText = normalized.length > 90
+    ? `${normalized.slice(0, 90).trim()}…`
+    : normalized;
+
+  return {
+    text: shortText,
+    empty: false
+  };
+}
+
+function getMoreButtonLabel(description) {
+  return String(description || "").trim() ? "Редактировать описание" : "Добавить описание";
+}
+
+function updateDescriptionUI(card, previewEl, buttonEl) {
+  const preview = getDescriptionPreview(card.description);
+
+  previewEl.textContent = preview.text;
+  previewEl.classList.toggle("is-empty", preview.empty);
+  buttonEl.textContent = getMoreButtonLabel(card.description);
+}
+
+function updateCategoryChipUI(categoryName, chipLabelEl) {
+  const meta = getCategoryMetaByName(categoryName || "Разное");
+  chipLabelEl.textContent = `${meta.emoji} ${meta.name}`;
+}
+
+function closeAllCategorySelects(exceptWrap = null) {
+  document.querySelectorAll(".category-select-wrap.is-open").forEach((wrap) => {
+    if (exceptWrap && wrap === exceptWrap) return;
+    wrap.classList.remove("is-open");
+  });
+}
+
+function renderStats() {
+  if (!DOM.stats) return;
+
+  const visibleCards = getVisibleCards();
+
+  if (!visibleCards.length) {
+    DOM.stats.textContent = "Карточек: 0";
+    return;
+  }
+
+  const avg = (
+    visibleCards.reduce((sum, card) => sum + (Number(card.rating) || 0), 0) /
+    visibleCards.length
+  ).toFixed(1);
+
+  DOM.stats.textContent = `Средняя оценка: ${avg} • Карточек: ${visibleCards.length}`;
+}
+
+function renderCards() {
+  if (!DOM.grid) return;
+
+  DOM.grid.innerHTML = "";
+
+  const cards = getVisibleCards();
+
+  cards.forEach((card) => {
+    DOM.grid.appendChild(buildCard(card));
+  });
+
+  updateFilterButtons();
+}
+
+function buildCard(card) {
+  const el = document.createElement("div");
+  el.className = "card";
+
+  const safeTitle = escapeHtml(card.text || "");
+  const selectedCategory = card.category || "Разное";
+  const preview = getDescriptionPreview(card.description);
+  const moreLabel = getMoreButtonLabel(card.description);
+  const categoryMeta = getCategoryMetaByName(selectedCategory);
+
+  el.innerHTML = `
+    <div class="delete-bg">Удалить</div>
+
+    <div class="card-content">
+      <img
+        class="card__image"
+        src="${escapeHtml(card.image_url || "")}"
+        alt="Фото карточки"
+        onerror="this.src='https://via.placeholder.com/140x140/111/fff?text=Фото';"
+      >
+
+      <div class="card-right-column">
+        <div class="card__title" data-placeholder="Добавить название">${safeTitle}</div>
+
+        <div class="card__description-preview ${preview.empty ? "is-empty" : ""}">
+          ${escapeHtml(preview.text)}
+        </div>
+
+        <button class="card-more-btn ${preview.empty ? "is-empty" : ""}" type="button">
+          ${escapeHtml(moreLabel)}
+        </button>
+
+        <div class="rating">${Number(card.rating) || 0}/10</div>
+
+        <input
+          type="range"
+          class="slider"
+          min="0"
+          max="10"
+          step="0.5"
+          value="${Number(card.rating) || 0}"
+        >
+
+        <div class="card-meta-row">
+          <div class="category-select-wrap">
+            <button class="category-chip" type="button">
+              <span class="category-chip__label">${escapeHtml(`${categoryMeta.emoji} ${categoryMeta.name}`)}</span>
+              <span class="category-chip__arrow">▾</span>
+            </button>
+
+            <select class="category-select">
+              ${getCategoryOptions(selectedCategory)}
+            </select>
+          </div>
+
+          <div class="created">${formatDate(card.created_at)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  el.style.setProperty("--hue", getHue(Number(card.rating) || 0));
+  el.style.setProperty("--rating", Number(card.rating) || 0);
+
+  const slider = el.querySelector(".slider");
+  setSliderProgress(slider);
+
+  setupCardEvents(el, card);
+  enableSwipeDelete(el, card);
+
+  return el;
+}
+
+function setupCardEvents(el, card) {
+  const img = el.querySelector(".card__image");
+  const slider = el.querySelector(".slider");
+  const rating = el.querySelector(".rating");
+  const title = el.querySelector(".card__title");
+  const more = el.querySelector(".card-more-btn");
+  const preview = el.querySelector(".card__description-preview");
+  const category = el.querySelector(".category-select");
+  const categoryWrap = el.querySelector(".category-select-wrap");
+  const categoryChip = el.querySelector(".category-chip");
+  const categoryChipLabel = el.querySelector(".category-chip__label");
+
+  slider.addEventListener("touchstart", (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  slider.addEventListener("touchmove", (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  slider.addEventListener("touchend", (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  img.addEventListener("click", () => {
+    if (!card.image_url) return;
+    DOM.modalImg.src = card.image_url;
+    DOM.imageModal.classList.add("active");
+  });
+
+  slider.addEventListener("input", (e) => {
+    const val = Number(e.target.value);
+    rating.textContent = `${val}/10`;
+    el.style.setProperty("--hue", getHue(val));
+    el.style.setProperty("--rating", val);
+    setSliderProgress(slider);
+  });
+
+  slider.addEventListener("change", async () => {
+    const val = Number(slider.value);
+
+    try {
+      await API.updateCard(card.id, { rating: val });
+      card.rating = val;
+      renderStats();
+    } catch (error) {
+      alert("Не удалось сохранить рейтинг");
+      console.error(error);
+    }
+  });
+
+  title.addEventListener("click", () => {
+    if (title.querySelector("input")) return;
+
+    const current = card.text || "";
+
+    title.innerHTML = `<input type="text" value="${escapeHtml(current)}" placeholder="Введите название">`;
+
+    const input = title.querySelector("input");
+    input.focus();
+    input.select();
+
+    const saveTitle = async () => {
+      const newTitle = input.value.trim();
+
+      try {
+        await API.updateCard(card.id, { text: newTitle });
+        card.text = newTitle;
+        title.textContent = newTitle;
+      } catch (error) {
+        console.error(error);
+        title.textContent = card.text || "";
+        alert("Не удалось сохранить название");
+      }
+    };
+
+    input.addEventListener("blur", saveTitle, { once: true });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        input.blur();
+      }
+    });
+  });
+
+  category.value = card.category || "Разное";
+  updateDescriptionUI(card, preview, more);
+  updateCategoryChipUI(card.category || "Разное", categoryChipLabel);
+
+  categoryChip.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = !categoryWrap.classList.contains("is-open");
+    closeAllCategorySelects();
+    categoryWrap.classList.toggle("is-open", willOpen);
+
+    if (willOpen) {
+      category.focus();
+      category.click();
+    }
+  });
+
+  category.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+
+  category.addEventListener("change", async () => {
+    const oldCategory = card.category || "Разное";
+    const value = category.value;
+
+    try {
+      await API.updateCard(card.id, { category: value });
+      card.category = value;
+      updateCategoryChipUI(value, categoryChipLabel);
+      categoryWrap.classList.remove("is-open");
+
+      if (state.activeCategory && oldCategory === state.activeCategory && value !== state.activeCategory) {
+        renderCards();
+      }
+
+      renderStats();
+    } catch (error) {
+      console.error(error);
+      category.value = oldCategory;
+      updateCategoryChipUI(oldCategory, categoryChipLabel);
+      alert("Не удалось сохранить категорию");
+    }
+  });
+
+  more.addEventListener("click", () => {
+    if (!DOM.descriptionModal || !DOM.descriptionInput || !DOM.saveDescription) return;
+
+    DOM.descriptionInput.value = card.description || "";
+    DOM.descriptionInput.placeholder = "Напиши пару слов: что понравилось, чем запомнилось, стоит ли советовать";
+    DOM.descriptionModal.classList.add("active");
+
+    const saveHandler = async () => {
+      const text = DOM.descriptionInput.value.trim();
+
+      try {
+        await API.updateCard(card.id, { description: text });
+        card.description = text;
+        updateDescriptionUI(card, preview, more);
+        DOM.descriptionModal.classList.remove("active");
+      } catch (error) {
+        console.error(error);
+        alert("Не удалось сохранить описание");
+      } finally {
+        DOM.saveDescription.removeEventListener("click", saveHandler);
+      }
+    };
+
+    DOM.saveDescription.replaceWith(DOM.saveDescription.cloneNode(true));
+    DOM.saveDescription = document.getElementById("saveDescription");
+    DOM.saveDescription.addEventListener("click", saveHandler);
+  });
+}
+
+function enableSwipeDelete(cardEl, card) {
+  let startX = 0;
+  let diff = 0;
+  let isSliderDrag = false;
+
+  cardEl.addEventListener("touchstart", (e) => {
+    isSliderDrag = Boolean(e.target.closest(".slider"));
+
+    if (isSliderDrag) {
+      diff = 0;
+      return;
+    }
+
+    startX = e.touches[0].clientX;
+  });
+
+  cardEl.addEventListener("touchmove", (e) => {
+    if (isSliderDrag) return;
+
+    diff = e.touches[0].clientX - startX;
+
+    if (diff < 0) {
+      cardEl.style.transform = `translateX(${diff}px)`;
+    }
+  });
+
+  cardEl.addEventListener("touchend", () => {
+    if (isSliderDrag) {
+      isSliderDrag = false;
+      cardEl.style.transform = "";
+      diff = 0;
+      return;
+    }
+
+    if (diff < -120) {
+      scheduleCardDelete(card);
+    }
+
+    cardEl.style.transform = "";
+    diff = 0;
+  });
+}
