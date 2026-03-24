@@ -185,29 +185,9 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
-    function getNormalizedSleepDate(dateStr, bedTime, wakeTime) {
+function getNormalizedSleepDate(dateStr) {
   if (!dateStr) return "";
-  if (!bedTime) return dateStr;
-  if (!wakeTime) return dateStr;
-
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const [bh, bm] = bedTime.split(":").map(Number);
-  const [wh, wm] = wakeTime.split(":").map(Number);
-
-  const bedMinutes = bh * 60 + bm;
-  const wakeMinutes = wh * 60 + wm;
-
-  const baseDate = new Date(year, month - 1, day);
-
-  if (wakeMinutes <= bedMinutes) {
-    baseDate.setDate(baseDate.getDate() + 1);
-  }
-
-  const yyyy = baseDate.getFullYear();
-  const mm = String(baseDate.getMonth() + 1).padStart(2, "0");
-  const dd = String(baseDate.getDate()).padStart(2, "0");
-
-  return `${yyyy}-${mm}-${dd}`;
+  return dateStr;
 }
 
 function getAnchorDate(entries) {
@@ -1000,27 +980,7 @@ function openSleepModal(entry = null) {
     modalState.mode = "edit";
     modalState.editingId = entry.id;
 
-    let formDate = String(entry.sleep_date || "");
-
-    if (entry.sleep_date && entry.bed_time && entry.wake_time) {
-      const [bh, bm] = String(entry.bed_time).split(":").map(Number);
-      const [wh, wm] = String(entry.wake_time).split(":").map(Number);
-
-      const bedMinutes = bh * 60 + bm;
-      const wakeMinutes = wh * 60 + wm;
-
-      if (wakeMinutes <= bedMinutes) {
-        const date = new Date(`${entry.sleep_date}T12:00:00`);
-        date.setDate(date.getDate() - 1);
-
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, "0");
-        const dd = String(date.getDate()).padStart(2, "0");
-        formDate = `${yyyy}-${mm}-${dd}`;
-      }
-    }
-
-    if (DOM.dateInput) DOM.dateInput.value = formDate;
+    if (DOM.dateInput) DOM.dateInput.value = String(entry.sleep_date || "");
     if (DOM.bedInput) DOM.bedInput.value = String(entry.bed_time || "");
     if (DOM.wakeInput) DOM.wakeInput.value = String(entry.wake_time || "");
     if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
@@ -1080,18 +1040,9 @@ async function saveSleepEntry() {
     return;
   }
 
-  const existingEntry =
-    modalState.mode === "edit" && modalState.editingId
-      ? (window.__sleepEntries || []).find(
-          (entry) => Number(entry.id) === Number(modalState.editingId)
-        )
-      : null;
-
-  const normalizedSleepDate =
-    existingEntry?.sleep_date || getNormalizedSleepDate(selectedDate, bedTime, wakeTime);
-
   const hasWakeTime = Boolean(wakeTime);
 
+  const sleepDate = getNormalizedSleepDate(selectedDate);
   const baseDuration = hasWakeTime ? calcDuration(bedTime, wakeTime) : 0;
   const sleepLatencyMinutes = getFallAsleepMinutes(fallAsleepSpeed);
   const sleepDurationMinutes = hasWakeTime
@@ -1118,7 +1069,7 @@ async function saveSleepEntry() {
     : 0;
 
   const payload = {
-    sleep_date: normalizedSleepDate,
+    sleep_date: sleepDate,
     bed_time: bedTime,
     wake_time: wakeTime || null,
     wake_count: wakeCount,
