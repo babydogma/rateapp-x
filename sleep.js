@@ -187,6 +187,8 @@ function getTodayDateString() {
 
     function getNormalizedSleepDate(dateStr, bedTime, wakeTime) {
   if (!dateStr) return "";
+  if (!bedTime) return dateStr;
+  if (!wakeTime) return dateStr;
 
   const [year, month, day] = dateStr.split("-").map(Number);
   const [bh, bm] = bedTime.split(":").map(Number);
@@ -998,7 +1000,27 @@ function openSleepModal(entry = null) {
     modalState.mode = "edit";
     modalState.editingId = entry.id;
 
-    if (DOM.dateInput) DOM.dateInput.value = String(entry.sleep_date || "");
+    let formDate = String(entry.sleep_date || "");
+
+    if (entry.sleep_date && entry.bed_time && entry.wake_time) {
+      const [bh, bm] = String(entry.bed_time).split(":").map(Number);
+      const [wh, wm] = String(entry.wake_time).split(":").map(Number);
+
+      const bedMinutes = bh * 60 + bm;
+      const wakeMinutes = wh * 60 + wm;
+
+      if (wakeMinutes <= bedMinutes) {
+        const date = new Date(`${entry.sleep_date}T12:00:00`);
+        date.setDate(date.getDate() - 1);
+
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        formDate = `${yyyy}-${mm}-${dd}`;
+      }
+    }
+
+    if (DOM.dateInput) DOM.dateInput.value = formDate;
     if (DOM.bedInput) DOM.bedInput.value = String(entry.bed_time || "");
     if (DOM.wakeInput) DOM.wakeInput.value = String(entry.wake_time || "");
     if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
@@ -1040,52 +1062,69 @@ async function saveSleepEntry() {
   const energyAfterSleep = clampRating(DOM.energyAfterSleepInput?.value);
   const note = String(DOM.noteInput?.value || "").trim();
 
-      if (!selectedDate) {
-  alert("Выбери дату");
-  DOM.dateInput?.focus();
-  return;
-}
+  if (!selectedDate) {
+    alert("Выбери дату");
+    DOM.dateInput?.focus();
+    return;
+  }
 
-if (!isValidTime(bedTime)) {
-  alert("Выбери корректное время, когда лёг");
-  DOM.bedInput?.focus();
-  return;
-}
+  if (!isValidTime(bedTime)) {
+    alert("Выбери корректное время, когда лёг");
+    DOM.bedInput?.focus();
+    return;
+  }
 
-if (!isValidTime(wakeTime)) {
-  alert("Выбери корректное время, когда встал");
-  DOM.wakeInput?.focus();
-  return;
-}
+  if (wakeTime && !isValidTime(wakeTime)) {
+    alert("Выбери корректное время, когда встал");
+    DOM.wakeInput?.focus();
+    return;
+  }
 
-  const normalizedSleepDate = getNormalizedSleepDate(selectedDate, bedTime, wakeTime);
-  const baseDuration = calcDuration(bedTime, wakeTime);
+  const existingEntry =
+    modalState.mode === "edit" && modalState.editingId
+      ? (window.__sleepEntries || []).find(
+          (entry) => Number(entry.id) === Number(modalState.editingId)
+        )
+      : null;
+
+  const normalizedSleepDate =
+    existingEntry?.sleep_date || getNormalizedSleepDate(selectedDate, bedTime, wakeTime);
+
+  const hasWakeTime = Boolean(wakeTime);
+
+  const baseDuration = hasWakeTime ? calcDuration(bedTime, wakeTime) : 0;
   const sleepLatencyMinutes = getFallAsleepMinutes(fallAsleepSpeed);
-  const sleepDurationMinutes = Math.max(baseDuration - sleepLatencyMinutes, 0);
+  const sleepDurationMinutes = hasWakeTime
+    ? Math.max(baseDuration - sleepLatencyMinutes, 0)
+    : 0;
 
-  const sleepScore = getAutoSleepRating(
-    sleepDurationMinutes,
-    wakeCount,
-    dreamType,
-    fallAsleepSpeed
-  );
+  const sleepScore = hasWakeTime
+    ? getAutoSleepRating(
+        sleepDurationMinutes,
+        wakeCount,
+        dreamType,
+        fallAsleepSpeed
+      )
+    : 0;
 
-  const sleepEfficiency = getSleepEfficiency(
-  sleepDurationMinutes,
-  wakeCount,
-  dreamType,
-  fallAsleepSpeed,
-  energyAfterSleep
-);
+  const sleepEfficiency = hasWakeTime
+    ? getSleepEfficiency(
+        sleepDurationMinutes,
+        wakeCount,
+        dreamType,
+        fallAsleepSpeed,
+        energyAfterSleep
+      )
+    : 0;
 
   const payload = {
     sleep_date: normalizedSleepDate,
     bed_time: bedTime,
-    wake_time: wakeTime,
+    wake_time: wakeTime || null,
     wake_count: wakeCount,
     dream_type: dreamType,
     fall_asleep_speed: fallAsleepSpeed,
-    sleep_latency_minutes: sleepLatencyMinutes,
+    sleep_latency_minutes: hasWakeTime ? sleepLatencyMinutes : 0,
     sleep_duration_minutes: sleepDurationMinutes,
     sleep_efficiency: sleepEfficiency,
     sleep_score: sleepScore,
