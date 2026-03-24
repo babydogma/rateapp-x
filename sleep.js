@@ -1,4 +1,7 @@
 const DOM = {
+  
+  <script src="script/supabase.js"></script>
+  
   list: document.getElementById("sleepList"),
   addBtn: document.getElementById("addSleepBtn"),
 
