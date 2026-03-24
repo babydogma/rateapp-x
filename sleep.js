@@ -1,8 +1,5 @@
 const DOM = {
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
-  
   list: document.getElementById("sleepList"),
   addBtn: document.getElementById("addSleepBtn"),
 
