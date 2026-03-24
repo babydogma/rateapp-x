@@ -371,6 +371,30 @@
     color: #8f99a7;
     font-style: italic;
   }
+  
+  .sleep-ai-block {
+  padding: 12px 13px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(28, 24, 18, 0.92), rgba(17, 14, 10, 0.96));
+  border: 1px solid rgba(212, 175, 55, 0.10);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.015);
+}
+
+.sleep-ai-text {
+  color: #e3d7b3;
+  font-size: 13px;
+  line-height: 1.42;
+  font-weight: 600;
+}
+
+.sleep-ai-advice {
+  margin-top: 6px;
+  color: #bfa971;
+  font-size: 12px;
+  line-height: 1.38;
+}
 
   .sleep-list {
     display: grid;
