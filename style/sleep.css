@@ -779,63 +779,6 @@
   color: #f0d486;
 }
 
-.sleep-summary-dot.is-empty {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.025);
-}
-
-.sleep-summary-day {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.sleep-summary-day__date {
-  font-size: 11px;
-  font-weight: 700;
-  color: #d7dde6;
-  line-height: 1;
-  text-align: center;
-}
-
-.sleep-summary-day__weekday {
-  font-size: 10px;
-  color: #8f99a7;
-  line-height: 1;
-  text-align: center;
-}
-
-.sleep-summary-day--mini {
-  gap: 4px;
-}
-
-.sleep-summary-day__date--mini {
-  font-size: 9px;
-}
-
-.sleep-summary-day__weekday--mini {
-  font-size: 9px;
-}
-
-.sleep-summary-day__date.is-hidden,
-.sleep-summary-day__weekday.is-hidden {
-  visibility: hidden;
-}
-
-.sleep-summary-strip--7 {
-  grid-template-columns: repeat(7, 1fr);
-  align-items: start;
-}
-
-.sleep-summary-strip--30 {
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 8px 4px;
-  align-items: start;
-  justify-items: start;
-  padding-right: 14px;
-}
-
 @media (max-width: 420px) {
   .sleep-summary-head {
     align-items: flex-start;
