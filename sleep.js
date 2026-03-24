@@ -576,6 +576,7 @@ function getSleepStatus(durationMinutes, sleepRating) {
   if (hours > 8.5 && rating >= 6) {
     return {
       label: "Пересып",
+      emoji: "🥴",
       className: "is-oversleep"
     };
   }
@@ -583,6 +584,7 @@ function getSleepStatus(durationMinutes, sleepRating) {
   if (rating < 4) {
     return {
       label: "Плохой сон",
+      emoji: "😵",
       className: "is-bad"
     };
   }
@@ -590,6 +592,7 @@ function getSleepStatus(durationMinutes, sleepRating) {
   if (rating < 6) {
     return {
       label: "Нормально",
+      emoji: "😐",
       className: "is-mid"
     };
   }
@@ -597,12 +600,14 @@ function getSleepStatus(durationMinutes, sleepRating) {
   if (rating < 8) {
     return {
       label: "Хороший сон",
+      emoji: "🙂",
       className: "is-good"
     };
   }
 
   return {
     label: "Отличный сон",
+    emoji: "🥹",
     className: "is-great"
   };
 }
@@ -1260,7 +1265,7 @@ function render(entries, loadError = null) {
         <div class="card-right-column sleep-card-column">
           <div class="sleep-card-head">
             <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
-            <div class="sleep-status-chip ${status.className}">${escapeHtml(status.label)}</div>
+            <div class="sleep-status-chip ${status.className}">${escapeHtml(status.emoji)} ${escapeHtml(status.label)}</div>
           </div>
 
           <div class="sleep-chip-row">
