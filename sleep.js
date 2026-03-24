@@ -1399,13 +1399,6 @@ function render(entries, loadError = null) {
             </div>
           </div>
 
-                    <div class="sleep-chip-row sleep-chip-row--metrics">
-            <div class="sleep-metric-chip">
-              <span>Эффективность</span>
-              <strong>${formatPercent(sleepEfficiency)}</strong>
-            </div>
-          </div>
-
           <div class="sleep-ai-block">
             <div class="sleep-ai-text">
               ${escapeHtml(insightData.insight)}
