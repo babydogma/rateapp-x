@@ -529,35 +529,40 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
   energyAfterSleep
 ) {
   const hours = (Number(durationMinutes) || 0) / 60;
-  let score = 100;
 
-  if (hours < 5) score -= 35;
-  else if (hours < 6) score -= 20;
-  else if (hours < 7) score -= 10;
-  else if (hours > 8.5) score -= 4;
+  let score = 0;
 
+  // 1. ДЛИТЕЛЬНОСТЬ (основа)
+  if (hours < 5) score += 20;
+  else if (hours < 6) score += 40;
+  else if (hours < 7) score += 60;
+  else if (hours < 8) score += 75;
+  else if (hours <= 9) score += 85;
+  else score += 70;
+
+  // 2. ПРОБУЖДЕНИЯ
   const wakeValue = String(wakeCountValue || "0");
   if (wakeValue === "1") score -= 5;
   else if (wakeValue === "2") score -= 10;
   else if (wakeValue === "3") score -= 15;
   else if (wakeValue === "4plus") score -= 20;
 
+  // 3. ЗАСЫПАНИЕ
   const fallValue = String(fallAsleepSpeedValue || "medium");
   if (fallValue === "medium") score -= 5;
   else if (fallValue === "slow") score -= 10;
   else if (fallValue === "very_slow") score -= 15;
 
+  // 4. СНЫ
   const dreamValue = String(dreamTypeValue || "neutral");
   if (dreamValue === "good") score += 3;
   else if (dreamValue === "nightmare") score -= 8;
 
+  // 5. ЭНЕРГИЯ (очень важный фактор)
   const energy = Number(energyAfterSleep) || 0;
-  if (energy <= 3) score -= 8;
-  else if (energy <= 5) score -= 4;
-  else if (energy <= 8) score += 0;
-  else score += 2;
+  score += (energy - 5) * 3;
 
-  return Math.max(35, Math.min(99, Math.round(score)));
+  return Math.max(30, Math.min(95, Math.round(score)));
 }
 
 /* =========================
