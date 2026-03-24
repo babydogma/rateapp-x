@@ -1,1 +1,90 @@
+/* =========================================================
+   13. CATEGORIES COMPONENT
+   ========================================================= */
 
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding: 0 18px 120px;
+}
+
+.category-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  background: linear-gradient(
+    180deg,
+    rgba(17, 20, 24, 0.96),
+    rgba(10, 12, 15, 0.96)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+
+.category-block:active {
+  transform: scale(0.98);
+  border-color: var(--color-gold);
+}
+
+.category-block--add {
+  margin: 28px 18px 120px 18px;
+  border: 2px dashed rgba(200, 169, 90, 0.30);
+  background: linear-gradient(
+    180deg,
+    rgba(200, 169, 90, 0.04),
+    rgba(0, 0, 0, 0.18)
+  );
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.category-block--add:active {
+  transform: scale(0.97);
+  opacity: 1;
+}
+
+.cat-emoji {
+  font-size: 22px;
+}
+
+.cat-title {
+  font-size: 16px;
+}
+
+.category-edit,
+.category-delete {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: rgba(200, 169, 90, 0.65);
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.category-edit:hover,
+.category-delete:hover {
+  color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(200, 169, 90, 0.3);
+}
+
+.category-edit:active,
+.category-delete:active {
+  transform: scale(0.85);
+}
