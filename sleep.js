@@ -692,8 +692,8 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
    SUMMARY
 ========================= */
 
-function getStatusMeta(durationMinutes, sleepRating) {
-  return getSleepStatus(durationMinutes, sleepRating);
+function getStatusMeta(durationMinutes, sleepEfficiency) {
+  return getSleepStatus(durationMinutes, sleepEfficiency);
 }
 
 function getRangeEntries(entries, days) {
@@ -795,10 +795,10 @@ function buildSummaryData(entries, days) {
     };
   }
 
-  filtered.forEach((entry) => {
+    filtered.forEach((entry) => {
     const status = getStatusMeta(
       Number(entry.sleep_duration_minutes) || 0,
-      clampHalf(entry.sleep_score)
+      clampPercent(entry.sleep_efficiency)
     );
 
     if (status.className === "is-bad") counts.bad += 1;
@@ -868,9 +868,9 @@ function buildSummaryData(entries, days) {
           let statusClass = "is-empty";
 
           if (day.entry) {
-            const status = getStatusMeta(
+              const status = getStatusMeta(
               Number(day.entry.sleep_duration_minutes) || 0,
-              clampHalf(day.entry.sleep_score)
+              clampPercent(day.entry.sleep_efficiency)
             );
             statusClass = status.className;
           }
@@ -934,7 +934,7 @@ function buildSummaryData(entries, days) {
                 if (day.entry) {
                   const status = getStatusMeta(
                     Number(day.entry.sleep_duration_minutes) || 0,
-                    clampHalf(day.entry.sleep_score)
+                    clampPercent(day.entry.sleep_efficiency)
                   );
                   statusClass = status.className;
                 }
