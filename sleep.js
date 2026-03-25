@@ -543,10 +543,10 @@ function getSleepEfficiency(
 
   // 2. ПРОБУЖДЕНИЯ
   const wakeValue = String(wakeCountValue || "0");
-  if (wakeValue === "1") score -= 5;
-  else if (wakeValue === "2") score -= 10;
-  else if (wakeValue === "3") score -= 15;
-  else if (wakeValue === "4plus") score -= 20;
+  if (wakeValue === "1") score -= 8;
+  else if (wakeValue === "2") score -= 18;
+  else if (wakeValue === "3") score -= 25;
+  else if (wakeValue === "4plus") score -= 35;
 
   // 3. ЗАСЫПАНИЕ
   const fallValue = String(fallAsleepSpeedValue || "medium");
