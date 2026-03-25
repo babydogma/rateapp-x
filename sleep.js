@@ -634,7 +634,7 @@ function getSleepStatus(durationMinutes, sleepEfficiency) {
   }
 
   if (eff < 80) {
-    return { label: "Нормально", emoji: "🙂", className: "is-good" };
+    return { label: "Нормально", emoji: "😊", className: "is-good" };
   }
 
   return { label: "Отлично", emoji: "🥹", className: "is-great" };
