@@ -31,7 +31,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .sleep-modal-box .category-modal__title {
@@ -69,8 +69,8 @@
 }
 
 .sleep-modal-box select {
-  min-height: 50px !important;
-  height: 50px !important;
+  min-height: 56px !important;
+  height: 56px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
@@ -106,7 +106,7 @@
   align-items: start !important;
   gap: 10px !important;
   width: 100% !important;
-  margin: 0 auto 14px !important;
+  margin: 0 auto 18px !important;
 }
 
   .sleep-time-field {
