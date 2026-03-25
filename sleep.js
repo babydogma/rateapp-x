@@ -616,47 +616,28 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
    STATUS
 ========================= */
 
-function getSleepStatus(durationMinutes, sleepRating) {
+function getSleepStatus(durationMinutes, sleepEfficiency) {
   const hours = (Number(durationMinutes) || 0) / 60;
-  const rating = clampHalf(sleepRating);
+  const eff = Number(sleepEfficiency) || 0;
 
-  if (hours > 8.5 && rating >= 6) {
-    return {
-      label: "Пересып",
-      emoji: "🥴",
-      className: "is-oversleep"
-    };
+  // пересып
+  if (hours > 8.5 && eff >= 65) {
+    return { label: "Пересып", emoji: "🥴", className: "is-oversleep" };
   }
 
-  if (rating < 4) {
-    return {
-      label: "Плохой сон",
-      emoji: "😵",
-      className: "is-bad"
-    };
+  if (eff < 45) {
+    return { label: "Плохой сон", emoji: "😵", className: "is-bad" };
   }
 
-  if (rating < 6) {
-    return {
-      label: "Нормально",
-      emoji: "😐",
-      className: "is-mid"
-    };
+  if (eff < 65) {
+    return { label: "Пойдёт", emoji: "🫪", className: "is-mid" };
   }
 
-  if (rating < 8) {
-    return {
-      label: "Хороший сон",
-      emoji: "🙂",
-      className: "is-good"
-    };
+  if (eff < 80) {
+    return { label: "Нормальный сон", emoji: "🙂", className: "is-good" };
   }
 
-  return {
-    label: "Отличный сон",
-    emoji: "🥹",
-    className: "is-great"
-  };
+  return { label: "Отличный сон", emoji: "🥹", className: "is-great" };
 }
 
 function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed }) {
@@ -1352,7 +1333,7 @@ function render(entries, loadError = null) {
     const dreamType = String(entry.dream_type || "neutral");
     const fallAsleepSpeed = String(entry.fall_asleep_speed || "medium");
     const safeNote = String(entry.note || "").trim();
-    const status = getSleepStatus(sleepDurationMinutes, sleepScore);
+    const status = getSleepStatus(sleepDurationMinutes, sleepEfficiency);
     const noteClass = safeNote ? "" : "is-empty";
         const insightData = getSleepInsightData({
       durationMinutes: sleepDurationMinutes,
