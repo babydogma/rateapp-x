@@ -176,72 +176,75 @@
     border-radius: var(--radius-md);
   }
 
-  .sleep-entry-card {
-    position: relative;
-    will-change: transform;
-    background:
-      linear-gradient(180deg, rgba(24, 28, 34, 0.98), rgba(13, 16, 20, 0.98)) !important;
-    border: 1px solid rgba(255, 255, 255, 0.045) !important;
-    box-shadow:
-      0 14px 30px rgba(0, 0, 0, 0.28),
-      0 0 0 1px rgba(255, 255, 255, 0.01) !important;
-  }
+.sleep-entry-card {
+  position: relative;
+  will-change: transform;
+  background:
+    radial-gradient(circle at top center, rgba(212, 175, 55, 0.05), transparent 42%),
+    linear-gradient(180deg, rgba(23, 27, 33, 0.985), rgba(11, 14, 18, 0.99)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.30),
+    0 0 0 1px rgba(255, 255, 255, 0.012) !important;
+}
 
-  .sleep-entry-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 18px;
-    right: 18px;
-    height: 2px;
-    border-radius: 999px;
-    opacity: 0.9;
-    pointer-events: none;
-  }
+.sleep-entry-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 22px;
+  right: 22px;
+  height: 1px;
+  border-radius: 999px;
+  opacity: 0.85;
+  pointer-events: none;
+}
 
   .sleep-entry-card::after {
     display: none !important;
   }
 
-  .sleep-card-content {
-    padding: 14px !important;
-  }
+.sleep-card-content {
+  padding: 16px 15px 15px !important;
+}
 
-  .sleep-card-column {
-    gap: 12px !important;
-  }
+.sleep-card-column {
+  gap: 13px !important;
+}
 
-  .sleep-card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
+.sleep-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  .sleep-card-date {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--color-gold);
-  }
+.sleep-card-date {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #e1c878;
+}
 
-  .sleep-status-chip {
-    flex-shrink: 0;
-    padding: 7px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: #e7e3dc;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.03),
-      0 0 0 rgba(0, 0, 0, 0);
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      background 0.2s ease,
-      color 0.2s ease;
-  }
+.sleep-status-chip {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e7e3dc;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 6px 18px rgba(0, 0, 0, 0.10);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
 
   .sleep-status-chip.is-bad {
     background: rgba(166, 63, 63, 0.16);
@@ -314,36 +317,37 @@
     gap: 8px;
   }
 
-  .sleep-info-chip,
-  .sleep-metric-chip {
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    background: linear-gradient(180deg, rgba(21, 25, 31, 0.96), rgba(13, 16, 20, 0.96));
-    box-shadow:
-      0 8px 18px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.02);
-  }
+.sleep-info-chip,
+.sleep-metric-chip {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
 
-  .sleep-info-chip {
-    padding: 9px 11px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #e3e7ec;
-  }
+.sleep-info-chip {
+  padding: 8px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #d7dde6;
+  background: linear-gradient(180deg, rgba(18, 21, 27, 0.92), rgba(12, 15, 19, 0.94));
+}
 
   .sleep-chip-row--metrics {
     gap: 10px;
   }
 
-  .sleep-metric-chip {
-    flex: 1 1 0;
-    min-width: 0;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
+.sleep-metric-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(180deg, rgba(22, 26, 32, 0.98), rgba(13, 16, 20, 0.98));
+}
 
   .sleep-metric-chip span {
     font-size: 12px;
@@ -362,52 +366,60 @@
 }
 
 .sleep-metric-chip--primary {
-  padding: 11px 13px;
+  padding: 13px 14px;
+  border-color: rgba(212, 175, 55, 0.08);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .sleep-metric-chip--primary span {
-  font-size: 13px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ea8b5;
 }
 
 .sleep-metric-chip--primary strong {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .sleep-metric-chip--secondary {
   padding: 8px 10px;
-  opacity: 0.88;
+  opacity: 0.82;
+  background: linear-gradient(180deg, rgba(18, 21, 27, 0.92), rgba(12, 15, 18, 0.94));
 }
 
 .sleep-metric-chip--secondary span {
-  font-size: 11px;
+  font-size: 10.5px;
 }
 
 .sleep-metric-chip--secondary strong {
   font-size: 13px;
 }
 
-  .sleep-note-block {
-    padding: 12px 13px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(19, 22, 27, 0.92), rgba(12, 15, 18, 0.96));
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    color: #c7ccd3;
-    font-size: 13px;
-    line-height: 1.42;
-  }
+.sleep-note-block {
+  padding: 12px 13px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(16, 19, 24, 0.88), rgba(10, 13, 16, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: #b8c0cb;
+  font-size: 13px;
+  line-height: 1.45;
+}
 
   .sleep-note-block.is-empty {
     color: #8f99a7;
     font-style: italic;
   }
   
-  .sleep-ai-block {
-  padding: 12px 13px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(28, 24, 18, 0.92), rgba(17, 14, 10, 0.96));
-  border: 1px solid rgba(212, 175, 55, 0.10);
+.sleep-ai-block {
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(29, 24, 17, 0.94), rgba(17, 13, 10, 0.98));
+  border: 1px solid rgba(212, 175, 55, 0.11);
   box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.16),
+    0 10px 22px rgba(0, 0, 0, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.015);
 }
 
