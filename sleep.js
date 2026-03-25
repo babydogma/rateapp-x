@@ -1362,21 +1362,21 @@ function render(entries, loadError = null) {
             <div class="sleep-info-chip">Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})</div>
           </div>
 
-          <div class="sleep-chip-row sleep-chip-row--metrics">
-            <div class="sleep-metric-chip">
-              <span>Сон</span>
-              <strong>${formatAutoSleepRating(sleepScore)}</strong>
-            </div>
-            <div class="sleep-metric-chip">
-              <span>Энергия</span>
-              <strong>${energyAfterSleep}/10</strong>
+                    <div class="sleep-chip-row sleep-chip-row--metrics">
+            <div class="sleep-metric-chip sleep-metric-chip--primary">
+              <span>Эффективность</span>
+              <strong>${formatPercent(sleepEfficiency)}</strong>
             </div>
           </div>
 
-                    <div class="sleep-chip-row sleep-chip-row--metrics">
-            <div class="sleep-metric-chip">
-              <span>Эффективность</span>
-              <strong>${formatPercent(sleepEfficiency)}</strong>
+          <div class="sleep-chip-row sleep-chip-row--metrics sleep-chip-row--secondary">
+            <div class="sleep-metric-chip sleep-metric-chip--secondary">
+              <span>Сон</span>
+              <strong>${formatAutoSleepRating(sleepScore)}</strong>
+            </div>
+            <div class="sleep-metric-chip sleep-metric-chip--secondary">
+              <span>Энергия</span>
+              <strong>${energyAfterSleep}/10</strong>
             </div>
           </div>
 
