@@ -812,22 +812,8 @@
 }
 
 .sleep-summary-strip::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  top: 32px;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.14),
-    rgba(255,255,255,0.3),
-    rgba(226,190,101,0.42),
-    rgba(255,255,255,0.26),
-    rgba(255,255,255,0.12)
-  );
-  opacity: 0.55;
+  opacity: 0.25;
+  height: 1px;
 }
 
 .sleep-summary-strip--7 {
