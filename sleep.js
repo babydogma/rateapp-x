@@ -1349,48 +1349,44 @@ function render(entries, loadError = null) {
     el.innerHTML = `
   <div class="card-content sleep-card-content sleep-card-content--focus">
     <div class="card-right-column sleep-card-column sleep-card-column--focus">
-      <div class="sleep-card-head sleep-card-head--focus">
+
+      <div class="sleep-card-head">
         <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
-        <div class="sleep-status-chip sleep-status-chip--focus ${status.className}">
+        <div class="sleep-status-chip ${status.className}">
           ${escapeHtml(status.emoji)} ${escapeHtml(status.label)}
         </div>
       </div>
 
       <div class="sleep-main-block">
-        <div class="sleep-main-range">
+        <div class="sleep-main-time">
           ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")}
         </div>
+
         <div class="sleep-main-duration">
           ${escapeHtml(formatDuration(sleepDurationMinutes))}
         </div>
-      </div>
 
-      <div class="sleep-meta-line">
-        Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))} •
-        Снилось: ${escapeHtml(getDreamLabel(dreamType))} •
-        Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})
-      </div>
-
-      <div class="sleep-stats-line">
-        Эфф: ${formatPercent(sleepEfficiency)} •
-        Сон: ${formatAutoSleepRating(sleepScore)} •
-        Энергия: ${energyAfterSleep}/10
-      </div>
-
-      <div class="sleep-ai-block sleep-ai-block--focus">
-        <div class="sleep-ai-text">
-          ${escapeHtml(insightData.insight)}
+        <div class="sleep-meta-line">
+          Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))} •
+          Снилось: ${escapeHtml(getDreamLabel(dreamType))} •
+          Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})
         </div>
-        ${
-          insightData.advice
-            ? `<div class="sleep-ai-advice">${escapeHtml(insightData.advice)}</div>`
-            : ""
-        }
+
+        <div class="sleep-score-line">
+          Эфф: ${formatPercent(sleepEfficiency)} •
+          Сон: ${formatAutoSleepRating(sleepScore)} •
+          Энергия: ${energyAfterSleep}/10
+        </div>
       </div>
 
-      <div class="sleep-note-block sleep-note-block--focus ${noteClass}" data-role="sleep-note-edit">
+      <div class="sleep-summary-box">
+        ${escapeHtml(insightData.insight)}
+      </div>
+
+      <div class="sleep-note-text">
         ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
       </div>
+
     </div>
   </div>
 `;
