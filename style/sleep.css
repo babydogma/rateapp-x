@@ -209,7 +209,7 @@
 }
 
 .sleep-card-column {
-  gap: 13px !important;
+  gap: 11px !important;
 }
 
 .sleep-card-head {
@@ -327,11 +327,13 @@
 }
 
 .sleep-info-chip {
-  padding: 8px 10px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #d7dde6;
-  background: linear-gradient(180deg, rgba(18, 21, 27, 0.92), rgba(12, 15, 19, 0.94));
+  padding: 7px 9px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #aeb6c2;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.025);
+  box-shadow: none;
 }
 
   .sleep-chip-row--metrics {
@@ -399,13 +401,13 @@
 }
 
 .sleep-note-block {
-  padding: 12px 13px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(16, 19, 24, 0.88), rgba(10, 13, 16, 0.92));
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  color: #b8c0cb;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: #8f98a5;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
   .sleep-note-block.is-empty {
