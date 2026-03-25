@@ -578,8 +578,8 @@ function getSleepStatus(durationMinutes, sleepEfficiency, energyAfterSleep) {
   let level = "great";
 
   if (eff < 45) level = "bad";
-  else if (eff < 65) level = "mid";
-  else if (eff < 80) level = "good";
+  else if (eff < 60) level = "mid";
+  else if (eff < 75) level = "good";
 
   // мягкая коррекция статуса по очень низкой энергии
   if (Number.isFinite(energy) && energy <= 3) {
