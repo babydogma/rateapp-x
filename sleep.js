@@ -934,21 +934,21 @@ function buildSummaryData(entries, days) {
 }
 
   DOM.summaryPanel.innerHTML = `
-    <div class="sleep-summary-head">
-      <div class="sleep-summary-panel__title">${title}</div>
-      ${monthFilterHtml}
+  <div class="sleep-summary-head">
+    <div class="sleep-summary-panel__title">${title}</div>
+    ${monthFilterHtml}
+  </div>
+  ${stripHtml}
+  <div class="sleep-summary-metrics sleep-summary-metrics--focus">
+    <div class="sleep-summary-line sleep-summary-line--focus">
+      <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
     </div>
-    ${stripHtml}
-    <div class="sleep-summary-metrics">
-      <div class="sleep-summary-line">
-        <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
-      </div>
-      <div class="sleep-summary-line">
-        Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Плохих ночей: ${data.counts.bad}
-      </div>
+    <div class="sleep-summary-line sleep-summary-line--focus sleep-summary-line--muted">
+      Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Плохих ночей: ${data.counts.bad}
     </div>
-    <div class="sleep-summary-insight">${escapeHtml(data.insight)}</div>
-  `;
+  </div>
+  <div class="sleep-summary-insight sleep-summary-insight--focus">${escapeHtml(data.insight)}</div>
+`;
 
   DOM.summaryPanel.hidden = false;
 
@@ -1347,60 +1347,53 @@ function render(entries, loadError = null) {
     });
 
     el.innerHTML = `
-      <div class="card-content sleep-card-content">
-        <div class="card-right-column sleep-card-column">
-          <div class="sleep-card-head">
-            <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
-            <div class="sleep-status-chip ${status.className}">${escapeHtml(status.emoji)} ${escapeHtml(status.label)}</div>
-          </div>
-
-          <div class="sleep-chip-row">
-            <div class="sleep-info-chip">🌙 ${escapeHtml(entry.bed_time || "--:--")}</div>
-            <div class="sleep-info-chip">☀️ ${escapeHtml(entry.wake_time || "--:--")}</div>
-            <div class="sleep-info-chip">😴 ${escapeHtml(formatDuration(sleepDurationMinutes))}</div>
-          </div>
-
-          <div class="sleep-chip-row">
-            <div class="sleep-info-chip">Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</div>
-            <div class="sleep-info-chip">Снилось: ${escapeHtml(getDreamLabel(dreamType))}</div>
-            <div class="sleep-info-chip">Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})</div>
-          </div>
-
-                    <div class="sleep-chip-row sleep-chip-row--metrics">
-            <div class="sleep-metric-chip sleep-metric-chip--primary">
-              <span>Эффективность</span>
-              <strong>${formatPercent(sleepEfficiency)}</strong>
-            </div>
-          </div>
-
-          <div class="sleep-chip-row sleep-chip-row--metrics sleep-chip-row--secondary">
-            <div class="sleep-metric-chip sleep-metric-chip--secondary">
-              <span>Сон</span>
-              <strong>${formatAutoSleepRating(sleepScore)}</strong>
-            </div>
-            <div class="sleep-metric-chip sleep-metric-chip--secondary">
-              <span>Энергия</span>
-              <strong>${energyAfterSleep}/10</strong>
-            </div>
-          </div>
-
-          <div class="sleep-ai-block">
-            <div class="sleep-ai-text">
-              ${escapeHtml(insightData.insight)}
-            </div>
-            ${
-              insightData.advice
-                ? `<div class="sleep-ai-advice">${escapeHtml(insightData.advice)}</div>`
-                : ""
-            }
-          </div>
-
-          <div class="sleep-note-block ${noteClass}" data-role="sleep-note-edit">
-            ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
-          </div>
+  <div class="card-content sleep-card-content sleep-card-content--focus">
+    <div class="card-right-column sleep-card-column sleep-card-column--focus">
+      <div class="sleep-card-head sleep-card-head--focus">
+        <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
+        <div class="sleep-status-chip sleep-status-chip--focus ${status.className}">
+          ${escapeHtml(status.emoji)} ${escapeHtml(status.label)}
         </div>
       </div>
-    `;
+
+      <div class="sleep-main-block">
+        <div class="sleep-main-range">
+          ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")}
+        </div>
+        <div class="sleep-main-duration">
+          ${escapeHtml(formatDuration(sleepDurationMinutes))}
+        </div>
+      </div>
+
+      <div class="sleep-meta-line">
+        Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))} •
+        Снилось: ${escapeHtml(getDreamLabel(dreamType))} •
+        Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})
+      </div>
+
+      <div class="sleep-stats-line">
+        Эфф: ${formatPercent(sleepEfficiency)} •
+        Сон: ${formatAutoSleepRating(sleepScore)} •
+        Энергия: ${energyAfterSleep}/10
+      </div>
+
+      <div class="sleep-ai-block sleep-ai-block--focus">
+        <div class="sleep-ai-text">
+          ${escapeHtml(insightData.insight)}
+        </div>
+        ${
+          insightData.advice
+            ? `<div class="sleep-ai-advice">${escapeHtml(insightData.advice)}</div>`
+            : ""
+        }
+      </div>
+
+      <div class="sleep-note-block sleep-note-block--focus ${noteClass}" data-role="sleep-note-edit">
+        ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
+      </div>
+    </div>
+  </div>
+`;
 
     el.addEventListener("click", () => openSleepModal(entry));
     enableSleepSwipeDelete(wrapper, el, entry);
