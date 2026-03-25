@@ -626,7 +626,7 @@ function getSleepStatus(durationMinutes, sleepEfficiency) {
   }
 
   if (eff < 45) {
-    return { label: "Плохой сон", emoji: "😵", className: "is-bad" };
+    return { label: "Плохо", emoji: "😵", className: "is-bad" };
   }
 
   if (eff < 65) {
@@ -634,10 +634,10 @@ function getSleepStatus(durationMinutes, sleepEfficiency) {
   }
 
   if (eff < 80) {
-    return { label: "Нормальный сон", emoji: "🙂", className: "is-good" };
+    return { label: "Нормально", emoji: "🙂", className: "is-good" };
   }
 
-  return { label: "Отличный сон", emoji: "🥹", className: "is-great" };
+  return { label: "Отлично", emoji: "🥹", className: "is-great" };
 }
 
 function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed }) {
