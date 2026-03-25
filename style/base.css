@@ -51,9 +51,7 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top center, rgba(200, 169, 90, 0.06), transparent 30%),
-    radial-gradient(circle at 18% 0%, rgba(90, 108, 132, 0.10), transparent 34%),
-    linear-gradient(180deg, #050607 0%, #0b0d10 28%, #111418 100%);
+    linear-gradient(180deg, #05070c 0%, #090d16 40%, #0b111d 100%);
   color: var(--color-text-primary);
   padding-top: env(safe-area-inset-top);
   padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
