@@ -508,10 +508,10 @@
   }
 
   .sleep-summary-strip {
-    display: grid;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
 
   .sleep-summary-strip--7 {
     grid-template-columns: repeat(7, 1fr);
