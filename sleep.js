@@ -522,7 +522,7 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
    EFFICIENCY
 ========================= */
 
-    function getSleepEfficiency(
+function getSleepEfficiency(
   durationMinutes,
   wakeCountValue,
   dreamTypeValue,
@@ -559,10 +559,6 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
   if (dreamValue === "good") score += 3;
   else if (dreamValue === "nightmare") score -= 8;
 
-  // 5. ЭНЕРГИЯ (очень важный фактор)
-  const energy = Number(energyAfterSleep) || 0;
-  score += (energy - 5) * 1.5;
-
   return Math.max(30, Math.min(95, Math.round(score)));
 }
 
@@ -570,24 +566,37 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
    STATUS
 ========================= */
 
-function getSleepStatus(durationMinutes, sleepEfficiency) {
+function getSleepStatus(durationMinutes, sleepEfficiency, energyAfterSleep) {
   const hours = (Number(durationMinutes) || 0) / 60;
   const eff = Number(sleepEfficiency) || 0;
+  const energy = Number(energyAfterSleep);
 
-  // пересып
   if (hours > 8.5 && eff >= 65) {
     return { label: "Пересып", emoji: "🥴", className: "is-oversleep" };
   }
 
-  if (eff < 45) {
+  let level = "great";
+
+  if (eff < 45) level = "bad";
+  else if (eff < 65) level = "mid";
+  else if (eff < 80) level = "good";
+
+  // мягкая коррекция статуса по очень низкой энергии
+  if (Number.isFinite(energy) && energy <= 3) {
+    if (level === "great") level = "good";
+    else if (level === "good") level = "mid";
+    else if (level === "mid") level = "bad";
+  }
+
+  if (level === "bad") {
     return { label: "Плохо", emoji: "😵", className: "is-bad" };
   }
 
-  if (eff < 65) {
+  if (level === "mid") {
     return { label: "Пойдёт", emoji: "🙂", className: "is-mid" };
   }
 
-  if (eff < 80) {
+  if (level === "good") {
     return { label: "Нормально", emoji: "😊", className: "is-good" };
   }
 
@@ -646,8 +655,8 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
    SUMMARY
 ========================= */
 
-function getStatusMeta(durationMinutes, sleepEfficiency) {
-  return getSleepStatus(durationMinutes, sleepEfficiency);
+function getStatusMeta(durationMinutes, sleepEfficiency, energyAfterSleep) {
+  return getSleepStatus(durationMinutes, sleepEfficiency, energyAfterSleep);
 }
 
 function getRangeEntries(entries, days) {
@@ -751,9 +760,10 @@ function buildSummaryData(entries, days) {
 
     filtered.forEach((entry) => {
     const status = getStatusMeta(
-      Number(entry.sleep_duration_minutes) || 0,
-      clampPercent(entry.sleep_efficiency)
-    );
+  Number(entry.sleep_duration_minutes) || 0,
+  clampPercent(entry.sleep_efficiency),
+  clampRating(entry.energy_after_sleep)
+);
 
     if (status.className === "is-bad") counts.bad += 1;
     if (status.className === "is-mid") counts.mid += 1;
@@ -823,9 +833,10 @@ function buildSummaryData(entries, days) {
 
           if (day.entry) {
               const status = getStatusMeta(
-              Number(day.entry.sleep_duration_minutes) || 0,
-              clampPercent(day.entry.sleep_efficiency)
-            );
+  Number(day.entry.sleep_duration_minutes) || 0,
+  clampPercent(day.entry.sleep_efficiency),
+  clampRating(day.entry.energy_after_sleep)
+);
             statusClass = status.className;
           }
 
@@ -887,9 +898,10 @@ function buildSummaryData(entries, days) {
 
                 if (day.entry) {
                   const status = getStatusMeta(
-                    Number(day.entry.sleep_duration_minutes) || 0,
-                    clampPercent(day.entry.sleep_efficiency)
-                  );
+  Number(day.entry.sleep_duration_minutes) || 0,
+  clampPercent(day.entry.sleep_efficiency),
+  clampRating(day.entry.energy_after_sleep)
+);
                   statusClass = status.className;
                 }
 
@@ -1287,7 +1299,11 @@ function render(entries, loadError = null) {
     const dreamType = String(entry.dream_type || "neutral");
     const fallAsleepSpeed = String(entry.fall_asleep_speed || "medium");
     const safeNote = String(entry.note || "").trim();
-    const status = getSleepStatus(sleepDurationMinutes, sleepEfficiency);
+    const status = getSleepStatus(
+  sleepDurationMinutes,
+  sleepEfficiency,
+  energyAfterSleep
+);
     const noteClass = safeNote ? "" : "is-empty";
         const insightData = getSleepInsightData({
       durationMinutes: sleepDurationMinutes,
