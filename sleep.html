@@ -64,19 +64,19 @@
         </div>
       </div>
 
-      <div class="sleep-time-row">
-        <div class="sleep-time-field">
-          <label class="category-modal__label" for="wakeCountInput">Просыпался</label>
-          <div class="sleep-time-shell">
-            <select id="wakeCountInput" class="sleep-time-input">
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4plus">более 3</option>
-            </select>
-          </div>
-        </div>
+      <div class="sleep-time-field">
+  <label class="category-modal__label">Просыпался</label>
+
+  <input type="hidden" id="wakeCountInput" value="0">
+
+  <div class="sleep-radio-group" id="wakeCountGroup">
+    <button type="button" class="sleep-radio is-active" data-value="0">0</button>
+    <button type="button" class="sleep-radio" data-value="1">1</button>
+    <button type="button" class="sleep-radio" data-value="2">2</button>
+    <button type="button" class="sleep-radio" data-value="3">3</button>
+    <button type="button" class="sleep-radio" data-value="4plus">3+</button>
+  </div>
+</div>
 
         <div class="sleep-time-field">
           <label class="category-modal__label" for="dreamTypeInput">Что снилось</label>
