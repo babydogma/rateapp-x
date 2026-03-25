@@ -1024,11 +1024,26 @@ function syncSleepSliderUI() {
   }
 }
 
+function syncWakeCountRadioUI(value = "0") {
+  const safeValue = String(value || "0");
+  const group = document.getElementById("wakeCountGroup");
+  if (!group) return;
+
+  group.querySelectorAll(".sleep-radio").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.value === safeValue);
+  });
+
+  if (DOM.wakeCountInput) {
+    DOM.wakeCountInput.value = safeValue;
+  }
+}
+
 function resetSleepForm() {
   if (DOM.dateInput) DOM.dateInput.value = getTodayDateString();
   if (DOM.bedInput) DOM.bedInput.value = "";
   if (DOM.wakeInput) DOM.wakeInput.value = "";
   if (DOM.wakeCountInput) DOM.wakeCountInput.value = "0";
+syncWakeCountRadioUI("0");
   if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = "neutral";
   if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = "medium";
   if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = "0";
@@ -1048,6 +1063,7 @@ function openSleepModal(entry = null) {
     if (DOM.bedInput) DOM.bedInput.value = String(entry.bed_time || "");
     if (DOM.wakeInput) DOM.wakeInput.value = String(entry.wake_time || "");
     if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
+    syncWakeCountRadioUI(String(entry.wake_count || "0"));
     if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = String(entry.dream_type || "neutral");
     if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = String(entry.fall_asleep_speed || "medium");
     if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = String(clampRating(entry.energy_after_sleep));
@@ -1193,8 +1209,14 @@ function setupSleepModal() {
 
   DOM.energyAfterSleepInput?.addEventListener("input", syncSleepSliderUI);
 
-  resetSleepForm();
-}
+document.querySelectorAll("#wakeCountGroup .sleep-radio").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const value = String(btn.dataset.value || "0");
+    syncWakeCountRadioUI(value);
+  });
+});
+
+resetSleepForm();
 
 /* =========================
    CONFIRM
