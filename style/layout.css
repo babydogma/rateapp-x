@@ -56,6 +56,20 @@
   pointer-events: none;
 }
 
+.top-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.06), transparent 35%),
+    radial-gradient(circle at 50% 40%, rgba(255,215,120,0.06), transparent 45%);
+
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
 .layout-grid {
   display: grid;
   grid-template-columns: 1fr;
