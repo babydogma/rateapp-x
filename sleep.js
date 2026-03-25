@@ -630,7 +630,7 @@ function getSleepStatus(durationMinutes, sleepEfficiency) {
   }
 
   if (eff < 65) {
-    return { label: "Пойдёт", emoji: "🫪", className: "is-mid" };
+    return { label: "Пойдёт", emoji: "🙂", className: "is-mid" };
   }
 
   if (eff < 80) {
