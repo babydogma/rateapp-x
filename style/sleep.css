@@ -6,6 +6,28 @@
     linear-gradient(180deg, #070b14 0%, #0a1020 48%, #070c16 100%) !important;
 }
 
+.sleep-page {
+  position: relative;
+}
+
+.sleep-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.32;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,0.08) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 78% 12%, rgba(255,255,255,0.06) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 85% 38%, rgba(255,255,255,0.05) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 32% 56%, rgba(255,255,255,0.04) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 64% 72%, rgba(255,245,220,0.05) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 18% 84%, rgba(255,255,255,0.04) 0 1px, transparent 1.7px);
+  background-size: 280px 280px, 360px 360px, 420px 420px, 320px 320px, 380px 380px, 300px 300px;
+  mix-blend-mode: screen;
+}
+
 .sleep-page .app {
   background: transparent !important;
 }
