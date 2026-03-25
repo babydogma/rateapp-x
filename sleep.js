@@ -631,19 +631,26 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
     };
   }
 
-  if (energyVal <= 4) {
-    return {
-      insight: "По самочувствию восстановление получилось слабым.",
-      advice: ""
-    };
-  }
+  if (energyVal <= 4 && hours >= 7) {
+  return {
+    insight: "Сон был нормальным, но по ощущениям восстановление слабое.",
+    advice: ""
+  };
+}
 
-  if (wakeVal >= 2) {
-    return {
-      insight: "Сон прерывался несколько раз — это мешает глубокому восстановлению.",
-      advice: ""
-    };
-  }
+  if (wakeVal >= 2 && hours < 7) {
+  return {
+    insight: "Сон был прерывистым и немного коротким — восстановление среднее.",
+    advice: ""
+  };
+}
+
+if (wakeVal >= 2) {
+  return {
+    insight: "Сон прерывался — это слегка снижает качество восстановления.",
+    advice: ""
+  };
+}
 
   return {
     insight: "Сон прошёл стабильно — организм восстановился.",
@@ -715,8 +722,12 @@ function buildSummaryInsight(entries, stats) {
     return "Основная проблема — долгое засыпание";
   }
 
-  if (stats.avgSleepEfficiency < 75) {
+  if (stats.avgSleepEfficiency < 55) {
   return "Общее восстановление слабое — стоит улучшить сон";
+}
+
+if (stats.avgSleepEfficiency < 70) {
+  return "Сон нестабильный — есть потенциал для улучшения";
 }
 
   if (wakeHeavyShare >= 0.3) {
