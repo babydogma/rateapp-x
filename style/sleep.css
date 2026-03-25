@@ -768,32 +768,14 @@
 ========================= */
 
 .sleep-summary-panel {
-  position: relative;
-  margin-top: 14px;
-  padding: 18px 18px 16px !important;
-  border-radius: 30px !important;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 42%),
-    radial-gradient(circle at 50% 52%, rgba(228, 192, 103, 0.07), transparent 44%),
-    linear-gradient(180deg, rgba(14, 20, 34, 0.58), rgba(10, 16, 28, 0.64)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.055) !important;
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  overflow: hidden;
-}
+  margin-top: 12px;
+  padding: 16px 6px 10px !important;
 
-.sleep-summary-panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.05), transparent 24%),
-    radial-gradient(circle at 82% 74%, rgba(227, 189, 98, 0.06), transparent 28%);
-  opacity: 0.9;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  backdrop-filter: none;
 }
 
 .sleep-summary-panel[hidden] {
