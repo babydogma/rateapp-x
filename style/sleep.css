@@ -685,10 +685,10 @@
       font-size: 11.5px;
     }
 
-    .sleep-info-chip {
-      font-size: 12px;
-      padding: 8px 10px;
-    }
+.sleep-info-chip {
+  font-size: 11.5px;
+  padding: 7px 9px;
+}
 
     .sleep-metric-chip {
       padding: 9px 10px;
@@ -907,7 +907,7 @@
 .sleep-summary-week-days {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .sleep-summary-week-day {
