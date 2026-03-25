@@ -356,6 +356,35 @@
     color: var(--color-gold);
     font-weight: 700;
   }
+  
+  .sleep-chip-row--secondary {
+  gap: 8px;
+}
+
+.sleep-metric-chip--primary {
+  padding: 11px 13px;
+}
+
+.sleep-metric-chip--primary span {
+  font-size: 13px;
+}
+
+.sleep-metric-chip--primary strong {
+  font-size: 16px;
+}
+
+.sleep-metric-chip--secondary {
+  padding: 8px 10px;
+  opacity: 0.88;
+}
+
+.sleep-metric-chip--secondary span {
+  font-size: 11px;
+}
+
+.sleep-metric-chip--secondary strong {
+  font-size: 13px;
+}
 
   .sleep-note-block {
     padding: 12px 13px;
