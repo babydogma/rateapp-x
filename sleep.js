@@ -431,10 +431,6 @@ function getWeekRangeLabel(startDateStr, endDateStr) {
   return `${getDateShortLabel(startDateStr)} — ${getDateShortLabel(endDateStr)}`;
 }
 
-function getSleepSummaryComment({ durationMinutes, wakeCount, energy }) {
-  const hours = (Number(durationMinutes) || 0) / 60;
-  const energyVal = Number(energy) || 0;
-
   function random(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
@@ -607,7 +603,7 @@ function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fal
 
   // 5. ЭНЕРГИЯ (очень важный фактор)
   const energy = Number(energyAfterSleep) || 0;
-  score += (energy - 5) * 3;
+  score += (energy - 5) * 1.5;
 
   return Math.max(30, Math.min(95, Math.round(score)));
 }
@@ -753,8 +749,8 @@ function buildSummaryInsight(entries, stats) {
   }
 
   if (stats.avgSleepEfficiency < 75) {
-    return "Качество сна слабое: мешают структура сна и пробуждения";
-  }
+  return "Общее восстановление слабое — стоит улучшить сон";
+}
 
   if (wakeHeavyShare >= 0.3) {
     return "Сон часто рвётся из-за пробуждений";
