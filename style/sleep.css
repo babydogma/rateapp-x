@@ -327,13 +327,13 @@
 }
 
 .sleep-info-chip {
-  padding: 7px 9px;
-  font-size: 12px;
+  padding: 6px 8px;
+  font-size: 11.5px;
   font-weight: 500;
-  color: #aeb6c2;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.025);
-  box-shadow: none;
+  color: #8f99a7;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  opacity: 0.9;
 }
 
   .sleep-chip-row--metrics {
