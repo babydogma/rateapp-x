@@ -1,5 +1,4 @@
 const DOM = {
-  
   list: document.getElementById("sleepList"),
   addBtn: document.getElementById("addSleepBtn"),
 
@@ -28,7 +27,7 @@ const DOM = {
 
   summarySwitcher: document.getElementById("sleepSummarySwitcher"),
   summaryPanel: document.getElementById("sleepSummaryPanel"),
-  
+
   monthFilterWrap: document.getElementById("sleepMonthFilterWrap"),
   monthFilterBtn: document.getElementById("sleepMonthFilterBtn"),
   monthFilterMenu: document.getElementById("sleepMonthFilterMenu"),
@@ -533,7 +532,6 @@ function getSleepEfficiency(
 
   let score = 0;
 
-  // 1. ДЛИТЕЛЬНОСТЬ (основа)
   if (hours < 5) score += 20;
   else if (hours < 6) score += 40;
   else if (hours < 7) score += 60;
@@ -541,20 +539,17 @@ function getSleepEfficiency(
   else if (hours <= 9) score += 85;
   else score += 70;
 
-  // 2. ПРОБУЖДЕНИЯ
   const wakeValue = String(wakeCountValue || "0");
   if (wakeValue === "1") score -= 8;
   else if (wakeValue === "2") score -= 18;
   else if (wakeValue === "3") score -= 25;
   else if (wakeValue === "4plus") score -= 35;
 
-  // 3. ЗАСЫПАНИЕ
   const fallValue = String(fallAsleepSpeedValue || "medium");
   if (fallValue === "medium") score -= 5;
   else if (fallValue === "slow") score -= 10;
   else if (fallValue === "very_slow") score -= 15;
 
-  // 4. СНЫ
   const dreamValue = String(dreamTypeValue || "neutral");
   if (dreamValue === "good") score += 3;
   else if (dreamValue === "nightmare") score -= 8;
@@ -581,7 +576,6 @@ function getSleepStatus(durationMinutes, sleepEfficiency, energyAfterSleep) {
   else if (eff < 60) level = "mid";
   else if (eff < 75) level = "good";
 
-  // мягкая коррекция статуса по очень низкой энергии
   if (Number.isFinite(energy) && energy <= 3) {
     if (level === "great") level = "good";
     else if (level === "good") level = "mid";
@@ -632,25 +626,25 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
   }
 
   if (energyVal <= 4 && hours >= 7) {
-  return {
-    insight: "Сон был нормальным, но по ощущениям восстановление слабое.",
-    advice: ""
-  };
-}
+    return {
+      insight: "Сон был нормальным, но по ощущениям восстановление слабое.",
+      advice: ""
+    };
+  }
 
   if (wakeVal >= 2 && hours < 7) {
-  return {
-    insight: "Сон был прерывистым и немного коротким — восстановление среднее.",
-    advice: ""
-  };
-}
+    return {
+      insight: "Сон был прерывистым и немного коротким — восстановление среднее.",
+      advice: ""
+    };
+  }
 
-if (wakeVal >= 2) {
-  return {
-    insight: "Сон прерывался — это слегка снижает качество восстановления.",
-    advice: ""
-  };
-}
+  if (wakeVal >= 2) {
+    return {
+      insight: "Сон прерывался — это слегка снижает качество восстановления.",
+      advice: ""
+    };
+  }
 
   return {
     insight: "Сон прошёл стабильно — организм восстановился.",
@@ -703,11 +697,6 @@ function getRangeEntries(entries, days) {
     .sort((a, b) => new Date(`${a.sleep_date}T12:00:00`) - new Date(`${b.sleep_date}T12:00:00`));
 }
 
-function getWeekdayShort(dateStr) {
-  const date = new Date(`${dateStr}T12:00:00`);
-  return date.toLocaleDateString("ru-RU", { weekday: "short" });
-}
-
 function buildSummaryInsight(entries, stats) {
   if (!entries.length) return "Нет записей за выбранный период";
 
@@ -723,12 +712,12 @@ function buildSummaryInsight(entries, stats) {
   }
 
   if (stats.avgSleepEfficiency < 55) {
-  return "Общее восстановление слабое — стоит улучшить сон";
-}
+    return "Общее восстановление слабое — стоит улучшить сон";
+  }
 
-if (stats.avgSleepEfficiency < 70) {
-  return "Сон нестабильный — есть потенциал для улучшения";
-}
+  if (stats.avgSleepEfficiency < 70) {
+    return "Сон нестабильный — есть потенциал для улучшения";
+  }
 
   if (wakeHeavyShare >= 0.3) {
     return "Сон часто рвётся из-за пробуждений";
@@ -769,12 +758,12 @@ function buildSummaryData(entries, days) {
     };
   }
 
-    filtered.forEach((entry) => {
+  filtered.forEach((entry) => {
     const status = getStatusMeta(
-  Number(entry.sleep_duration_minutes) || 0,
-  clampPercent(entry.sleep_efficiency),
-  clampRating(entry.energy_after_sleep)
-);
+      Number(entry.sleep_duration_minutes) || 0,
+      clampPercent(entry.sleep_efficiency),
+      clampRating(entry.energy_after_sleep)
+    );
 
     if (status.className === "is-bad") counts.bad += 1;
     if (status.className === "is-mid") counts.mid += 1;
@@ -823,7 +812,7 @@ function buildSummaryData(entries, days) {
   };
 }
 
-  function renderSummary(entries, range) {
+function renderSummary(entries, range) {
   if (!DOM.summaryPanel) return;
 
   let data;
@@ -843,11 +832,11 @@ function buildSummaryData(entries, days) {
           let statusClass = "is-empty";
 
           if (day.entry) {
-              const status = getStatusMeta(
-  Number(day.entry.sleep_duration_minutes) || 0,
-  clampPercent(day.entry.sleep_efficiency),
-  clampRating(day.entry.energy_after_sleep)
-);
+            const status = getStatusMeta(
+              Number(day.entry.sleep_duration_minutes) || 0,
+              clampPercent(day.entry.sleep_efficiency),
+              clampRating(day.entry.energy_after_sleep)
+            );
             statusClass = status.className;
           }
 
@@ -864,91 +853,96 @@ function buildSummaryData(entries, days) {
       </div>
     `;
   } else {
-  ensureSelectedMonth(entries);
+    ensureSelectedMonth(entries);
 
-  const monthEntries = getMonthEntries(
-    entries,
-    summaryState.selectedYear,
-    summaryState.selectedMonth
-  );
+    const monthEntries = getMonthEntries(
+      entries,
+      summaryState.selectedYear,
+      summaryState.selectedMonth
+    );
 
-  data = buildSummaryData(monthEntries, 9999);
-  title = "Сводка за месяц";
+    data = buildSummaryData(monthEntries, 9999);
+    title = "Сводка за месяц";
 
-  const monthWeeks = getMonthWeeks(
-    monthEntries,
-    summaryState.selectedYear,
-    summaryState.selectedMonth
-  );
+    const monthWeeks = getMonthWeeks(
+      monthEntries,
+      summaryState.selectedYear,
+      summaryState.selectedMonth
+    );
 
-  monthFilterHtml = `
-    <div class="sleep-month-filter-wrap" id="sleepMonthFilterWrap">
-      <button
-        type="button"
-        class="sleep-month-filter-btn"
-        id="sleepMonthFilterBtn"
-      >
-        ${escapeHtml(getMonthLabel(summaryState.selectedMonth, summaryState.selectedYear))}
-      </button>
-      <div class="sleep-month-filter-menu" id="sleepMonthFilterMenu" hidden></div>
-    </div>
-  `;
+    monthFilterHtml = `
+      <div class="sleep-month-filter-wrap" id="sleepMonthFilterWrap">
+        <button
+          type="button"
+          class="sleep-month-filter-btn"
+          id="sleepMonthFilterBtn"
+        >
+          ${escapeHtml(getMonthLabel(summaryState.selectedMonth, summaryState.selectedYear))}
+        </button>
+        <div class="sleep-month-filter-menu" id="sleepMonthFilterMenu" hidden></div>
+      </div>
+    `;
 
-  stripHtml = `
-    <div class="sleep-summary-month-weeks">
-      ${monthWeeks.map((week) => {
-        return `
-          <div class="sleep-summary-week-block">
-            <div class="sleep-summary-week-range">
-              ${escapeHtml(getWeekRangeLabel(week.startDate, week.endDate))}
-            </div>
+    stripHtml = `
+      <div class="sleep-summary-month-weeks">
+        ${monthWeeks.map((week) => {
+          return `
+            <div class="sleep-summary-week-block">
+              <div class="sleep-summary-week-range">
+                ${escapeHtml(getWeekRangeLabel(week.startDate, week.endDate))}
+              </div>
 
-            <div class="sleep-summary-week-days">
-              ${week.days.map((day) => {
-                let statusClass = "is-empty";
+              <div class="sleep-summary-week-days">
+                ${week.days.map((day) => {
+                  let statusClass = "is-empty";
 
-                if (day.entry) {
-                  const status = getStatusMeta(
-  Number(day.entry.sleep_duration_minutes) || 0,
-  clampPercent(day.entry.sleep_efficiency),
-  clampRating(day.entry.energy_after_sleep)
-);
-                  statusClass = status.className;
-                }
+                  if (day.entry) {
+                    const status = getStatusMeta(
+                      Number(day.entry.sleep_duration_minutes) || 0,
+                      clampPercent(day.entry.sleep_efficiency),
+                      clampRating(day.entry.energy_after_sleep)
+                    );
+                    statusClass = status.className;
+                  }
 
-                return `
-                  <div class="sleep-summary-week-day">
-                    <div class="sleep-summary-dot ${statusClass}"></div>
-                    <div class="sleep-summary-weekday-label">
-                      ${escapeHtml(day.dayLabel)}
+                  return `
+                    <div class="sleep-summary-week-day">
+                      <div class="sleep-summary-dot ${statusClass}"></div>
+                      <div class="sleep-summary-weekday-label">
+                        ${escapeHtml(day.dayLabel)}
+                      </div>
                     </div>
-                  </div>
-                `;
-              }).join("")}
+                  `;
+                }).join("")}
+              </div>
             </div>
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
 
   DOM.summaryPanel.innerHTML = `
-  <div class="sleep-summary-head">
-    <div class="sleep-summary-panel__title">${title}</div>
-    ${monthFilterHtml}
-  </div>
-  ${stripHtml}
-  <div class="sleep-summary-metrics sleep-summary-metrics--focus">
-    <div class="sleep-summary-line sleep-summary-line--focus">
-      <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
+    <div class="sleep-summary-head">
+      <div class="sleep-summary-panel__title">${title}</div>
+      ${monthFilterHtml}
     </div>
-    <div class="sleep-summary-line sleep-summary-line--focus sleep-summary-line--muted">
-      Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Плохих ночей: ${data.counts.bad}
+
+    ${stripHtml}
+
+    <div class="sleep-summary-metrics sleep-summary-metrics--focus">
+      <div class="sleep-summary-line sleep-summary-line--focus">
+        <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
+      </div>
+      <div class="sleep-summary-line sleep-summary-line--focus sleep-summary-line--muted">
+        Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Плохих ночей: ${data.counts.bad}
+      </div>
     </div>
-  </div>
-  <div class="sleep-summary-insight sleep-summary-insight--focus">${escapeHtml(data.insight)}</div>
-`;
+
+    <div class="sleep-summary-insight sleep-summary-insight--focus">
+      ${escapeHtml(data.insight)}
+    </div>
+  `;
 
   DOM.summaryPanel.hidden = false;
 
@@ -1027,15 +1021,16 @@ function syncSleepSliderUI() {
 function syncWakeCountRadioUI(value = "0") {
   const safeValue = String(value || "0");
   const group = document.getElementById("wakeCountGroup");
+
+  if (DOM.wakeCountInput) {
+    DOM.wakeCountInput.value = safeValue;
+  }
+
   if (!group) return;
 
   group.querySelectorAll(".sleep-radio").forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.value === safeValue);
   });
-
-  if (DOM.wakeCountInput) {
-    DOM.wakeCountInput.value = safeValue;
-  }
 }
 
 function resetSleepForm() {
@@ -1043,7 +1038,7 @@ function resetSleepForm() {
   if (DOM.bedInput) DOM.bedInput.value = "";
   if (DOM.wakeInput) DOM.wakeInput.value = "";
   if (DOM.wakeCountInput) DOM.wakeCountInput.value = "0";
-syncWakeCountRadioUI("0");
+  syncWakeCountRadioUI("0");
   if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = "neutral";
   if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = "medium";
   if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = "0";
@@ -1209,14 +1204,14 @@ function setupSleepModal() {
 
   DOM.energyAfterSleepInput?.addEventListener("input", syncSleepSliderUI);
 
-document.querySelectorAll("#wakeCountGroup .sleep-radio").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const value = String(btn.dataset.value || "0");
-    syncWakeCountRadioUI(value);
+  document.querySelectorAll("#wakeCountGroup .sleep-radio").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const value = String(btn.dataset.value || "0");
+      syncWakeCountRadioUI(value);
+    });
   });
-});
 
-resetSleepForm();
+  resetSleepForm();
 }
 
 /* =========================
@@ -1333,63 +1328,69 @@ function render(entries, loadError = null) {
     const dreamType = String(entry.dream_type || "neutral");
     const fallAsleepSpeed = String(entry.fall_asleep_speed || "medium");
     const safeNote = String(entry.note || "").trim();
+
     const status = getSleepStatus(
-  sleepDurationMinutes,
-  sleepEfficiency,
-  energyAfterSleep
-);
-    const noteClass = safeNote ? "" : "is-empty";
-        const insightData = getSleepInsightData({
+      sleepDurationMinutes,
+      sleepEfficiency,
+      energyAfterSleep
+    );
+
+    const insightData = getSleepInsightData({
       durationMinutes: sleepDurationMinutes,
-      wakeCount: wakeCount,
+      wakeCount,
       energy: energyAfterSleep,
-      fallAsleepSpeed: fallAsleepSpeed
+      fallAsleepSpeed
     });
 
     el.innerHTML = `
-  <div class="card-content sleep-card-content sleep-card-content--focus">
-    <div class="card-right-column sleep-card-column sleep-card-column--focus">
+      <div class="card-content sleep-card-content sleep-card-content--focus">
+        <div class="card-right-column sleep-card-column sleep-card-column--focus">
 
-      <div class="sleep-card-head">
-        <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
-        <div class="sleep-status-chip ${status.className}">
-          ${escapeHtml(status.emoji)} ${escapeHtml(status.label)}
+          <div class="sleep-card-head">
+            <div class="sleep-card-date">${escapeHtml(formatSleepDate(entry.sleep_date))}</div>
+            <div class="sleep-status-chip ${status.className}">
+              ${escapeHtml(status.emoji)} ${escapeHtml(status.label)}
+            </div>
+          </div>
+
+          <div class="sleep-main">
+            <div class="sleep-time-range">
+              ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")}
+            </div>
+
+            <div class="sleep-duration-main">
+              ${escapeHtml(formatDuration(sleepDurationMinutes))}
+            </div>
+          </div>
+
+          <div class="sleep-inline-meta">
+            <span>Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</span>
+            <span>Снилось: ${escapeHtml(getDreamLabel(dreamType))}</span>
+            <span>Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})</span>
+          </div>
+
+          <div class="sleep-stats-line">
+            Эфф: ${formatPercent(sleepEfficiency)} • Сон: ${formatAutoSleepRating(sleepScore)} • Энергия: ${energyAfterSleep}/10
+          </div>
+
+          <div class="sleep-ai-block sleep-ai-block--focus">
+            <div class="sleep-ai-text">
+              ${escapeHtml(insightData.insight)}
+            </div>
+            ${
+              insightData.advice
+                ? `<div class="sleep-ai-advice">${escapeHtml(insightData.advice)}</div>`
+                : ""
+            }
+          </div>
+
+          <div class="sleep-note-block sleep-note-block--focus ${safeNote ? "" : "is-empty"}" data-role="sleep-note-edit">
+            ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
+          </div>
+
         </div>
       </div>
-
-      <div class="sleep-main-block">
-        <div class="sleep-main-time">
-          ${escapeHtml(entry.bed_time || "--:--")} → ${escapeHtml(entry.wake_time || "--:--")}
-        </div>
-
-        <div class="sleep-main-duration">
-          ${escapeHtml(formatDuration(sleepDurationMinutes))}
-        </div>
-
-        <div class="sleep-meta-line">
-          Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))} •
-          Снилось: ${escapeHtml(getDreamLabel(dreamType))} •
-          Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})
-        </div>
-
-        <div class="sleep-score-line">
-          Эфф: ${formatPercent(sleepEfficiency)} •
-          Сон: ${formatAutoSleepRating(sleepScore)} •
-          Энергия: ${energyAfterSleep}/10
-        </div>
-      </div>
-
-      <div class="sleep-summary-box">
-        ${escapeHtml(insightData.insight)}
-      </div>
-
-      <div class="sleep-note-text">
-        ${safeNote ? escapeHtml(safeNote) : "Без заметки"}
-      </div>
-
-    </div>
-  </div>
-`;
+    `;
 
     el.addEventListener("click", () => openSleepModal(entry));
     enableSleepSwipeDelete(wrapper, el, entry);
