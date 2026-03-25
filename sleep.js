@@ -1217,6 +1217,7 @@ document.querySelectorAll("#wakeCountGroup .sleep-radio").forEach((btn) => {
 });
 
 resetSleepForm();
+}
 
 /* =========================
    CONFIRM
