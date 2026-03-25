@@ -13,7 +13,7 @@
   max-height: calc(100vh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  padding: 20px 18px 16px !important;
+  padding: 16px 18px 16px !important;
   margin: 0 auto !important;
   border-radius: 24px !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -31,16 +31,11 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .sleep-modal-box .category-modal__title {
-  margin-bottom: 10px !important;
-  line-height: 1.08 !important;
-  text-align: center !important;
-  font-size: 19px !important;
-  font-weight: 800 !important;
-  color: var(--color-gold) !important;
+  display: none !important;
 }
 
 .sleep-modal-box .category-modal__label {
@@ -51,11 +46,11 @@
   color: #a9b2be !important;
 }
 
-  .sleep-date-wrap {
-    width: 100% !important;
-    max-width: 250px !important;
-    margin: 0 auto 20px !important;
-  }
+.sleep-date-wrap {
+  width: 100% !important;
+  max-width: 230px !important;
+  margin: 0 auto 14px !important;
+}
 
   .sleep-date-wrap .category-modal__label {
     text-align: center !important;
@@ -73,36 +68,46 @@
   overflow: hidden !important;
 }
 
-  .sleep-date-shell {
-    margin-top: 4px !important;
-    height: 62px !important;
-  }
+.sleep-modal-box select {
+  min-height: 50px !important;
+  height: 50px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.sleep-date-shell {
+  margin-top: 0 !important;
+  height: 54px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
 
 .sleep-modal-box .sleep-date-input {
   width: 100% !important;
-  height: 62px !important;
-  min-height: 62px !important;
+  height: 54px !important;
+  min-height: 54px !important;
   border: none !important;
   outline: none !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 0 14px !important;
+  padding: 0 !important;
   text-align: center !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   color: #f3f5f8 !important;
   box-sizing: border-box !important;
   color-scheme: dark !important;
 }
 
-  .sleep-time-row {
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    width: 100% !important;
-    margin: 0 auto 20px !important;
-  }
+.sleep-time-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: start !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 0 auto 14px !important;
+}
 
   .sleep-time-field {
     flex: 1 1 0 !important;
@@ -114,21 +119,24 @@
     text-align: center !important;
   }
 
-  .sleep-time-shell {
-    height: 56px !important;
-  }
+.sleep-time-shell {
+  height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
 
 .sleep-modal-box .sleep-time-input {
   width: 100% !important;
-  height: 56px !important;
-  min-height: 56px !important;
+  height: 50px !important;
+  min-height: 50px !important;
   border: none !important;
   outline: none !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 0 10px !important;
+  padding: 0 !important;
   text-align: center !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
   color: #ffffff !important;
   text-shadow: 0 0 6px rgba(255,255,255,0.15);
@@ -692,31 +700,31 @@
     }
 
     .sleep-date-shell {
-      height: 58px !important;
+      height: 52px !important;
     }
 
-    .sleep-modal-box .sleep-date-input {
-      height: 58px !important;
-      min-height: 58px !important;
-      font-size: 16px !important;
-      padding: 0 12px !important;
-    }
+.sleep-modal-box .sleep-date-input {
+  height: 52px !important;
+  min-height: 52px !important;
+  font-size: 15px !important;
+  padding: 0 !important;
+}
 
-    .sleep-time-row {
-      gap: 10px !important;
-      margin-bottom: 18px !important;
-    }
+.sleep-time-row {
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+}
 
-    .sleep-time-shell {
-      height: 54px !important;
-    }
+.sleep-time-shell {
+  height: 48px !important;
+}
 
-    .sleep-modal-box .sleep-time-input {
-      height: 54px !important;
-      min-height: 54px !important;
-      font-size: 15px !important;
-      padding: 0 8px !important;
-    }
+.sleep-modal-box .sleep-time-input {
+  height: 48px !important;
+  min-height: 48px !important;
+  font-size: 14px !important;
+  padding: 0 !important;
+}
 
     .sleep-note-input {
       min-height: 110px !important;
