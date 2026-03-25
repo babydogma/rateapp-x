@@ -419,165 +419,848 @@
 }
 
 .sleep-status-chip.is-great {
-  background: rgba(120, 160, 255, 0.18);
-  border-color: rgba(120, 160, 255, 0.32);
-  color: #c9d8ff;
+  background: rgba(116, 162, 96, 0.18);
+  border-color: rgba(116, 162, 96, 0.34);
+  color: #d5efb2;
   box-shadow:
-    0 0 20px rgba(120, 160, 255, 0.18),
-    0 0 40px rgba(120, 160, 255, 0.08);
+    0 0 18px rgba(116, 162, 96, 0.16),
+    0 0 32px rgba(116, 162, 96, 0.08);
 }
 
-/* =========================
-   MAIN SLEEP BLOCK (ВАЖНОЕ)
-========================= */
-
-.sleep-main-block {
-  margin-top: 6px;
-  padding: 18px 16px 16px;
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(120, 140, 255, 0.12), transparent 55%),
-    linear-gradient(180deg, rgba(18, 24, 40, 0.75), rgba(10, 14, 26, 0.82));
-  border: 1px solid rgba(255,255,255,0.04);
+.sleep-status-chip.is-oversleep {
+  background: rgba(124, 104, 168, 0.18);
+  border-color: rgba(124, 104, 168, 0.32);
+  color: #d8c7f4;
   box-shadow:
-    0 14px 30px rgba(0,0,0,0.22),
-    inset 0 1px 0 rgba(255,255,255,0.02);
-  backdrop-filter: blur(12px);
+    0 0 18px rgba(124, 104, 168, 0.16),
+    0 0 32px rgba(124, 104, 168, 0.08);
 }
 
-/* ВРЕМЯ (00:00 → 07:08) */
-.sleep-main-time {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+.sleep-main {
+  padding: 10px 0 4px;
   text-align: center;
-  color: #f2f5ff;
-  margin-bottom: 6px;
 }
 
-/* ДЛИТЕЛЬНОСТЬ */
-.sleep-main-duration {
+.sleep-time-range {
+  font-size: 32px;
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #f3f4f7;
+}
+
+.sleep-duration-main {
+  margin-top: 8px;
   font-size: 16px;
   font-weight: 600;
-  text-align: center;
-  color: #aeb7c6;
-  margin-bottom: 12px;
+  color: #aeb8c6;
 }
 
-/* СТРОКА МЕТЫ */
-.sleep-meta-line {
+.sleep-inline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 12px;
   text-align: center;
-  font-size: 13px;
-  color: #8f98a3;
-  line-height: 1.4;
-  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8f99a8;
 }
 
-/* СТРОКА С ОЦЕНКАМИ */
-.sleep-score-line {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: #cfd6e2;
+.sleep-inline-meta span {
+  white-space: nowrap;
 }
 
-/* =========================
-   SUMMARY TEXT
-========================= */
+.sleep-stats-line {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #e1e6ee;
+  text-align: center;
+}
 
-.sleep-summary-box {
-  margin-top: 12px;
-  padding: 14px 14px;
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(40, 32, 18, 0.55), rgba(22, 18, 10, 0.65));
-  border: 1px solid rgba(212,175,55,0.18);
-  color: #f0e6c8;
-  font-weight: 600;
-  line-height: 1.4;
+.sleep-ai-block {
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(29, 24, 17, 0.94), rgba(17, 13, 10, 0.98));
+  border: 1px solid rgba(212, 175, 55, 0.11);
   box-shadow:
-    0 10px 24px rgba(212,175,55,0.08);
+    0 10px 22px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.015);
 }
 
-/* =========================
-   NOTE TEXT
-========================= */
+.sleep-ai-block--focus {
+  padding: 10px 0 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
 
-.sleep-note-text {
-  margin-top: 10px;
+.sleep-ai-text {
+  color: #e3d7b3;
+  font-size: 13px;
+  line-height: 1.42;
+  font-weight: 600;
+}
+
+.sleep-ai-block--focus .sleep-ai-text {
+  color: #d9dee6;
   font-size: 14px;
   line-height: 1.55;
-  color: #aeb7c6;
-}
-
-/* =========================
-   WEEK BLOCK (верх)
-========================= */
-
-.sleep-week-card {
-  border-radius: 24px;
-  padding: 16px;
-  background:
-    radial-gradient(circle at 50% -20%, rgba(120,140,255,0.15), transparent 60%),
-    linear-gradient(180deg, rgba(15,20,35,0.8), rgba(8,12,22,0.9));
-  border: 1px solid rgba(255,255,255,0.04);
-  box-shadow:
-    0 18px 40px rgba(0,0,0,0.25);
-}
-
-/* линия точек */
-.sleep-week-line {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  margin-bottom: 10px;
-}
-
-.sleep-week-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-}
-
-.sleep-week-dot.is-active {
-  background: var(--color-gold);
-  box-shadow:
-    0 0 10px rgba(212,175,55,0.5),
-    0 0 20px rgba(212,175,55,0.2);
-}
-
-/* =========================
-   TABS (7 дней / месяц)
-========================= */
-
-.sleep-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.sleep-tab {
-  flex: 1;
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
+  font-weight: 500;
   text-align: left;
 }
 
-.sleep-tab.is-active {
-  border-color: rgba(212,175,55,0.35);
-  box-shadow:
-    0 0 20px rgba(212,175,55,0.15);
+.sleep-ai-advice {
+  margin-top: 6px;
+  color: #bfa971;
+  font-size: 12px;
+  line-height: 1.38;
 }
 
-.sleep-tab-title {
-  font-weight: 800;
-  color: #e7cd7d;
-}
-
-.sleep-tab-sub {
+.sleep-ai-block--focus .sleep-ai-advice {
+  margin-top: 4px;
+  color: #bba979;
   font-size: 13px;
-  color: #8f98a3;
+  line-height: 1.4;
+}
+
+.sleep-note-block {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: #8f98a5;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sleep-note-block--focus {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  color: #8994a3 !important;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.sleep-note-block.is-empty,
+.sleep-note-block--focus.is-empty {
+  color: #7f8a98 !important;
+  font-style: italic;
+}
+
+/* =========================
+   LEGACY CHIPS (safe fallback)
+========================= */
+
+.sleep-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sleep-info-chip,
+.sleep-metric-chip {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.sleep-info-chip {
+  padding: 6px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #8f99a7;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  opacity: 0.9;
+}
+
+.sleep-chip-row--metrics {
+  gap: 10px;
+}
+
+.sleep-metric-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(180deg, rgba(22, 26, 32, 0.98), rgba(13, 16, 20, 0.98));
+}
+
+.sleep-metric-chip span {
+  font-size: 12px;
+  color: #aeb6c1;
+  font-weight: 600;
+}
+
+.sleep-metric-chip strong {
+  font-size: 15px;
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+.sleep-chip-row--secondary {
+  gap: 8px;
+}
+
+.sleep-metric-chip--primary {
+  padding: 13px 14px;
+  border-color: rgba(212, 175, 55, 0.08);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.sleep-metric-chip--primary span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ea8b5;
+}
+
+.sleep-metric-chip--primary strong {
+  font-size: 18px;
+}
+
+.sleep-metric-chip--secondary {
+  padding: 8px 10px;
+  opacity: 0.82;
+  background: linear-gradient(180deg, rgba(18, 21, 27, 0.92), rgba(12, 15, 18, 0.94));
+}
+
+.sleep-metric-chip--secondary span {
+  font-size: 10.5px;
+}
+
+.sleep-metric-chip--secondary strong {
+  font-size: 13px;
+}
+
+/* =========================
+   LIST
+========================= */
+
+.sleep-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 0 0 calc(120px + env(safe-area-inset-bottom));
+}
+
+/* =========================
+   SUMMARY SWITCHER
+========================= */
+
+.sleep-summary-switcher {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.sleep-summary-toggle {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(14, 19, 31, 0.55);
+  color: #e7e3dc;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 10px 24px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(10px);
+  transition:
+    transform 0.16s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.sleep-summary-toggle:active {
+  transform: scale(0.98);
+}
+
+.sleep-summary-toggle.is-active {
+  border-color: rgba(212, 175, 55, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 12px 28px rgba(0, 0, 0, 0.18),
+    0 0 20px rgba(212, 175, 55, 0.06);
+}
+
+.sleep-summary-toggle__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.sleep-summary-toggle__hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #9ca6b2;
+}
+
+/* =========================
+   SUMMARY PANEL
+========================= */
+
+.sleep-summary-panel {
+  margin-top: 14px;
+  padding: 8px 0 0 !important;
+  border-radius: 26px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+.sleep-summary-panel[hidden] {
+  display: none !important;
+}
+
+.sleep-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sleep-summary-head .sleep-summary-panel__title {
+  margin-bottom: 0;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+
+.sleep-summary-panel__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 12px;
+}
+
+.sleep-summary-strip {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.sleep-summary-strip--7 {
+  grid-template-columns: repeat(7, 1fr);
+  align-items: start;
+}
+
+.sleep-summary-strip--30 {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 8px 4px;
+  align-items: start;
+  justify-items: start;
+  padding-right: 18px;
+}
+
+.sleep-summary-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.sleep-summary-day__label {
+  font-size: 11px;
+  color: #94a0ad;
+}
+
+.sleep-summary-day__date {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d7dde6;
+  line-height: 1;
+  text-align: center;
+}
+
+.sleep-summary-day__weekday {
+  font-size: 10px;
+  color: #8f99a7;
+  line-height: 1;
+  text-align: center;
+}
+
+.sleep-summary-day--mini {
+  gap: 4px;
+}
+
+.sleep-summary-day__date--mini {
+  font-size: 9px;
+}
+
+.sleep-summary-day__weekday--mini {
+  font-size: 9px;
+}
+
+.sleep-summary-day__date.is-hidden,
+.sleep-summary-day__weekday.is-hidden {
+  visibility: hidden;
+}
+
+.sleep-summary-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+.sleep-summary-dot.is-empty {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.sleep-summary-dot.is-bad {
+  background: rgba(166, 63, 63, 0.95);
+}
+
+.sleep-summary-dot.is-mid {
+  background: rgba(200, 169, 90, 0.95);
+}
+
+.sleep-summary-dot.is-good {
+  background: rgba(85, 140, 106, 0.95);
+}
+
+.sleep-summary-dot.is-great {
+  background: rgba(116, 162, 96, 0.98);
+}
+
+.sleep-summary-dot.is-oversleep {
+  background: rgba(124, 104, 168, 0.95);
+}
+
+.sleep-summary-metrics {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+
+.sleep-summary-metrics--focus {
+  gap: 6px;
+  margin: 12px 0 0;
+}
+
+.sleep-summary-line {
+  padding: 10px 11px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(19, 23, 29, 0.96), rgba(13, 16, 20, 0.96));
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.018);
+  font-size: 13px;
+  line-height: 1.4;
+  color: #d8dde4;
+}
+
+.sleep-summary-line strong {
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+.sleep-summary-line--focus {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #cfd6e0;
+}
+
+.sleep-summary-line--focus strong {
+  font-size: 16px;
+  color: #e8d28a;
+}
+
+.sleep-summary-line--muted {
+  font-size: 13px;
+  color: #9aa5b4;
+}
+
+.sleep-summary-insight {
+  margin-top: 4px;
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.08);
+  background: linear-gradient(180deg, rgba(27, 23, 18, 0.92), rgba(17, 14, 10, 0.96));
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.015);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #d7c79b;
+}
+
+.sleep-summary-insight--focus {
+  margin-top: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: #9aa5b4;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* =========================
+   MONTH FILTER
+========================= */
+
+.sleep-month-filter-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sleep-month-filter-btn {
+  border: 1px solid rgba(200, 169, 90, 0.16);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
+  color: #e7e3dc;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.sleep-month-filter-btn:active {
+  transform: scale(0.98);
+}
+
+.sleep-month-filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: 170px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(18, 22, 27, 0.98), rgba(11, 14, 18, 0.99));
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.sleep-month-filter-menu[hidden] {
+  display: none !important;
+}
+
+.sleep-month-filter-option {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #d7dde6;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sleep-month-filter-option:hover,
+.sleep-month-filter-option.is-active {
+  background: rgba(200, 169, 90, 0.1);
+  color: #f0d486;
+}
+
+/* =========================
+   MONTH WEEKS
+========================= */
+
+.sleep-summary-month-weeks {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sleep-summary-week-block {
+  display: grid;
+  gap: 6px;
+  padding: 8px 9px 7px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.sleep-summary-week-range {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e7e3dc;
+}
+
+.sleep-summary-week-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sleep-summary-week-day {
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.sleep-summary-weekday-label {
+  font-size: 9px;
+  color: #8f99a7;
+  line-height: 1;
+  text-align: center;
+}
+
+/* =========================
+   WAKE RADIO
+========================= */
+
+.sleep-radio-group {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 56px));
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.sleep-radio {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(19, 23, 29, 0.9), rgba(12, 15, 18, 0.94));
+  color: #cfd6df;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 50px;
+  padding: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    0 8px 18px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
+}
+
+.sleep-radio:active {
+  transform: scale(0.98);
+}
+
+.sleep-radio.is-active {
+  border-color: rgba(212, 175, 55, 0.28);
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.13), rgba(212, 175, 55, 0.06));
+  color: var(--color-gold);
+  box-shadow:
+    0 0 14px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.sleep-time-field--ghost {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 420px) {
+  .sleep-modal {
+    padding:
+      calc(env(safe-area-inset-top) + 10px)
+      8px
+      calc(env(safe-area-inset-bottom) + 10px) !important;
+  }
+
+  .sleep-modal-box {
+    width: min(390px, 100%) !important;
+    max-width: min(390px, 100%) !important;
+    padding: 18px 12px 12px !important;
+    border-radius: 14px !important;
+    overflow-x: hidden !important;
+  }
+
+  .sleep-modal-inner {
+    max-width: 330px;
+  }
+
+  .sleep-date-wrap {
+    max-width: 230px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .sleep-date-shell {
+    height: 52px !important;
+  }
+
+  .sleep-modal-box .sleep-date-input {
+    height: 52px !important;
+    min-height: 52px !important;
+    font-size: 15px !important;
+    padding: 0 !important;
+  }
+
+  .sleep-time-row {
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .sleep-time-shell {
+    height: 48px !important;
+  }
+
+  .sleep-modal-box .sleep-time-input {
+    height: 48px !important;
+    min-height: 48px !important;
+    font-size: 14px !important;
+    padding: 0 !important;
+  }
+
+  .sleep-note-input {
+    min-height: 110px !important;
+  }
+
+  .sleep-card-date {
+    font-size: 17px;
+  }
+
+  .sleep-status-chip {
+    padding: 6px 9px;
+    font-size: 11.5px;
+  }
+
+  .sleep-info-chip {
+    font-size: 11.5px;
+    padding: 7px 9px;
+  }
+
+  .sleep-metric-chip {
+    padding: 9px 10px;
+  }
+
+  .sleep-metric-chip strong {
+    font-size: 14px;
+  }
+
+  .sleep-list {
+    margin-top: 16px;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom));
+  }
+
+  .sleep-summary-switcher {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .sleep-summary-toggle {
+    padding: 11px 12px;
+    border-radius: 18px;
+  }
+
+  .sleep-summary-panel {
+    margin-top: 10px;
+  }
+
+  .sleep-summary-line,
+  .sleep-summary-insight {
+    font-size: 12px;
+  }
+
+  .sleep-summary-dot {
+    width: 11px;
+    height: 11px;
+  }
+
+  .sleep-month-filter-btn {
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+
+  .sleep-month-filter-menu {
+    width: 156px;
+  }
+
+  .sleep-radio {
+    min-height: 46px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .sleep-screen-title {
+    gap: 10px;
+    font-size: 28px;
+  }
+
+  .sleep-screen-title__icon {
+    font-size: 24px;
+  }
+
+  .sleep-card-content--focus {
+    padding: 16px 15px 14px !important;
+  }
+
+  .sleep-card-column--focus {
+    gap: 12px !important;
+  }
+
+  .sleep-time-range {
+    font-size: 26px;
+  }
+
+  .sleep-duration-main {
+    font-size: 16px;
+  }
+
+  .sleep-inline-meta {
+    font-size: 12px;
+    gap: 6px 10px;
+  }
+
+  .sleep-stats-line {
+    font-size: 14px;
+  }
+
+  .sleep-ai-block--focus .sleep-ai-text {
+    font-size: 14px;
+  }
+
+  .sleep-note-block--focus {
+    font-size: 14px;
+  }
+
+  .category-modal__btn {
+    min-height: 54px !important;
+    border-radius: 16px !important;
+  }
 }
