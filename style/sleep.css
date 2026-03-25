@@ -510,7 +510,7 @@
   .sleep-summary-strip {
     display: grid;
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .sleep-summary-strip--7 {
@@ -563,22 +563,22 @@
     background: rgba(124, 104, 168, 0.95);
   }
 
-  .sleep-summary-metrics {
+.sleep-summary-metrics {
   display: grid;
-  gap: 10px;
-  margin: 14px 0 10px;
+  gap: 8px;
+  margin: 12px 0 8px;
 }
 
 .sleep-summary-line {
-  padding: 11px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.045);
-  background: linear-gradient(180deg, rgba(20, 24, 30, 0.96), rgba(13, 16, 20, 0.96));
+  padding: 10px 11px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(19, 23, 29, 0.96), rgba(13, 16, 20, 0.96));
   box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    0 6px 14px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.018);
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.4;
   color: #d8dde4;
 }
 
@@ -871,17 +871,17 @@
 
 .sleep-summary-month-weeks {
   display: grid;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .sleep-summary-week-block {
   display: grid;
-  gap: 8px;
-  padding: 10px 10px 8px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.035);
+  gap: 6px;
+  padding: 8px 9px 7px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .sleep-summary-week-range {
