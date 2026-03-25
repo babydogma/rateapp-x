@@ -64,31 +64,32 @@
         </div>
       </div>
 
-<div class="sleep-time-field">
-  <label class="category-modal__label">Просыпался</label>
+<div class="sleep-time-row">
+  <div class="sleep-time-field">
+    <label class="category-modal__label">Просыпался</label>
 
-  <input type="hidden" id="wakeCountInput" value="0">
+    <input type="hidden" id="wakeCountInput" value="0">
 
-  <div class="sleep-radio-group" id="wakeCountGroup">
-    <button type="button" class="sleep-radio is-active" data-value="0">0</button>
-    <button type="button" class="sleep-radio" data-value="1">1</button>
-    <button type="button" class="sleep-radio" data-value="2">2</button>
-    <button type="button" class="sleep-radio" data-value="3">3</button>
-    <button type="button" class="sleep-radio" data-value="4plus">3+</button>
+    <div class="sleep-radio-group" id="wakeCountGroup">
+      <button type="button" class="sleep-radio is-active" data-value="0">0</button>
+      <button type="button" class="sleep-radio" data-value="1">1</button>
+      <button type="button" class="sleep-radio" data-value="2">2</button>
+      <button type="button" class="sleep-radio" data-value="3">3</button>
+      <button type="button" class="sleep-radio" data-value="4plus">3+</button>
+    </div>
+  </div>
+
+  <div class="sleep-time-field">
+    <label class="category-modal__label" for="dreamTypeInput">Что снилось</label>
+    <div class="sleep-time-shell">
+      <select id="dreamTypeInput" class="sleep-time-input">
+        <option value="nightmare">кошмар</option>
+        <option value="neutral" selected>ничего такого</option>
+        <option value="good">кайф</option>
+      </select>
+    </div>
   </div>
 </div>
-
-        <div class="sleep-time-field">
-          <label class="category-modal__label" for="dreamTypeInput">Что снилось</label>
-          <div class="sleep-time-shell">
-            <select id="dreamTypeInput" class="sleep-time-input">
-              <option value="nightmare">кошмар</option>
-              <option value="neutral" selected>ничего такого</option>
-              <option value="good">кайф</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
       <div class="sleep-time-row">
         <div class="sleep-time-field">
