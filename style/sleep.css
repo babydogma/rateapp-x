@@ -35,7 +35,7 @@
 }
 
 .sleep-modal-box .category-modal__title {
-  margin-bottom: 16px !important;
+  margin-bottom: 10px !important;
   line-height: 1.08 !important;
   text-align: center !important;
   font-size: 19px !important;
@@ -64,9 +64,9 @@
 .sleep-date-shell,
 .sleep-time-shell {
   width: 100% !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
   border-radius: 18px !important;
-  background: linear-gradient(180deg, rgba(19, 23, 29, 0.94), rgba(12, 15, 18, 0.96)) !important;
+  background: linear-gradient(180deg, rgba(22, 27, 34, 0.95), rgba(14, 18, 22, 0.98)) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.018),
     0 8px 18px rgba(0, 0, 0, 0.14) !important;
@@ -74,6 +74,7 @@
 }
 
   .sleep-date-shell {
+    margin-top: 4px !important;
     height: 62px !important;
   }
 
@@ -129,7 +130,8 @@
   text-align: center !important;
   font-size: 15px !important;
   font-weight: 700 !important;
-  color: #f3f5f8 !important;
+  color: #ffffff !important;
+  text-shadow: 0 0 6px rgba(255,255,255,0.15);
   box-sizing: border-box !important;
   color-scheme: dark !important;
   margin: 0 !important;
@@ -142,8 +144,12 @@
 
 .sleep-slider-block {
   width: 100%;
-  margin-top: 2px !important;
-  margin-bottom: 18px !important;
+  margin-top: 6px !important;
+  margin-bottom: 20px !important;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
 .sleep-slider-head {
