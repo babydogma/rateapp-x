@@ -1,6 +1,6 @@
 /* =========================
    CATEGORIES FULL SYSTEM
-========================= */
+========================= */ 
 
 const DOM = {
   grid: document.getElementById("categoriesGrid"),
