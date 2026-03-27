@@ -542,27 +542,23 @@ function getSleepStatusV2(tstMinutes, se, finalScore, energyAfterSleep, wakeCoun
     return { label: "Пересып", emoji: "🥴", className: "is-oversleep" };
   }
 
-  if (energy <= 2) {
-    return { label: "Плохо", emoji: "😵", className: "is-bad" };
-  }
-
-  if (wakeCount >= 4 && energy <= 4) {
-    return { label: "Плохо", emoji: "😵", className: "is-bad" };
-  }
-
-  if (waso >= 45 && energy <= 5) {
-    return { label: "Плохо", emoji: "😵", className: "is-bad" };
-  }
-
   if (finalScore < 4.5) {
     return { label: "Плохо", emoji: "😵", className: "is-bad" };
   }
 
-  if (finalScore < 6.5 || energy <= 4) {
+  if (finalScore < 6.5) {
     return { label: "Пойдёт", emoji: "🙂", className: "is-mid" };
   }
 
-  if (finalScore < 8.5) {
+  if (energy <= 2 && finalScore < 6) {
+    return { label: "Плохо", emoji: "😵", className: "is-bad" };
+  }
+
+  if ((wakeCount >= 4 || waso >= 45) && energy <= 3 && finalScore < 7) {
+    return { label: "Плохо", emoji: "😵", className: "is-bad" };
+  }
+
+  if (energy <= 4 || finalScore < 8.5) {
     return { label: "Нормально", emoji: "😊", className: "is-good" };
   }
 
