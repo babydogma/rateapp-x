@@ -819,34 +819,34 @@ function renderSummary(entries, range) {
     const timeline = buildTimelineDays(entries, 7);
 
     stripHtml = `
-  <div class="sleep-summary-strip sleep-summary-strip--7">
-    ${timeline.map((day) => {
-      let statusClass = "is-empty";
+      <div class="sleep-summary-strip sleep-summary-strip--7">
+        ${timeline.map((day) => {
+          let statusClass = "is-empty";
 
-      if (day.entry) {
-        const status = getStatusMeta(
-          Number(day.entry.sleep_duration_minutes) || 0,
-          clampPercent(day.entry.sleep_efficiency),
-          clampHalf(day.entry.sleep_score),
-          clampRating(day.entry.energy_after_sleep),
-          String(day.entry.wake_count || "0"),
-          Number(day.entry.wake_after_sleep_minutes) || 0
-        );
-        statusClass = status.className;
-      }
+          if (day.entry) {
+            const status = getStatusMeta(
+              Number(day.entry.sleep_duration_minutes) || 0,
+              clampPercent(day.entry.sleep_efficiency),
+              clampHalf(day.entry.sleep_score),
+              clampRating(day.entry.energy_after_sleep),
+              String(day.entry.wake_count || "0"),
+              Number(day.entry.wake_after_sleep_minutes) || 0
+            );
+            statusClass = status.className;
+          }
 
-      const labels = getDaySummaryParts(day.date);
+          const labels = getDaySummaryParts(day.date);
 
-      return `
-        <div class="sleep-summary-day">
-          <div class="sleep-summary-day__date">${escapeHtml(labels.dateLabel)}</div>
-          <div class="sleep-summary-dot ${statusClass}"></div>
-          <div class="sleep-summary-day__weekday">${escapeHtml(labels.weekdayLabel)}</div>
-        </div>
-      `;
-    }).join("")}
-  </div>
-`;
+          return `
+            <div class="sleep-summary-day">
+              <div class="sleep-summary-day__date">${escapeHtml(labels.dateLabel)}</div>
+              <div class="sleep-summary-dot ${statusClass}"></div>
+              <div class="sleep-summary-day__weekday">${escapeHtml(labels.weekdayLabel)}</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
   } else {
     ensureSelectedMonth(entries);
 
@@ -879,32 +879,45 @@ function renderSummary(entries, range) {
     `;
 
     stripHtml = `
-      <div class="sleep-summary-week-days">
-  ${week.days.map((day) => {
-    let statusClass = "is-empty";
+      <div class="sleep-summary-month-weeks">
+        ${monthWeeks.map((week) => {
+          return `
+            <div class="sleep-summary-week-block">
+              <div class="sleep-summary-week-range">
+                ${escapeHtml(getWeekRangeLabel(week.startDate, week.endDate))}
+              </div>
 
-    if (day.entry) {
-      const status = getStatusMeta(
-        Number(day.entry.sleep_duration_minutes) || 0,
-        clampPercent(day.entry.sleep_efficiency),
-        clampHalf(day.entry.sleep_score),
-        clampRating(day.entry.energy_after_sleep),
-        String(day.entry.wake_count || "0"),
-        Number(day.entry.wake_after_sleep_minutes) || 0
-      );
-      statusClass = status.className;
-    }
+              <div class="sleep-summary-week-days">
+                ${week.days.map((day) => {
+                  let statusClass = "is-empty";
 
-    return `
-      <div class="sleep-summary-week-day">
-        <div class="sleep-summary-dot ${statusClass}"></div>
-        <div class="sleep-summary-weekday-label">
-          ${escapeHtml(day.dayLabel)}
-        </div>
+                  if (day.entry) {
+                    const status = getStatusMeta(
+                      Number(day.entry.sleep_duration_minutes) || 0,
+                      clampPercent(day.entry.sleep_efficiency),
+                      clampHalf(day.entry.sleep_score),
+                      clampRating(day.entry.energy_after_sleep),
+                      String(day.entry.wake_count || "0"),
+                      Number(day.entry.wake_after_sleep_minutes) || 0
+                    );
+                    statusClass = status.className;
+                  }
+
+                  return `
+                    <div class="sleep-summary-week-day">
+                      <div class="sleep-summary-dot ${statusClass}"></div>
+                      <div class="sleep-summary-weekday-label">
+                        ${escapeHtml(day.dayLabel)}
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          `;
+        }).join("")}
       </div>
     `;
-  }).join("")}
-</div>
   }
 
   DOM.summaryPanel.innerHTML = `
