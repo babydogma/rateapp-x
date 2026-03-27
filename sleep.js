@@ -552,16 +552,17 @@ function getSleepStatusV2(tstMinutes, se, finalScore, energyAfterSleep, wakeCoun
     return { label: "Плохо", emoji: "😵", className: "is-bad" };
   }
 
-  if (score <= 7) {
-    return { label: "Нормально", emoji: "🙂", className: "is-mid" };
+  if (score < 6) {
+    return { label: "Пойдёт", emoji: "🙂", className: "is-mid" };
   }
 
-  if (score <= 9) {
-    return { label: "Хорошо", emoji: "😊", className: "is-good" };
+  if (score < 8) {
+    return { label: "Нормально", emoji: "😊", className: "is-good" };
   }
 
-  return { label: "Суперский", emoji: "🥹", className: "is-great" };
-}
+  if (score < 10) {
+    return { label: "Хорошо", emoji: "🥹", className: "is-good" };
+  }
 
 function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed, wasoMinutes }) {
   const hours = (Number(durationMinutes) || 0) / 60;
