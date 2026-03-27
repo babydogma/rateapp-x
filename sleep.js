@@ -532,37 +532,25 @@ function getFinalSleepScore(durationScore, continuityScore, subjectiveScore) {
 }
 
 function getSleepStatusV2(tstMinutes, se, finalScore, energyAfterSleep, wakeCountValue, wasoMinutes) {
-  const hours = (Number(tstMinutes) || 0) / 60;
-  const energy = Number(energyAfterSleep) || 0;
-  const waso = Number(wasoMinutes) || 0;
-  const wakeRaw = String(wakeCountValue || "0");
-  const wakeCount = wakeRaw === "4plus" ? 4 : Number(wakeRaw) || 0;
+  const score = Number(finalScore) || 0;
 
-  if (hours >= 9.5 && se >= 80 && finalScore >= 7 && energy >= 6) {
-    return { label: "Пересып", emoji: "🥴", className: "is-oversleep" };
+  if (score <= 2) {
+    return { label: "Очень плохо", emoji: "💀", className: "is-bad" };
   }
 
-  if (finalScore < 4.5) {
+  if (score <= 4) {
     return { label: "Плохо", emoji: "😵", className: "is-bad" };
   }
 
-  if (finalScore < 6.5) {
-    return { label: "Пойдёт", emoji: "🙂", className: "is-mid" };
+  if (score <= 7) {
+    return { label: "Нормально", emoji: "🙂", className: "is-mid" };
   }
 
-  if (energy <= 2 && finalScore < 6) {
-    return { label: "Плохо", emoji: "😵", className: "is-bad" };
+  if (score <= 9) {
+    return { label: "Хорошо", emoji: "😊", className: "is-good" };
   }
 
-  if ((wakeCount >= 4 || waso >= 45) && energy <= 3 && finalScore < 7) {
-    return { label: "Плохо", emoji: "😵", className: "is-bad" };
-  }
-
-  if (energy <= 4 || finalScore < 8.5) {
-    return { label: "Нормально", emoji: "😊", className: "is-good" };
-  }
-
-  return { label: "Отлично", emoji: "🥹", className: "is-great" };
+  return { label: "Суперский", emoji: "🥹", className: "is-great" };
 }
 
 function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed, wasoMinutes }) {
