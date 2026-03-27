@@ -1403,7 +1403,7 @@ function render(entries, loadError = null) {
           </div>
 
           <div class="sleep-stats-line">
-            Качество: ${formatPercent(sleepEfficiency)} • Сон: ${formatAutoSleepRating(sleepScore)} • Энергия: ${energyAfterSleep}/10
+            Сон: ${formatAutoSleepRating(sleepScore)} • Энергия: ${energyAfterSleep}/10
           </div>
 
           <div class="sleep-ai-block sleep-ai-block--focus">
