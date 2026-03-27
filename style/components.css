@@ -832,9 +832,10 @@
 }
 
 .card-photo-pick {
-  width: 100%;
-  min-height: 150px;
-  border-radius: 18px;
+  width: 140px;
+  height: 140px;
+  min-height: 140px;
+  border-radius: 14px;
   border: 1px dashed rgba(200, 169, 90, 0.22);
   background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
   color: #d6deea;
@@ -844,6 +845,7 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
+  align-self: flex-start;
 }
 
 .card-photo-pick__plus {
@@ -861,14 +863,17 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  align-items: flex-start;
 }
 
 .card-photo-preview {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 140px;
+  height: 140px;
   object-fit: cover;
-  border-radius: 18px;
+  object-position: center;
+  border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.06);
+  display: block;
 }
 
 .card-photo-change-btn {
@@ -902,4 +907,21 @@
 
 .card-modal__actions {
   margin-top: 18px;
+}
+
+.card-modal {
+  align-items: flex-start !important;
+  overflow-y: auto !important;
+  padding:
+    calc(env(safe-area-inset-top) + 14px)
+    10px
+    calc(env(safe-area-inset-bottom) + 14px) !important;
+}
+
+.card-modal__box {
+  width: min(420px, 100%) !important;
+  max-width: min(420px, 100%) !important;
+  max-height: calc(100vh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  overflow-y: auto !important;
+  margin: 0 auto !important;
 }
