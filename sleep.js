@@ -576,22 +576,22 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
 
   if (hours < 6) {
     return {
-      insight: "Сна было мало — восстановление слабое.",
+      insight: "Сна было маловато.",
       advice: "Сегодня лучше лечь пораньше."
     };
   }
 
   if (waso >= 30 || wakeVal >= 3) {
     return {
-      insight: "Сон был прерывистым, это заметно снижает восстановление.",
-      advice: "Стоит понаблюдать, что именно будит тебя ночью."
+      insight: "Сон был прерывистым.",
+      advice: "Стоит понаблюдать, что будит тебя ночью."
     };
   }
 
   if (fallValue === "slow" || fallValue === "very_slow") {
     return {
-      insight: "Засыпание было долгим — сон начался менее плавно.",
-      advice: "Попробуй сделать вечерний режим спокойнее."
+      insight: "Засыпание было не самым быстрым.",
+      advice: "Попробуй сделать вечер спокойнее."
     };
   }
 
@@ -604,20 +604,20 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
 
   if (wakeVal >= 2 && hours < 7) {
     return {
-      insight: "Сон был и коротким, и прерывистым — восстановление среднее.",
+      insight: "Сон был коротким и не самым ровным.",
       advice: ""
     };
   }
 
   if (wakeVal >= 2 || waso >= 15) {
     return {
-      insight: "Ночное бодрствование слегка снизило качество сна.",
+      insight: "Ночное бодрствование немного снизило качество сна.",
       advice: ""
     };
   }
 
   return {
-    insight: "Сон прошёл стабильно — организм восстановился.",
+    insight: "Сон прошёл довольно спокойно.",
     advice: ""
   };
 }
