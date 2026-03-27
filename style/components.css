@@ -807,3 +807,99 @@
     font-size: 11.5px;
   }
 }
+
+.card-modal__box {
+  max-width: 440px;
+}
+
+.card-modal__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-gold);
+  margin-bottom: 16px;
+}
+
+.card-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-modal-photo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-photo-pick {
+  width: 100%;
+  min-height: 150px;
+  border-radius: 18px;
+  border: 1px dashed rgba(200, 169, 90, 0.22);
+  background: linear-gradient(180deg, rgba(19, 24, 29, 0.96), rgba(12, 15, 18, 0.96));
+  color: #d6deea;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.card-photo-pick__plus {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--color-gold);
+}
+
+.card-photo-pick__text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-photo-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-photo-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.card-photo-change-btn {
+  align-self: flex-start;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: #bca56f;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card-modal__textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.card-modal-rating-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-modal-rating-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-gold);
+}
+
+.card-modal__actions {
+  margin-top: 18px;
+}
