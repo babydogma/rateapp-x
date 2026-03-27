@@ -268,6 +268,56 @@ function renderCards() {
   updateFilterButtons();
 }
 
+function buildCard(card) {
+  const el = document.createElement("div");
+  el.className = "card";
+
+  const safeTitle = escapeHtml(card.text || "");
+  const selectedCategory = card.category || "Разное";
+  const preview = getDescriptionPreview(card.description);
+  const categoryMeta = getCategoryMetaByName(selectedCategory);
+  const numericRating = Number(card.rating) || 0;
+
+  el.innerHTML = `
+    <div class="delete-bg">Удалить</div>
+
+    <div class="card-content">
+      <img
+        class="card__image"
+        src="${escapeHtml(card.image_url || "")}"
+        alt="Фото карточки"
+        onerror="this.src='https://via.placeholder.com/140x140/111/fff?text=Фото';"
+      >
+
+      <div class="card-right-column">
+        <div class="card__title" data-placeholder="Без названия">${safeTitle}</div>
+
+        <div class="card__description-preview ${preview.empty ? "is-empty" : ""}">
+          ${escapeHtml(preview.text)}
+        </div>
+
+        <div class="rating">${numericRating}/10</div>
+
+        <div class="card-meta-row">
+          <div class="category-chip is-static">
+            <span class="category-chip__label">${escapeHtml(`${categoryMeta.emoji} ${categoryMeta.name}`)}</span>
+          </div>
+
+          <div class="created">${formatDate(card.created_at)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  el.style.setProperty("--hue", getHue(numericRating));
+  el.style.setProperty("--rating", numericRating === 0 ? 0.25 : numericRating);
+
+  setupCardEvents(el, card);
+  enableSwipeDelete(el, card);
+
+  return el;
+}
+
 function setupCardEvents(el, card) {
   const img = el.querySelector(".card__image");
 
@@ -286,22 +336,12 @@ function setupCardEvents(el, card) {
 function enableSwipeDelete(cardEl, card) {
   let startX = 0;
   let diff = 0;
-  let isSliderDrag = false;
 
   cardEl.addEventListener("touchstart", (e) => {
-    isSliderDrag = Boolean(e.target.closest(".slider"));
-
-    if (isSliderDrag) {
-      diff = 0;
-      return;
-    }
-
     startX = e.touches[0].clientX;
   });
 
   cardEl.addEventListener("touchmove", (e) => {
-    if (isSliderDrag) return;
-
     diff = e.touches[0].clientX - startX;
 
     if (diff < 0) {
@@ -310,13 +350,6 @@ function enableSwipeDelete(cardEl, card) {
   });
 
   cardEl.addEventListener("touchend", () => {
-    if (isSliderDrag) {
-      isSliderDrag = false;
-      cardEl.style.transform = "";
-      diff = 0;
-      return;
-    }
-
     if (diff < -120) {
       scheduleCardDelete(card);
     }
