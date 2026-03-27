@@ -11,6 +11,7 @@ const DOM = {
   wakeInput: document.getElementById("wakeTimeInput"),
 
   wakeCountInput: document.getElementById("wakeCountInput"),
+  wakeAfterSleepInput: document.getElementById("wakeAfterSleepInput"),
   dreamTypeInput: document.getElementById("dreamTypeInput"),
   fallAsleepSpeedInput: document.getElementById("fallAsleepSpeedInput"),
 
@@ -104,10 +105,14 @@ function isValidTime(value) {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(String(value || "").trim());
 }
 
-function clampRating(value) {
+function clamp(value, min, max) {
   const num = Number(value);
-  if (!Number.isFinite(num)) return 0;
-  return Math.max(0, Math.min(10, num));
+  if (!Number.isFinite(num)) return min;
+  return Math.max(min, Math.min(max, num));
+}
+
+function clampRating(value) {
+  return clamp(value, 0, 10);
 }
 
 function clampHalf(value) {
@@ -189,6 +194,10 @@ function getNormalizedSleepDate(dateStr) {
   if (!dateStr) return "";
   return dateStr;
 }
+
+/* =========================
+   DATE / TIMELINE
+========================= */
 
 function getAnchorDate(entries) {
   const today = new Date();
@@ -317,29 +326,6 @@ function getMonthEntries(entries, year, month) {
     .sort((a, b) => new Date(`${a.sleep_date}T12:00:00`) - new Date(`${b.sleep_date}T12:00:00`));
 }
 
-function buildMonthTimeline(entries, year, month) {
-  const byDate = new Map();
-
-  entries.forEach((entry) => {
-    if (entry.sleep_date) {
-      byDate.set(entry.sleep_date, entry);
-    }
-  });
-
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const result = [];
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const key = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    result.push({
-      date: key,
-      entry: byDate.get(key) || null
-    });
-  }
-
-  return result;
-}
-
 function setupMonthFilter(entries) {
   if (!DOM.monthFilterBtn || !DOM.monthFilterMenu) return;
 
@@ -431,7 +417,7 @@ function getWeekRangeLabel(startDateStr, endDateStr) {
 }
 
 /* =========================
-   FALL ASLEEP / LABELS
+   LABELS
 ========================= */
 
 function getFallAsleepMinutes(fallAsleepSpeedValue) {
@@ -466,143 +452,114 @@ function getDreamLabel(dreamTypeValue) {
   return "ничего такого";
 }
 
-/* =========================
-   AUTO SLEEP RATING
-========================= */
+function getWakeAfterSleepLabel(value) {
+  const safe = Number(value) || 0;
 
-function getBaseSleepRating(durationMinutes) {
-  const hours = (Number(durationMinutes) || 0) / 60;
-
-  if (hours < 5) return 2;
-  if (hours < 6) return 4;
-  if (hours < 7) return 6;
-  if (hours < 8) return 8;
-  if (hours <= 9) return 9;
-  return 7;
+  if (safe <= 0) return "почти не было";
+  if (safe <= 5) return "до 5 мин";
+  if (safe <= 15) return "5–15 мин";
+  if (safe <= 30) return "15–30 мин";
+  if (safe <= 60) return "30–60 мин";
+  return "60+ мин";
 }
 
-function getWakePenalty(wakeCountValue) {
+/* =========================
+   SLEEP MODEL V2
+========================= */
+
+function getEstimatedWasoMinutesFromWakeCount(wakeCountValue) {
   const value = String(wakeCountValue || "0");
 
   if (value === "0") return 0;
-  if (value === "1") return -0.5;
-  if (value === "2") return -1;
-  if (value === "3") return -1.5;
-  return -2;
+  if (value === "1") return 8;
+  if (value === "2") return 18;
+  if (value === "3") return 30;
+  return 45;
 }
 
-function getDreamAdjustment(dreamTypeValue) {
-  const value = String(dreamTypeValue || "neutral");
-
-  if (value === "nightmare") return -1;
-  if (value === "good") return 1;
-  return 0;
+function getWakeAfterSleepMinutesValue(rawValue, wakeCountValue = "0") {
+  const parsed = Number(rawValue);
+  if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  return getEstimatedWasoMinutesFromWakeCount(wakeCountValue);
 }
 
-function getFallAsleepPenalty(fallAsleepSpeedValue) {
-  const value = String(fallAsleepSpeedValue || "medium");
-
-  if (value === "fast") return 0;
-  if (value === "medium") return -0.5;
-  if (value === "slow") return -1;
-  return -1.5;
+function getTotalSleepTimeMinutes(timeInBedMinutes, sleepLatencyMinutes, wasoMinutes) {
+  return Math.max(timeInBedMinutes - sleepLatencyMinutes - wasoMinutes, 0);
 }
 
-function getAutoSleepRating(durationMinutes, wakeCountValue, dreamTypeValue, fallAsleepSpeedValue) {
-  const base = getBaseSleepRating(durationMinutes);
-  const wakePenalty = getWakePenalty(wakeCountValue);
-  const dreamAdjustment = getDreamAdjustment(dreamTypeValue);
-  const fallAsleepPenalty = getFallAsleepPenalty(fallAsleepSpeedValue);
-
-  return clampHalf(base + wakePenalty + dreamAdjustment + fallAsleepPenalty);
+function getSleepEfficiencyPercent(totalSleepTimeMinutes, timeInBedMinutes) {
+  if (!timeInBedMinutes || timeInBedMinutes <= 0) return 0;
+  return clampPercent((totalSleepTimeMinutes / timeInBedMinutes) * 100);
 }
 
-/* =========================
-   EFFICIENCY
-========================= */
+function getDurationScore(tstMinutes) {
+  const h = tstMinutes / 60;
 
-function getSleepEfficiency(
-  durationMinutes,
-  wakeCountValue,
-  dreamTypeValue,
-  fallAsleepSpeedValue,
-  energyAfterSleep
-) {
-  const hours = (Number(durationMinutes) || 0) / 60;
-
-  let score = 0;
-
-  if (hours < 5) score += 20;
-  else if (hours < 6) score += 40;
-  else if (hours < 7) score += 60;
-  else if (hours < 8) score += 75;
-  else if (hours <= 9) score += 85;
-  else score += 70;
-
-  const wakeValue = String(wakeCountValue || "0");
-  if (wakeValue === "1") score -= 8;
-  else if (wakeValue === "2") score -= 18;
-  else if (wakeValue === "3") score -= 25;
-  else if (wakeValue === "4plus") score -= 35;
-
-  const fallValue = String(fallAsleepSpeedValue || "medium");
-  if (fallValue === "medium") score -= 5;
-  else if (fallValue === "slow") score -= 10;
-  else if (fallValue === "very_slow") score -= 15;
-
-  const dreamValue = String(dreamTypeValue || "neutral");
-  if (dreamValue === "good") score += 3;
-  else if (dreamValue === "nightmare") score -= 8;
-
-  return Math.max(30, Math.min(95, Math.round(score)));
+  if (h < 4.5) return 1.0;
+  if (h < 5.5) return 3.0;
+  if (h < 6.5) return 5.0;
+  if (h < 7.0) return 6.5;
+  if (h <= 8.5) return 9.5;
+  if (h <= 9.5) return 8.0;
+  if (h <= 10.5) return 6.0;
+  return 4.5;
 }
 
-/* =========================
-   STATUS
-========================= */
+function getContinuityScore(se, solMinutes, wasoMinutes, dreamTypeValue) {
+  let score = 10 - Math.max(0, (85 - se) / 6);
 
-function getSleepStatus(durationMinutes, sleepEfficiency, energyAfterSleep) {
-  const hours = (Number(durationMinutes) || 0) / 60;
-  const eff = Number(sleepEfficiency) || 0;
-  const energy = Number(energyAfterSleep);
+  if (solMinutes > 20) score -= 0.5;
+  if (solMinutes > 40) score -= 0.75;
+  if (solMinutes > 60) score -= 0.75;
 
-  if (hours > 8.5 && eff >= 65) {
+  if (wasoMinutes >= 15) score -= 0.5;
+  if (wasoMinutes >= 30) score -= 0.75;
+  if (wasoMinutes >= 45) score -= 0.75;
+
+  if (dreamTypeValue === "nightmare") score -= 0.75;
+  if (dreamTypeValue === "good") score += 0.25;
+
+  return clampHalf(Math.max(0, Math.min(10, score)));
+}
+
+function getFinalSleepScore(durationScore, continuityScore, subjectiveScore) {
+  const raw =
+    durationScore * 0.40 +
+    continuityScore * 0.35 +
+    subjectiveScore * 0.25;
+
+  return clampHalf(raw);
+}
+
+function getSleepStatusV2(tstMinutes, se, finalScore) {
+  const hours = (Number(tstMinutes) || 0) / 60;
+
+  if (hours >= 9.5 && se >= 80 && finalScore >= 7) {
     return { label: "Пересып", emoji: "🥴", className: "is-oversleep" };
   }
 
-  let level = "great";
-
-  if (eff < 45) level = "bad";
-  else if (eff < 60) level = "mid";
-  else if (eff < 75) level = "good";
-
-  if (Number.isFinite(energy) && energy <= 3) {
-    if (level === "great") level = "good";
-    else if (level === "good") level = "mid";
-    else if (level === "mid") level = "bad";
-  }
-
-  if (level === "bad") {
+  if (finalScore < 4.5) {
     return { label: "Плохо", emoji: "😵", className: "is-bad" };
   }
 
-  if (level === "mid") {
+  if (finalScore < 6.5) {
     return { label: "Пойдёт", emoji: "🙂", className: "is-mid" };
   }
 
-  if (level === "good") {
+  if (finalScore < 8.5) {
     return { label: "Нормально", emoji: "😊", className: "is-good" };
   }
 
   return { label: "Отлично", emoji: "🥹", className: "is-great" };
 }
 
-function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed }) {
+function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed, wasoMinutes }) {
   const hours = (Number(durationMinutes) || 0) / 60;
   const energyVal = Number(energy) || 0;
   const wakeRaw = String(wakeCount || "0");
   const wakeVal = wakeRaw === "4plus" ? 4 : Number(wakeRaw) || 0;
   const fallValue = String(fallAsleepSpeed || "medium");
+  const waso = Number(wasoMinutes) || 0;
 
   if (hours < 6) {
     return {
@@ -611,10 +568,10 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
     };
   }
 
-  if (wakeVal >= 3) {
+  if (waso >= 30 || wakeVal >= 3) {
     return {
-      insight: "Сон был прерывистым, это снижает глубину восстановления.",
-      advice: "Стоит понаблюдать, что может мешать спать спокойнее."
+      insight: "Сон был прерывистым, это заметно снижает восстановление.",
+      advice: "Стоит понаблюдать, что именно будит тебя ночью."
     };
   }
 
@@ -627,21 +584,21 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
 
   if (energyVal <= 4 && hours >= 7) {
     return {
-      insight: "Сон был нормальным, но по ощущениям восстановление слабое.",
+      insight: "По времени сон был нормальный, но по ощущениям восстановление слабое.",
       advice: ""
     };
   }
 
   if (wakeVal >= 2 && hours < 7) {
     return {
-      insight: "Сон был прерывистым и немного коротким — восстановление среднее.",
+      insight: "Сон был и коротким, и прерывистым — восстановление среднее.",
       advice: ""
     };
   }
 
-  if (wakeVal >= 2) {
+  if (wakeVal >= 2 || waso >= 15) {
     return {
-      insight: "Сон прерывался — это слегка снижает качество восстановления.",
+      insight: "Ночное бодрствование слегка снизило качество сна.",
       advice: ""
     };
   }
@@ -656,8 +613,8 @@ function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpe
    SUMMARY
 ========================= */
 
-function getStatusMeta(durationMinutes, sleepEfficiency, energyAfterSleep) {
-  return getSleepStatus(durationMinutes, sleepEfficiency, energyAfterSleep);
+function getStatusMeta(durationMinutes, sleepEfficiency, sleepScore) {
+  return getSleepStatusV2(durationMinutes, sleepEfficiency, sleepScore);
 }
 
 function getRangeEntries(entries, days) {
@@ -700,7 +657,11 @@ function getRangeEntries(entries, days) {
 function buildSummaryInsight(entries, stats) {
   if (!entries.length) return "Нет записей за выбранный период";
 
-  const wakeHeavyCount = entries.filter((e) => ["2", "3", "4plus"].includes(String(e.wake_count || "0"))).length;
+  const wakeHeavyCount = entries.filter((e) => {
+    const waso = Number(e.wake_after_sleep_minutes) || 0;
+    return waso >= 30 || ["2", "3", "4plus"].includes(String(e.wake_count || "0"));
+  }).length;
+
   const wakeHeavyShare = wakeHeavyCount / entries.length;
 
   if (stats.avgSleepDurationMinutes < 6 * 60) {
@@ -711,20 +672,16 @@ function buildSummaryInsight(entries, stats) {
     return "Основная проблема — долгое засыпание";
   }
 
-  if (stats.avgSleepEfficiency < 55) {
-    return "Общее восстановление слабое — стоит улучшить сон";
-  }
-
-  if (stats.avgSleepEfficiency < 70) {
-    return "Сон нестабильный — есть потенциал для улучшения";
+  if (stats.avgSleepEfficiency < 75) {
+    return "Сон получается не очень эффективным — слишком много потерь ночью";
   }
 
   if (wakeHeavyShare >= 0.3) {
-    return "Сон часто рвётся из-за пробуждений";
+    return "Сон часто рвётся из-за ночного бодрствования";
   }
 
   if (stats.avgSleepScore >= 6 && stats.avgEnergy <= 4.5) {
-    return "Сон выглядит нормальным, но восстановление по ощущениям слабое";
+    return "Сон выглядит терпимым, но восстановление по ощущениям слабое";
   }
 
   return "Сон в целом выглядит довольно стабильным";
@@ -751,8 +708,10 @@ function buildSummaryData(entries, days) {
       avgDuration: "0ч 0м",
       avgEfficiency: "0%",
       avgLatency: "~0 мин",
+      avgWakeAfterSleep: "~0 мин",
       avgSleepDurationMinutes: 0,
       avgSleepLatencyMinutes: 0,
+      avgWakeAfterSleepMinutes: 0,
       avgSleepEfficiency: 0,
       insight: "Нет записей за выбранный период"
     };
@@ -762,7 +721,7 @@ function buildSummaryData(entries, days) {
     const status = getStatusMeta(
       Number(entry.sleep_duration_minutes) || 0,
       clampPercent(entry.sleep_efficiency),
-      clampRating(entry.energy_after_sleep)
+      clampHalf(entry.sleep_score)
     );
 
     if (status.className === "is-bad") counts.bad += 1;
@@ -786,6 +745,10 @@ function buildSummaryData(entries, days) {
     filtered.reduce((sum, e) => sum + (Number(e.sleep_latency_minutes) || 0), 0) / filtered.length
   );
 
+  const avgWakeAfterSleepMinutes = Math.round(
+    filtered.reduce((sum, e) => sum + (Number(e.wake_after_sleep_minutes) || 0), 0) / filtered.length
+  );
+
   const avgSleepEfficiency = Math.round(
     filtered.reduce((sum, e) => sum + clampPercent(e.sleep_efficiency), 0) / filtered.length
   );
@@ -799,14 +762,17 @@ function buildSummaryData(entries, days) {
     avgDuration: formatDuration(avgSleepDurationMinutes),
     avgEfficiency: formatPercent(avgSleepEfficiency),
     avgLatency: formatApproxMinutes(avgSleepLatencyMinutes),
+    avgWakeAfterSleep: formatApproxMinutes(avgWakeAfterSleepMinutes),
     avgSleepDurationMinutes,
     avgSleepLatencyMinutes,
+    avgWakeAfterSleepMinutes,
     avgSleepEfficiency,
     insight: buildSummaryInsight(filtered, {
       avgSleepScore: avgSleepScoreRaw,
       avgEnergy: avgEnergyRaw,
       avgSleepDurationMinutes,
       avgSleepLatencyMinutes,
+      avgWakeAfterSleepMinutes,
       avgSleepEfficiency
     })
   };
@@ -835,7 +801,7 @@ function renderSummary(entries, range) {
             const status = getStatusMeta(
               Number(day.entry.sleep_duration_minutes) || 0,
               clampPercent(day.entry.sleep_efficiency),
-              clampRating(day.entry.energy_after_sleep)
+              clampHalf(day.entry.sleep_score)
             );
             statusClass = status.className;
           }
@@ -900,7 +866,7 @@ function renderSummary(entries, range) {
                     const status = getStatusMeta(
                       Number(day.entry.sleep_duration_minutes) || 0,
                       clampPercent(day.entry.sleep_efficiency),
-                      clampRating(day.entry.energy_after_sleep)
+                      clampHalf(day.entry.sleep_score)
                     );
                     statusClass = status.className;
                   }
@@ -935,7 +901,7 @@ function renderSummary(entries, range) {
         <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
       </div>
       <div class="sleep-summary-line sleep-summary-line--focus sleep-summary-line--muted">
-        Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Плохих ночей: ${data.counts.bad}
+        Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Ночью: ${data.avgWakeAfterSleep}
       </div>
     </div>
 
@@ -1038,6 +1004,7 @@ function resetSleepForm() {
   if (DOM.bedInput) DOM.bedInput.value = "";
   if (DOM.wakeInput) DOM.wakeInput.value = "";
   if (DOM.wakeCountInput) DOM.wakeCountInput.value = "0";
+  if (DOM.wakeAfterSleepInput) DOM.wakeAfterSleepInput.value = "15";
   syncWakeCountRadioUI("0");
   if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = "neutral";
   if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = "medium";
@@ -1059,6 +1026,14 @@ function openSleepModal(entry = null) {
     if (DOM.wakeInput) DOM.wakeInput.value = String(entry.wake_time || "");
     if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
     syncWakeCountRadioUI(String(entry.wake_count || "0"));
+    if (DOM.wakeAfterSleepInput) {
+      const currentWaso = Number(entry.wake_after_sleep_minutes);
+      DOM.wakeAfterSleepInput.value = String(
+        Number.isFinite(currentWaso)
+          ? currentWaso
+          : getEstimatedWasoMinutesFromWakeCount(entry.wake_count)
+      );
+    }
     if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = String(entry.dream_type || "neutral");
     if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = String(entry.fall_asleep_speed || "medium");
     if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = String(clampRating(entry.energy_after_sleep));
@@ -1092,6 +1067,10 @@ async function saveSleepEntry() {
   const bedTime = String(DOM.bedInput?.value || "").trim();
   const wakeTime = String(DOM.wakeInput?.value || "").trim();
   const wakeCount = String(DOM.wakeCountInput?.value || "0").trim();
+  const wakeAfterSleepMinutes = getWakeAfterSleepMinutesValue(
+    DOM.wakeAfterSleepInput?.value,
+    wakeCount
+  );
   const dreamType = String(DOM.dreamTypeInput?.value || "neutral").trim();
   const fallAsleepSpeed = String(DOM.fallAsleepSpeedInput?.value || "medium").trim();
   const energyAfterSleep = clampRating(DOM.energyAfterSleepInput?.value);
@@ -1118,29 +1097,36 @@ async function saveSleepEntry() {
   const hasWakeTime = Boolean(wakeTime);
 
   const sleepDate = getNormalizedSleepDate(selectedDate);
-  const baseDuration = hasWakeTime ? calcDuration(bedTime, wakeTime) : 0;
+  const timeInBedMinutes = hasWakeTime ? calcDuration(bedTime, wakeTime) : 0;
   const sleepLatencyMinutes = getFallAsleepMinutes(fallAsleepSpeed);
-  const sleepDurationMinutes = hasWakeTime
-    ? Math.max(baseDuration - sleepLatencyMinutes, 0)
-    : 0;
 
-  const sleepScore = hasWakeTime
-    ? getAutoSleepRating(
-        sleepDurationMinutes,
-        wakeCount,
-        dreamType,
-        fallAsleepSpeed
+  const sleepDurationMinutes = hasWakeTime
+    ? getTotalSleepTimeMinutes(
+        timeInBedMinutes,
+        sleepLatencyMinutes,
+        wakeAfterSleepMinutes
       )
     : 0;
 
   const sleepEfficiency = hasWakeTime
-    ? getSleepEfficiency(
-        sleepDurationMinutes,
-        wakeCount,
-        dreamType,
-        fallAsleepSpeed,
-        energyAfterSleep
+    ? getSleepEfficiencyPercent(sleepDurationMinutes, timeInBedMinutes)
+    : 0;
+
+  const durationScore = hasWakeTime
+    ? getDurationScore(sleepDurationMinutes)
+    : 0;
+
+  const continuityScore = hasWakeTime
+    ? getContinuityScore(
+        sleepEfficiency,
+        sleepLatencyMinutes,
+        wakeAfterSleepMinutes,
+        dreamType
       )
+    : 0;
+
+  const sleepScore = hasWakeTime
+    ? getFinalSleepScore(durationScore, continuityScore, energyAfterSleep)
     : 0;
 
   const payload = {
@@ -1148,6 +1134,7 @@ async function saveSleepEntry() {
     bed_time: bedTime,
     wake_time: wakeTime || null,
     wake_count: wakeCount,
+    wake_after_sleep_minutes: hasWakeTime ? wakeAfterSleepMinutes : 0,
     dream_type: dreamType,
     fall_asleep_speed: fallAsleepSpeed,
     sleep_latency_minutes: hasWakeTime ? sleepLatencyMinutes : 0,
@@ -1323,23 +1310,28 @@ function render(entries, loadError = null) {
     const sleepDurationMinutes = Number(entry.sleep_duration_minutes) || 0;
     const sleepEfficiency = clampPercent(entry.sleep_efficiency);
     const sleepLatencyMinutes = Number(entry.sleep_latency_minutes) || getFallAsleepMinutes(entry.fall_asleep_speed);
+    const wakeAfterSleepMinutes = getWakeAfterSleepMinutesValue(
+      entry.wake_after_sleep_minutes,
+      entry.wake_count
+    );
 
     const wakeCount = String(entry.wake_count || "0");
     const dreamType = String(entry.dream_type || "neutral");
     const fallAsleepSpeed = String(entry.fall_asleep_speed || "medium");
     const safeNote = String(entry.note || "").trim();
 
-    const status = getSleepStatus(
+    const status = getSleepStatusV2(
       sleepDurationMinutes,
       sleepEfficiency,
-      energyAfterSleep
+      sleepScore
     );
 
     const insightData = getSleepInsightData({
       durationMinutes: sleepDurationMinutes,
       wakeCount,
       energy: energyAfterSleep,
-      fallAsleepSpeed
+      fallAsleepSpeed,
+      wasoMinutes: wakeAfterSleepMinutes
     });
 
     el.innerHTML = `
@@ -1365,6 +1357,7 @@ function render(entries, loadError = null) {
 
           <div class="sleep-inline-meta">
             <span>Пробуждений: ${escapeHtml(getWakeCountLabel(wakeCount))}</span>
+            <span>Ночью: ${escapeHtml(getWakeAfterSleepLabel(wakeAfterSleepMinutes))}</span>
             <span>Снилось: ${escapeHtml(getDreamLabel(dreamType))}</span>
             <span>Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})</span>
           </div>
