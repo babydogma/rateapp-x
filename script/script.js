@@ -33,7 +33,7 @@ const DOM = {
   filterBad: document.getElementById("filterBad"),
   descriptionModal: document.getElementById("descriptionModal"),
   descriptionInput: document.getElementById("descriptionInput"),
-  saveDescription: document.getElementById("saveDescription")
+  saveDescription: document.getElementById("saveDescription"),
     cardModal: document.getElementById("cardModal"),
   cardModalTitle: document.getElementById("cardModalTitle"),
   cardModalCancel: document.getElementById("cardModalCancel"),
@@ -103,16 +103,6 @@ function getCategoryMetaByName(name) {
 function getCategoryNames(selectedValue) {
   const fromStorage = getStoredCategories().map((item) => item.name);
   return [...new Set([...fromStorage, selectedValue].filter(Boolean))];
-}
-
-/* =========================
-   ADD CARD
-========================= */
-
-if (DOM.addBtn) {
-  DOM.addBtn.addEventListener("click", () => {
-    DOM.photoInput?.click();
-  });
 }
 
 /* =========================
