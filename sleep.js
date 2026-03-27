@@ -561,8 +561,11 @@ function getSleepStatusV2(tstMinutes, se, finalScore, energyAfterSleep, wakeCoun
   }
 
   if (score < 10) {
-    return { label: "Хорошо", emoji: "🥹", className: "is-good" };
+    return { label: "Хорошо", emoji: "😌", className: "is-good" };
   }
+
+  return { label: "Суперский", emoji: "🥹", className: "is-great" };
+}
 
 function getSleepInsightData({ durationMinutes, wakeCount, energy, fallAsleepSpeed, wasoMinutes }) {
   const hours = (Number(durationMinutes) || 0) / 60;
