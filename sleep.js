@@ -1391,12 +1391,6 @@ function render(entries, loadError = null) {
             </div>
           </div>
 
-          <div class="sleep-inline-meta">
-  <span>Ночью: ${escapeHtml(getWakeAfterSleepLabel(wakeAfterSleepMinutes))}</span>
-  <span>Снилось: ${escapeHtml(getDreamLabel(dreamType))}</span>
-  <span>Засыпание: ${escapeHtml(getFallAsleepLabel(fallAsleepSpeed))} (${escapeHtml(formatApproxMinutes(sleepLatencyMinutes))})</span>
-</div>
-
           <div class="sleep-stats-line">
             Сон: ${formatAutoSleepRating(sleepScore)} • Энергия: ${energyAfterSleep}/10
           </div>
