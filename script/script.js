@@ -350,13 +350,6 @@ function setupNavigation() {
     });
   });
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".category-select-wrap")) {
-      closeAllCategorySelects();
-    }
-  });
-}
-
 /* =========================
    INIT
 ========================= */
