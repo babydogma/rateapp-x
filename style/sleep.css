@@ -439,39 +439,39 @@
 }
 
 .sleep-status-chip.is-mid {
-  background: rgba(200, 169, 90, 0.14);
-  border-color: rgba(200, 169, 90, 0.28);
-  color: #e7d09a;
+  background: rgba(176, 124, 48, 0.16);
+  border-color: rgba(214, 165, 72, 0.28);
+  color: #e6c989;
   box-shadow:
-    0 0 18px rgba(200, 169, 90, 0.14),
-    0 0 30px rgba(200, 169, 90, 0.07);
+    0 0 18px rgba(212, 175, 55, 0.12),
+    0 0 28px rgba(212, 175, 55, 0.06);
 }
 
 .sleep-status-chip.is-good {
-  background: rgba(85, 140, 106, 0.17);
-  border-color: rgba(85, 140, 106, 0.3);
-  color: #b9e0c6;
+  background: rgba(133, 102, 26, 0.14);
+  border-color: rgba(227, 190, 98, 0.30);
+  color: #f0dca2;
   box-shadow:
-    0 0 18px rgba(85, 140, 106, 0.14),
-    0 0 30px rgba(85, 140, 106, 0.07);
+    0 0 18px rgba(227, 190, 98, 0.14),
+    0 0 30px rgba(227, 190, 98, 0.07);
 }
 
 .sleep-status-chip.is-great {
-  background: rgba(116, 162, 96, 0.18);
-  border-color: rgba(116, 162, 96, 0.34);
-  color: #d5efb2;
+  background: rgba(160, 125, 35, 0.16);
+  border-color: rgba(245, 220, 150, 0.34);
+  color: #fff1c9;
   box-shadow:
-    0 0 18px rgba(116, 162, 96, 0.16),
-    0 0 32px rgba(116, 162, 96, 0.08);
+    0 0 22px rgba(245, 220, 150, 0.16),
+    0 0 34px rgba(245, 220, 150, 0.08);
 }
 
 .sleep-status-chip.is-oversleep {
-  background: rgba(124, 104, 168, 0.18);
-  border-color: rgba(124, 104, 168, 0.32);
-  color: #d8c7f4;
+  background: rgba(130, 88, 28, 0.14);
+  border-color: rgba(220, 170, 110, 0.28);
+  color: #f3d7b0;
   box-shadow:
-    0 0 18px rgba(124, 104, 168, 0.16),
-    0 0 32px rgba(124, 104, 168, 0.08);
+    0 0 18px rgba(220, 170, 110, 0.12),
+    0 0 28px rgba(220, 170, 110, 0.06);
 }
 
 .sleep-main {
@@ -896,19 +896,19 @@
 }
 
 .sleep-summary-dot.is-mid {
-  background: rgba(200, 169, 90, 0.95);
+  background: rgba(214, 165, 72, 0.95);
 }
 
 .sleep-summary-dot.is-good {
-  background: rgba(85, 140, 106, 0.95);
+  background: rgba(227, 190, 98, 0.95);
 }
 
 .sleep-summary-dot.is-great {
-  background: rgba(116, 162, 96, 0.98);
+  background: rgba(245, 220, 150, 0.98);
 }
 
 .sleep-summary-dot.is-oversleep {
-  background: rgba(124, 104, 168, 0.95);
+  background: rgba(220, 170, 110, 0.95);
 }
 
 .sleep-summary-metrics {
