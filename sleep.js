@@ -498,35 +498,46 @@ function getDurationScore(tstMinutes) {
   if (h < 4.5) return 1.0;
   if (h < 5.5) return 3.0;
   if (h < 6.5) return 5.0;
-  if (h < 7.0) return 6.5;
-  if (h <= 8.5) return 9.5;
-  if (h <= 9.5) return 8.0;
+  if (h < 7.0) return 6.0;
+  if (h < 7.5) return 7.0;
+  if (h <= 8.5) return 9.0;
+  if (h <= 9.5) return 7.5;
   if (h <= 10.5) return 6.0;
   return 4.5;
 }
 
-function getContinuityScore(se, solMinutes, wasoMinutes, dreamTypeValue) {
-  let score = 10 - Math.max(0, (85 - se) / 6);
+function getContinuityScore(se, solMinutes, wasoMinutes, dreamTypeValue, wakeCountValue) {
+  let score = 9.5;
+
+  if (se < 95) score -= 0.5;
+  if (se < 90) score -= 1.0;
+  if (se < 85) score -= 1.0;
+  if (se < 80) score -= 1.0;
+  if (se < 75) score -= 1.0;
 
   if (solMinutes > 20) score -= 0.5;
-  if (solMinutes > 40) score -= 0.75;
-  if (solMinutes > 60) score -= 0.75;
+  if (solMinutes > 40) score -= 1.0;
+  if (solMinutes > 60) score -= 1.0;
 
-  if (wasoMinutes >= 15) score -= 0.5;
-  if (wasoMinutes >= 30) score -= 0.75;
-  if (wasoMinutes >= 45) score -= 0.75;
+  if (wasoMinutes >= 15) score -= 0.75;
+  if (wasoMinutes >= 30) score -= 1.0;
+  if (wasoMinutes >= 45) score -= 1.0;
+
+  const wakeRaw = String(wakeCountValue || "0");
+  if (wakeRaw === "2") score -= 0.5;
+  if (wakeRaw === "3") score -= 1.0;
+  if (wakeRaw === "4plus") score -= 1.5;
 
   if (dreamTypeValue === "nightmare") score -= 0.75;
-  if (dreamTypeValue === "good") score += 0.25;
 
   return clampHalf(Math.max(0, Math.min(10, score)));
 }
 
 function getFinalSleepScore(durationScore, continuityScore, subjectiveScore) {
   const raw =
-    durationScore * 0.40 +
-    continuityScore * 0.35 +
-    subjectiveScore * 0.25;
+    durationScore * 0.35 +
+    continuityScore * 0.30 +
+    subjectiveScore * 0.35;
 
   return clampHalf(raw);
 }
@@ -1138,13 +1149,14 @@ if (wakeCount === "4plus" && wakeAfterSleepMinutes < 15) {
     : 0;
 
   const continuityScore = hasWakeTime
-    ? getContinuityScore(
-        sleepEfficiency,
-        sleepLatencyMinutes,
-        wakeAfterSleepMinutes,
-        dreamType
-      )
-    : 0;
+  ? getContinuityScore(
+      sleepEfficiency,
+      sleepLatencyMinutes,
+      wakeAfterSleepMinutes,
+      dreamType,
+      wakeCount
+    )
+  : 0;
 
   const sleepScore = hasWakeTime
     ? getFinalSleepScore(durationScore, continuityScore, energyAfterSleep)
