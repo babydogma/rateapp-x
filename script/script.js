@@ -10,7 +10,11 @@ const state = {
   cards: [],
   ratingFilter: null,
   activeCategory: null,
-  pendingDelete: null
+  pendingDelete: null,
+  cardModalMode: "create",
+  editingCardId: null,
+  cardPhotoFile: null,
+  cardPhotoUrl: ""
 };
 
 /* =========================
@@ -30,6 +34,22 @@ const DOM = {
   descriptionModal: document.getElementById("descriptionModal"),
   descriptionInput: document.getElementById("descriptionInput"),
   saveDescription: document.getElementById("saveDescription")
+    cardModal: document.getElementById("cardModal"),
+  cardModalTitle: document.getElementById("cardModalTitle"),
+  cardModalCancel: document.getElementById("cardModalCancel"),
+  cardModalSave: document.getElementById("cardModalSave"),
+  cardModalDelete: document.getElementById("cardModalDelete"),
+
+  cardPhotoPickBtn: document.getElementById("cardPhotoPickBtn"),
+  cardPhotoPreviewWrap: document.getElementById("cardPhotoPreviewWrap"),
+  cardPhotoPreview: document.getElementById("cardPhotoPreview"),
+  cardPhotoChangeBtn: document.getElementById("cardPhotoChangeBtn"),
+
+  cardTitleInput: document.getElementById("cardTitleInput"),
+  cardDescriptionInput: document.getElementById("cardDescriptionInput"),
+  cardRatingInput: document.getElementById("cardRatingInput"),
+  cardRatingValue: document.getElementById("cardRatingValue"),
+  cardCategoryInput: document.getElementById("cardCategoryInput")
 };
 
 const DEFAULT_CATEGORIES = [
@@ -95,39 +115,6 @@ if (DOM.addBtn) {
   });
 }
 
-if (DOM.photoInput) {
-  DOM.photoInput.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      DOM.addBtn.disabled = true;
-
-      const url = await API.uploadPhoto(file);
-
-      const newCard = await API.insertCard({
-        image_url: url,
-        text: "",
-        rating: 0,
-        category: state.activeCategory || "Разное",
-        description: ""
-      });
-
-      if (newCard) {
-        state.cards.unshift(newCard);
-        renderCards();
-        renderStats();
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Не удалось загрузить фото");
-    } finally {
-      DOM.photoInput.value = "";
-      DOM.addBtn.disabled = false;
-    }
-  });
-}
-
 /* =========================
    IMAGE MODAL
 ========================= */
@@ -154,6 +141,180 @@ if (DOM.descriptionModal) {
 /* =========================
    FILTERS
 ========================= */
+
+function setCardModalRatingUI() {
+  if (!DOM.cardRatingInput || !DOM.cardRatingValue) return;
+  DOM.cardRatingValue.textContent = `${Number(DOM.cardRatingInput.value) || 0}/10`;
+  setSliderProgress(DOM.cardRatingInput);
+}
+
+function fillCardCategoryOptions(selectedValue = "Разное") {
+  if (!DOM.cardCategoryInput) return;
+
+  const categories = getStoredCategories();
+  DOM.cardCategoryInput.innerHTML = categories
+    .map((item) => {
+      const selected = item.name === selectedValue ? "selected" : "";
+      return `<option value="${escapeHtml(item.name)}" ${selected}>${escapeHtml(item.emoji)} ${escapeHtml(item.name)}</option>`;
+    })
+    .join("");
+}
+
+function resetCardModal() {
+  state.cardModalMode = "create";
+  state.editingCardId = null;
+  state.cardPhotoFile = null;
+  state.cardPhotoUrl = "";
+
+  if (DOM.cardModalTitle) DOM.cardModalTitle.textContent = "Новая карточка";
+  if (DOM.cardTitleInput) DOM.cardTitleInput.value = "";
+  if (DOM.cardDescriptionInput) DOM.cardDescriptionInput.value = "";
+  if (DOM.cardRatingInput) DOM.cardRatingInput.value = "0";
+  fillCardCategoryOptions(state.activeCategory || "Разное");
+  setCardModalRatingUI();
+
+  if (DOM.cardPhotoPreview) DOM.cardPhotoPreview.src = "";
+  if (DOM.cardPhotoPreviewWrap) DOM.cardPhotoPreviewWrap.hidden = true;
+  if (DOM.cardPhotoPickBtn) DOM.cardPhotoPickBtn.hidden = false;
+  if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = true;
+}
+
+function openCardModal(card = null) {
+  if (!DOM.cardModal) return;
+
+  if (card) {
+    state.cardModalMode = "edit";
+    state.editingCardId = card.id;
+    state.cardPhotoFile = null;
+    state.cardPhotoUrl = card.image_url || "";
+
+    if (DOM.cardModalTitle) DOM.cardModalTitle.textContent = "Редактировать карточку";
+    if (DOM.cardTitleInput) DOM.cardTitleInput.value = card.text || "";
+    if (DOM.cardDescriptionInput) DOM.cardDescriptionInput.value = card.description || "";
+    if (DOM.cardRatingInput) DOM.cardRatingInput.value = String(Number(card.rating) || 0);
+    fillCardCategoryOptions(card.category || "Разное");
+    setCardModalRatingUI();
+
+    if (DOM.cardPhotoPreview) DOM.cardPhotoPreview.src = card.image_url || "";
+    if (DOM.cardPhotoPreviewWrap) DOM.cardPhotoPreviewWrap.hidden = !card.image_url;
+    if (DOM.cardPhotoPickBtn) DOM.cardPhotoPickBtn.hidden = Boolean(card.image_url);
+    if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = false;
+  } else {
+    resetCardModal();
+  }
+
+  DOM.cardModal.classList.add("active");
+}
+
+function closeCardModal() {
+  DOM.cardModal?.classList.remove("active");
+}
+
+async function saveCardFromModal() {
+  const title = String(DOM.cardTitleInput?.value || "").trim();
+  const description = String(DOM.cardDescriptionInput?.value || "").trim();
+  const rating = Number(DOM.cardRatingInput?.value || 0);
+  const category = String(DOM.cardCategoryInput?.value || "Разное");
+
+  let imageUrl = state.cardPhotoUrl || "";
+
+  if (state.cardPhotoFile) {
+    imageUrl = await API.uploadPhoto(state.cardPhotoFile);
+  }
+
+  if (!imageUrl) {
+    alert("Сначала добавь фото");
+    return;
+  }
+
+  const payload = {
+    image_url: imageUrl,
+    text: title,
+    description,
+    rating,
+    category
+  };
+
+  DOM.cardModalSave.disabled = true;
+
+  try {
+    if (state.cardModalMode === "edit" && state.editingCardId) {
+      await API.updateCard(state.editingCardId, payload);
+
+      const target = state.cards.find((item) => item.id === state.editingCardId);
+      if (target) {
+        Object.assign(target, payload);
+      }
+    } else {
+      const newCard = await API.insertCard(payload);
+      if (newCard) {
+        state.cards.unshift(newCard);
+      }
+    }
+
+    closeCardModal();
+    renderCards();
+    renderStats();
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось сохранить карточку");
+  } finally {
+    DOM.cardModalSave.disabled = false;
+    DOM.photoInput.value = "";
+  }
+}
+
+async function deleteCardFromModal() {
+  if (!state.editingCardId) return;
+
+  try {
+    await API.deleteCard(state.editingCardId);
+    state.cards = state.cards.filter((card) => card.id !== state.editingCardId);
+    closeCardModal();
+    renderCards();
+    renderStats();
+  } catch (error) {
+    console.error(error);
+    alert("Не удалось удалить карточку");
+  }
+}
+
+function setupCardModal() {
+  DOM.addBtn?.addEventListener("click", () => openCardModal(null));
+
+  DOM.cardModalCancel?.addEventListener("click", closeCardModal);
+  DOM.cardModalSave?.addEventListener("click", saveCardFromModal);
+  DOM.cardModalDelete?.addEventListener("click", deleteCardFromModal);
+
+  DOM.cardModal?.addEventListener("click", (e) => {
+    if (e.target === DOM.cardModal) {
+      closeCardModal();
+    }
+  });
+
+  DOM.cardRatingInput?.addEventListener("input", setCardModalRatingUI);
+
+  DOM.cardPhotoPickBtn?.addEventListener("click", () => {
+    DOM.photoInput?.click();
+  });
+
+  DOM.cardPhotoChangeBtn?.addEventListener("click", () => {
+    DOM.photoInput?.click();
+  });
+
+  DOM.photoInput?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    state.cardPhotoFile = file;
+    const localUrl = URL.createObjectURL(file);
+    state.cardPhotoUrl = localUrl;
+
+    if (DOM.cardPhotoPreview) DOM.cardPhotoPreview.src = localUrl;
+    if (DOM.cardPhotoPreviewWrap) DOM.cardPhotoPreviewWrap.hidden = false;
+    if (DOM.cardPhotoPickBtn) DOM.cardPhotoPickBtn.hidden = true;
+  });
+}
 
 function setupFilters() {
   DOM.filterGood?.addEventListener("click", () => {
@@ -213,6 +374,7 @@ function setupNavigation() {
 async function init() {
   setupNavigation();
   setupFilters();
+  setupCardModal();
 
   state.activeCategory = localStorage.getItem("activeCategory");
 
