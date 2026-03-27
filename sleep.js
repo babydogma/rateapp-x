@@ -455,12 +455,11 @@ function getDreamLabel(dreamTypeValue) {
 function getWakeAfterSleepLabel(value) {
   const safe = Number(value) || 0;
 
-  if (safe <= 0) return "почти не было";
+  if (safe <= 0) return "0 мин";
   if (safe <= 5) return "до 5 мин";
   if (safe <= 15) return "5–15 мин";
-  if (safe <= 30) return "15–30 мин";
-  if (safe <= 60) return "30–60 мин";
-  return "60+ мин";
+  if (safe <= 30) return "16–30 мин";
+  return "30+ мин";
 }
 
 /* =========================
@@ -471,10 +470,10 @@ function getEstimatedWasoMinutesFromWakeCount(wakeCountValue) {
   const value = String(wakeCountValue || "0");
 
   if (value === "0") return 0;
-  if (value === "1") return 8;
-  if (value === "2") return 18;
-  if (value === "3") return 30;
-  return 45;
+  if (value === "1") return 5;
+  if (value === "2") return 10;
+  if (value === "3") return 20;
+  return 35; // 4plus
 }
 
 function getWakeAfterSleepMinutesValue(rawValue, wakeCountValue = "0") {
@@ -1031,7 +1030,7 @@ function resetSleepForm() {
   if (DOM.bedInput) DOM.bedInput.value = "";
   if (DOM.wakeInput) DOM.wakeInput.value = "";
   if (DOM.wakeCountInput) DOM.wakeCountInput.value = "0";
-  if (DOM.wakeAfterSleepInput) DOM.wakeAfterSleepInput.value = "15";
+  
   syncWakeCountRadioUI("0");
   if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = "neutral";
   if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = "medium";
@@ -1053,14 +1052,6 @@ function openSleepModal(entry = null) {
     if (DOM.wakeInput) DOM.wakeInput.value = String(entry.wake_time || "");
     if (DOM.wakeCountInput) DOM.wakeCountInput.value = String(entry.wake_count || "0");
     syncWakeCountRadioUI(String(entry.wake_count || "0"));
-    if (DOM.wakeAfterSleepInput) {
-      const currentWaso = Number(entry.wake_after_sleep_minutes);
-      DOM.wakeAfterSleepInput.value = String(
-        Number.isFinite(currentWaso)
-          ? currentWaso
-          : getEstimatedWasoMinutesFromWakeCount(entry.wake_count)
-      );
-    }
     if (DOM.dreamTypeInput) DOM.dreamTypeInput.value = String(entry.dream_type || "neutral");
     if (DOM.fallAsleepSpeedInput) DOM.fallAsleepSpeedInput.value = String(entry.fall_asleep_speed || "medium");
     if (DOM.energyAfterSleepInput) DOM.energyAfterSleepInput.value = String(clampRating(entry.energy_after_sleep));
@@ -1094,10 +1085,7 @@ async function saveSleepEntry() {
   const bedTime = String(DOM.bedInput?.value || "").trim();
   const wakeTime = String(DOM.wakeInput?.value || "").trim();
   const wakeCount = String(DOM.wakeCountInput?.value || "0").trim();
-  let wakeAfterSleepMinutes = getWakeAfterSleepMinutesValue(
-  DOM.wakeAfterSleepInput?.value,
-  wakeCount
-);
+  const wakeAfterSleepMinutes = getEstimatedWasoMinutesFromWakeCount(wakeCount);
 
 if (wakeCount === "4plus" && wakeAfterSleepMinutes < 15) {
   wakeAfterSleepMinutes = 15;
