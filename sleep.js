@@ -930,11 +930,11 @@ function renderSummary(entries, range) {
 
     <div class="sleep-summary-metrics sleep-summary-metrics--focus">
       <div class="sleep-summary-line sleep-summary-line--focus">
-        <strong>Сон ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10 • Эфф. ${data.avgEfficiency}
-      </div>
+  <strong>Качество ${data.avgSleepScore}/10</strong> • Энергия ${data.avgEnergy}/10
+</div>
       <div class="sleep-summary-line sleep-summary-line--focus sleep-summary-line--muted">
-        Ср. сон: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Ночью: ${data.avgWakeAfterSleep}
-      </div>
+  Ср. длительность: ${data.avgDuration} • Засыпание: ${data.avgLatency} • Ночью: ${data.avgWakeAfterSleep}
+</div>
     </div>
 
     <div class="sleep-summary-insight sleep-summary-insight--focus">
@@ -1403,7 +1403,7 @@ function render(entries, loadError = null) {
           </div>
 
           <div class="sleep-stats-line">
-            Эфф: ${formatPercent(sleepEfficiency)} • Сон: ${formatAutoSleepRating(sleepScore)} • Энергия: ${energyAfterSleep}/10
+            Качество: ${formatPercent(sleepEfficiency)} • Сон: ${formatAutoSleepRating(sleepScore)} • Энергия: ${energyAfterSleep}/10
           </div>
 
           <div class="sleep-ai-block sleep-ai-block--focus">
