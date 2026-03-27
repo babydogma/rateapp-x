@@ -11,7 +11,6 @@ const DOM = {
   wakeInput: document.getElementById("wakeTimeInput"),
 
   wakeCountInput: document.getElementById("wakeCountInput"),
-  wakeAfterSleepInput: document.getElementById("wakeAfterSleepInput"),
   dreamTypeInput: document.getElementById("dreamTypeInput"),
   fallAsleepSpeedInput: document.getElementById("fallAsleepSpeedInput"),
 
@@ -560,7 +559,7 @@ function getSleepStatusV2(tstMinutes, se, finalScore, energyAfterSleep, wakeCoun
     return { label: "Нормально", emoji: "😊", className: "is-good" };
   }
 
-  if (score < 10) {
+  if (score < 9.5) {
     return { label: "Хорошо", emoji: "😌", className: "is-good" };
   }
 
@@ -1090,11 +1089,6 @@ async function saveSleepEntry() {
   const wakeTime = String(DOM.wakeInput?.value || "").trim();
   const wakeCount = String(DOM.wakeCountInput?.value || "0").trim();
   const wakeAfterSleepMinutes = getEstimatedWasoMinutesFromWakeCount(wakeCount);
-
-if (wakeCount === "4plus" && wakeAfterSleepMinutes < 15) {
-  wakeAfterSleepMinutes = 15;
-}
-
   const dreamType = String(DOM.dreamTypeInput?.value || "neutral").trim();
   const fallAsleepSpeed = String(DOM.fallAsleepSpeedInput?.value || "medium").trim();
   const energyAfterSleep = clampRating(DOM.energyAfterSleepInput?.value);
