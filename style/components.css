@@ -28,9 +28,7 @@
       transparent 100%
     ) border-box;
 
-  animation:
-    borderPulse 3.5s ease-in-out infinite,
-    cardAppear 0.5s ease;
+  animation: cardAppear 0.5s ease;
 
   transition:
     box-shadow 0.3s ease,
@@ -46,8 +44,8 @@
 
 .card:hover {
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.7),
-    0 0 25px hsl(var(--hue), 90%, 60%, 0.35);
+    0 16px 34px rgba(0, 0, 0, 0.42),
+    0 0 14px hsl(var(--hue), 85%, 60%, 0.14);
 }
 
 .card:active {
@@ -119,7 +117,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .card__title {
@@ -156,28 +154,25 @@
 .card-more-btn {
   margin-top: -2px;
   align-self: flex-start;
-  padding: 7px 12px;
-  border: 1px solid rgba(200, 169, 90, 0.14);
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(200, 169, 90, 0.10), rgba(200, 169, 90, 0.04));
-  color: var(--color-gold);
+  padding: 4px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #bca56f;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: none;
   transition:
-    transform 0.16s ease,
-    border-color 0.18s ease,
-    background 0.18s ease,
-    color 0.18s ease;
+    opacity 0.16s ease,
+    color 0.18s ease,
+    transform 0.16s ease;
 }
 
 .card-more-btn:hover {
-  border-color: rgba(200, 169, 90, 0.22);
-  background: linear-gradient(180deg, rgba(200, 169, 90, 0.14), rgba(200, 169, 90, 0.06));
+  color: #d8bf84;
+  background: transparent;
 }
 
 .card-more-btn:active {
@@ -185,15 +180,15 @@
 }
 
 .card-more-btn.is-empty {
-  color: #d7c59a;
+  color: #9ea8b5;
 }
 
 .card__description-preview {
-  font-size: 13px;
-  line-height: 1.38;
-  color: #c7ccd3;
-  opacity: 0.92;
-  min-height: 36px;
+  font-size: 12.5px;
+  line-height: 1.42;
+  color: #aab3bf;
+  opacity: 0.9;
+  min-height: 34px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
