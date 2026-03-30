@@ -41,10 +41,7 @@ const DOM = {
   cardModalDelete: document.getElementById("cardModalDelete"),
 
   cardPhotoPickBtn: document.getElementById("cardPhotoPickBtn"),
-  cardPhotoPreviewWrap: document.getElementById("cardPhotoPreviewWrap"),
-  cardPhotoPreview: document.getElementById("cardPhotoPreview"),
-  cardPhotoChangeBtn: document.getElementById("cardPhotoChangeBtn"),
-
+  
   cardTitleInput: document.getElementById("cardTitleInput"),
   cardDescriptionInput: document.getElementById("cardDescriptionInput"),
   cardRatingInput: document.getElementById("cardRatingInput"),
@@ -163,9 +160,14 @@ function resetCardModal() {
   fillCardCategoryOptions(state.activeCategory || "Разное");
   setCardModalRatingUI();
 
-  if (DOM.cardPhotoPreview) DOM.cardPhotoPreview.src = "";
-  if (DOM.cardPhotoPreviewWrap) DOM.cardPhotoPreviewWrap.hidden = true;
-  if (DOM.cardPhotoPickBtn) DOM.cardPhotoPickBtn.hidden = false;
+  if (DOM.cardPhotoPickBtn) {
+    DOM.cardPhotoPickBtn.style.backgroundImage = "";
+    DOM.cardPhotoPickBtn.style.backgroundSize = "";
+    DOM.cardPhotoPickBtn.style.backgroundPosition = "";
+    DOM.cardPhotoPickBtn.style.backgroundRepeat = "";
+    DOM.cardPhotoPickBtn.classList.remove("has-photo");
+  }
+
   if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = true;
 }
 
@@ -288,10 +290,6 @@ function setupCardModal() {
     DOM.photoInput?.click();
   });
 
-  DOM.cardPhotoChangeBtn?.addEventListener("click", () => {
-    DOM.photoInput?.click();
-  });
-
   DOM.photoInput?.addEventListener("change", (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -300,9 +298,15 @@ function setupCardModal() {
     const localUrl = URL.createObjectURL(file);
     state.cardPhotoUrl = localUrl;
 
-    if (DOM.cardPhotoPreview) DOM.cardPhotoPreview.src = localUrl;
-    if (DOM.cardPhotoPreviewWrap) DOM.cardPhotoPreviewWrap.hidden = false;
-    if (DOM.cardPhotoPickBtn) DOM.cardPhotoPickBtn.hidden = true;
+    if (DOM.cardPhotoPickBtn) {
+      DOM.cardPhotoPickBtn.style.backgroundImage = `url("${localUrl}")`;
+      DOM.cardPhotoPickBtn.style.backgroundSize = "cover";
+      DOM.cardPhotoPickBtn.style.backgroundPosition = "center";
+      DOM.cardPhotoPickBtn.style.backgroundRepeat = "no-repeat";
+      DOM.cardPhotoPickBtn.classList.add("has-photo");
+    }
+
+    DOM.photoInput.value = "";
   });
 }
 
