@@ -145,6 +145,26 @@ function fillCardCategoryOptions(selectedValue = "Разное") {
     .join("");
 }
 
+function setCardPhotoButtonState(imageUrl = "") {
+  if (!DOM.cardPhotoPickBtn) return;
+
+  if (imageUrl) {
+    DOM.cardPhotoPickBtn.classList.add("has-photo");
+    DOM.cardPhotoPickBtn.style.backgroundImage = `url("${imageUrl}")`;
+    DOM.cardPhotoPickBtn.innerHTML = `
+      <span class="card-photo-pick__plus">+</span>
+      <span class="card-photo-pick__text">Сменить фото</span>
+    `;
+  } else {
+    DOM.cardPhotoPickBtn.classList.remove("has-photo");
+    DOM.cardPhotoPickBtn.style.backgroundImage = "";
+    DOM.cardPhotoPickBtn.innerHTML = `
+      <span class="card-photo-pick__plus">+</span>
+      <span class="card-photo-pick__text">Добавить фото</span>
+    `;
+  }
+}
+
 function resetCardModal() {
   state.cardModalMode = "create";
   state.editingCardId = null;
@@ -157,15 +177,7 @@ function resetCardModal() {
   if (DOM.cardRatingInput) DOM.cardRatingInput.value = "0";
   fillCardCategoryOptions(state.activeCategory || "Разное");
   setCardModalRatingUI();
-
-  if (DOM.cardPhotoPickBtn) {
-    DOM.cardPhotoPickBtn.classList.remove("has-photo");
-    DOM.cardPhotoPickBtn.style.backgroundImage = "";
-    DOM.cardPhotoPickBtn.innerHTML = `
-      <span class="card-photo-pick__plus">+</span>
-      <span class="card-photo-pick__text">Добавить фото</span>
-    `;
-  }
+  setCardPhotoButtonState("");
 
   if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = true;
 }
@@ -185,21 +197,7 @@ function openCardModal(card = null) {
     if (DOM.cardRatingInput) DOM.cardRatingInput.value = String(Number(card.rating) || 0);
     fillCardCategoryOptions(card.category || "Разное");
     setCardModalRatingUI();
-
-    if (DOM.cardPhotoPickBtn) {
-      if (card.image_url) {
-        DOM.cardPhotoPickBtn.classList.add("has-photo");
-        DOM.cardPhotoPickBtn.style.backgroundImage = `url("${card.image_url}")`;
-        DOM.cardPhotoPickBtn.innerHTML = "";
-      } else {
-        DOM.cardPhotoPickBtn.classList.remove("has-photo");
-        DOM.cardPhotoPickBtn.style.backgroundImage = "";
-        DOM.cardPhotoPickBtn.innerHTML = `
-          <span class="card-photo-pick__plus">+</span>
-          <span class="card-photo-pick__text">Добавить фото</span>
-        `;
-      }
-    }
+    setCardPhotoButtonState(card.image_url || "");
 
     if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = false;
   } else {
@@ -302,21 +300,16 @@ function setupCardModal() {
   });
 
   DOM.photoInput?.addEventListener("change", (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    state.cardPhotoFile = file;
-    const localUrl = URL.createObjectURL(file);
-    state.cardPhotoUrl = localUrl;
+  state.cardPhotoFile = file;
+  const localUrl = URL.createObjectURL(file);
+  state.cardPhotoUrl = localUrl;
+  setCardPhotoButtonState(localUrl);
 
-    if (DOM.cardPhotoPickBtn) {
-      DOM.cardPhotoPickBtn.classList.add("has-photo");
-      DOM.cardPhotoPickBtn.style.backgroundImage = `url("${localUrl}")`;
-      DOM.cardPhotoPickBtn.innerHTML = "";
-    }
-
-    DOM.photoInput.value = "";
-  });
+  DOM.photoInput.value = "";
+});
 }
 
 function setupFilters() {
