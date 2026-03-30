@@ -827,8 +827,7 @@
 
 .card-modal-photo {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: center;
 }
 
 .card-photo-pick {
