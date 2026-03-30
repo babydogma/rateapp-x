@@ -924,3 +924,15 @@
   overflow-y: auto !important;
   margin: 0 auto !important;
 }
+
+.card-photo-pick.has-photo {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-style: solid;
+}
+
+.card-photo-pick.has-photo .card-photo-pick__plus,
+.card-photo-pick.has-photo .card-photo-pick__text {
+  display: none;
+}
