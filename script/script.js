@@ -161,11 +161,12 @@ function resetCardModal() {
   setCardModalRatingUI();
 
   if (DOM.cardPhotoPickBtn) {
-    DOM.cardPhotoPickBtn.style.backgroundImage = "";
-    DOM.cardPhotoPickBtn.style.backgroundSize = "";
-    DOM.cardPhotoPickBtn.style.backgroundPosition = "";
-    DOM.cardPhotoPickBtn.style.backgroundRepeat = "";
     DOM.cardPhotoPickBtn.classList.remove("has-photo");
+    DOM.cardPhotoPickBtn.style.backgroundImage = "";
+    DOM.cardPhotoPickBtn.innerHTML = `
+      <span class="card-photo-pick__plus">+</span>
+      <span class="card-photo-pick__text">Добавить фото</span>
+    `;
   }
 
   if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = true;
@@ -187,9 +188,21 @@ function openCardModal(card = null) {
     fillCardCategoryOptions(card.category || "Разное");
     setCardModalRatingUI();
 
-    if (DOM.cardPhotoPreview) DOM.cardPhotoPreview.src = card.image_url || "";
-    if (DOM.cardPhotoPreviewWrap) DOM.cardPhotoPreviewWrap.hidden = !card.image_url;
-    if (DOM.cardPhotoPickBtn) DOM.cardPhotoPickBtn.hidden = Boolean(card.image_url);
+    if (DOM.cardPhotoPickBtn) {
+      if (card.image_url) {
+        DOM.cardPhotoPickBtn.classList.add("has-photo");
+        DOM.cardPhotoPickBtn.style.backgroundImage = `url("${card.image_url}")`;
+        DOM.cardPhotoPickBtn.innerHTML = "";
+      } else {
+        DOM.cardPhotoPickBtn.classList.remove("has-photo");
+        DOM.cardPhotoPickBtn.style.backgroundImage = "";
+        DOM.cardPhotoPickBtn.innerHTML = `
+          <span class="card-photo-pick__plus">+</span>
+          <span class="card-photo-pick__text">Добавить фото</span>
+        `;
+      }
+    }
+
     if (DOM.cardModalDelete) DOM.cardModalDelete.hidden = false;
   } else {
     resetCardModal();
@@ -299,11 +312,9 @@ function setupCardModal() {
     state.cardPhotoUrl = localUrl;
 
     if (DOM.cardPhotoPickBtn) {
-      DOM.cardPhotoPickBtn.style.backgroundImage = `url("${localUrl}")`;
-      DOM.cardPhotoPickBtn.style.backgroundSize = "cover";
-      DOM.cardPhotoPickBtn.style.backgroundPosition = "center";
-      DOM.cardPhotoPickBtn.style.backgroundRepeat = "no-repeat";
       DOM.cardPhotoPickBtn.classList.add("has-photo");
+      DOM.cardPhotoPickBtn.style.backgroundImage = `url("${localUrl}")`;
+      DOM.cardPhotoPickBtn.innerHTML = "";
     }
 
     DOM.photoInput.value = "";
