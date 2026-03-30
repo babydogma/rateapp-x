@@ -34,14 +34,12 @@ const DOM = {
   descriptionModal: document.getElementById("descriptionModal"),
   descriptionInput: document.getElementById("descriptionInput"),
   saveDescription: document.getElementById("saveDescription"),
-    cardModal: document.getElementById("cardModal"),
+  cardModal: document.getElementById("cardModal"),
   cardModalTitle: document.getElementById("cardModalTitle"),
   cardModalCancel: document.getElementById("cardModalCancel"),
   cardModalSave: document.getElementById("cardModalSave"),
   cardModalDelete: document.getElementById("cardModalDelete"),
-
   cardPhotoPickBtn: document.getElementById("cardPhotoPickBtn"),
-  
   cardTitleInput: document.getElementById("cardTitleInput"),
   cardDescriptionInput: document.getElementById("cardDescriptionInput"),
   cardRatingInput: document.getElementById("cardRatingInput"),
